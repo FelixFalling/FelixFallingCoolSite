@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2e2656">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Clock of Ra">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Curse of Ra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Uncial+Antiqua&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --egypt:'Papyrus','Uncial Antiqua','Marcellus',fantasy,serif;
+    --mono:'IBM Plex Mono',monospace;
+    --stone:#c6a96e; --stone-lt:#d7bd85; --stone-dk:#b3955c;
+    --ink:#3e2c12; --ink-soft:#6f5730;
+    --carve-hi:rgba(255,244,214,.55); --carve-sh:rgba(58,40,15,.5);
+    --gold:#c39a2a; --gold-lt:#eec857; --faience:#0f7a68;
+    --warn:#7c1f0e;
+    --tap:48px; --gap:12px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#2e2656;color:var(--ink);
+    font-family:var(--egypt);-webkit-tap-highlight-color:transparent}
+  #scene{position:fixed;inset:0}
+
+  .title{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;
+    font-family:var(--egypt);font-size:clamp(15px,2.2vw,21px);letter-spacing:.14em;
+    color:#5aeabc;pointer-events:none;
+    animation:titleGlow 4s ease-in-out infinite}
+  @keyframes titleGlow{
+    0%,100%{text-shadow:0 0 12px rgba(90,234,188,.55),0 2px 10px rgba(0,0,0,.6)}
+    50%{text-shadow:0 0 26px rgba(90,234,188,.95),0 2px 10px rgba(0,0,0,.6)}}
+
+  #previewPill{position:fixed;top:calc(52px + env(safe-area-inset-top));left:50%;
+    transform:translateX(-50%);z-index:3;pointer-events:none;
+    background:linear-gradient(180deg,var(--stone-lt),var(--stone));
+    border-radius:8px;box-shadow:inset 0 1px 0 var(--carve-hi),0 6px 18px rgba(0,0,0,.45);
+    padding:7px 16px;font-family:var(--mono);font-size:13px;color:var(--ink);
+    opacity:0;transition:opacity .25s;white-space:nowrap}
+  #previewPill.show{opacity:1}
+
+  /* ================= The wall ================= */
+  #panel{position:fixed;left:0;right:0;bottom:0;z-index:2;
+    background:linear-gradient(180deg,var(--stone-lt),var(--stone) 40%,var(--stone-dk)),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.16'/></svg>");
+    border-radius:14px 14px 0 0;
+    padding:10px 16px calc(14px + env(safe-area-inset-bottom));
+    box-shadow:inset 0 2px 0 var(--carve-hi),inset 0 -3px 8px rgba(58,40,15,.35),
+      inset 4px 0 8px rgba(58,40,15,.2),inset -4px 0 8px rgba(58,40,15,.2),
+      0 -14px 50px rgba(0,0,0,.5);
+    max-height:70vh;overflow-y:auto}
+  #panel::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background:
+      linear-gradient(105deg,transparent 12%,rgba(58,40,15,.14) 12.4%,transparent 13%),
+      linear-gradient(200deg,transparent 64%,rgba(58,40,15,.12) 64.5%,transparent 65.3%)}
+  .grabberBtn{display:block;width:100%;background:none;border:none;cursor:pointer;
+    padding:2px 0 8px}
+  .grabber{width:44px;height:5px;border-radius:3px;background:rgba(62,44,18,.5);margin:0 auto}
+  .glyphs{text-align:center;font-size:15px;letter-spacing:.5em;white-space:nowrap;
+    overflow:hidden;color:rgba(62,44,18,.55);margin-bottom:var(--gap);
+    text-shadow:0 1px 0 var(--carve-hi)}
+
+  /* ---------- Hero ---------- */
+  .hero{background:rgba(58,40,15,.14);border-radius:12px;padding:12px;text-align:center;
+    box-shadow:inset 0 4px 10px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
+  .hero .cue{font-family:var(--egypt);font-size:12px;letter-spacing:.18em;
+    color:var(--ink-soft);text-transform:uppercase;text-shadow:0 1px 0 var(--carve-hi)}
+  .hero .out{font-family:var(--mono);font-size:clamp(42px,12vw,56px);font-weight:600;
+    color:var(--faience);line-height:1.1;margin:2px 0;
+    text-shadow:0 1px 0 var(--carve-hi)}
+  .hero .count{font-family:var(--mono);font-size:15px;color:var(--ink)}
+  .bar{height:9px;border-radius:5px;background:rgba(58,40,15,.35);margin-top:10px;overflow:hidden;
+    box-shadow:inset 0 2px 4px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
+  .bar i{display:block;height:100%;width:0%;border-radius:5px;
+    background:linear-gradient(90deg,var(--gold),var(--faience));transition:width .8s ease}
+  .hero .sub{font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    margin-top:8px;line-height:1.7}
+  .overtime{color:#a2270f !important}
+
+  /* ---------- The single action ---------- */
+  .action{display:block;width:100%;margin-top:var(--gap);
+    min-height:56px;border:none;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,var(--gold-lt),var(--gold));color:#2a1f0c;
+    font-family:var(--egypt);font-size:18px;letter-spacing:.04em;
+    box-shadow:inset 0 1px 0 rgba(255,250,220,.8),inset 0 -2px 3px rgba(107,83,16,.6),
+      0 2px 5px rgba(58,40,15,.5);
+    transition:filter .15s,transform .12s}
+  .action:not(:disabled):hover{filter:brightness(1.08)}
+  .action:not(:disabled):active{transform:scale(.97)}
+  .action:disabled{cursor:default;filter:saturate(.5) brightness(.92)}
+  .action:focus-visible{outline:3px solid var(--faience);outline-offset:2px}
+
+  /* ---------- Punch chips: tap to edit ---------- */
+  .chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:var(--gap)}
+  .chip{position:relative;background:rgba(58,40,15,.16);border-radius:10px;
+    padding:8px 4px;text-align:center;cursor:pointer;
+    box-shadow:inset 0 3px 6px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
+  .chip span{display:block;font-family:var(--egypt);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);text-shadow:0 1px 0 var(--carve-hi)}
+  .chip b{display:block;font-family:var(--mono);font-size:14px;font-weight:600;
+    color:var(--ink);margin-top:2px;white-space:nowrap}
+  .chip input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;
+    color-scheme:light}
+  .chip.off{opacity:.45}
+  .chip.off input{pointer-events:none}
+  /* On a computer, show a real typeable time field instead of the invisible
+     touch overlay: hide the mirror <b> and let the native input carry the value. */
+  @media (pointer:fine){
+    .chip{cursor:text}
+    .chip b{display:none}
+    .chip input{position:static;inset:auto;width:100%;height:auto;opacity:1;
+      margin-top:2px;padding:0;background:transparent;border:none;text-align:center;
+      font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);cursor:text}
+    .chip input:focus-visible{outline:2px solid var(--faience);outline-offset:2px;border-radius:6px}
+    .chip.off input{color:var(--ink-soft)}
+  }
+  .hint{font-family:var(--mono);font-size:11px;color:var(--warn);text-align:center;
+    margin-top:6px;min-height:14px;text-shadow:0 1px 0 var(--carve-hi)}
+
+  /* ---------- Secondary ---------- */
+  details{margin-top:4px}
+  summary{cursor:pointer;font-family:var(--egypt);font-size:13px;letter-spacing:.1em;
+    color:var(--ink-soft);text-transform:uppercase;list-style:none;text-align:center;
+    min-height:var(--tap);display:flex;align-items:center;justify-content:center;gap:8px;
+    text-shadow:0 1px 0 var(--carve-hi)}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:'▾';transition:transform .2s}
+  details[open] summary::after{transform:rotate(180deg)}
+  .wkRow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:stretch;
+    margin-bottom:8px}
+  .wkRow label{font-family:var(--egypt);font-size:14px;align-self:center;
+    text-shadow:0 1px 0 var(--carve-hi)}
+  .wkRow input{font-family:var(--mono);font-size:16px;color:var(--ink);
+    background:rgba(58,40,15,.16);border:none;border-radius:10px;padding:0 10px;
+    min-height:var(--tap);width:130px;color-scheme:light;
+    box-shadow:inset 0 3px 6px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
+  .wkRow input:focus-visible{outline:2px solid var(--faience)}
+  .miniBtn{background:linear-gradient(180deg,var(--gold-lt),var(--gold));border:none;
+    border-radius:999px;min-height:var(--tap);padding:0 14px;cursor:pointer;
+    font-family:var(--egypt);font-size:13px;color:#2a1f0c;
+    box-shadow:inset 0 1px 0 rgba(255,250,220,.8),inset 0 -2px 3px rgba(107,83,16,.6)}
+  .wkOutBox{background:rgba(58,40,15,.14);border-radius:10px;padding:10px;text-align:center;
+    box-shadow:inset 0 3px 8px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
+  .wkOutBox .out{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--faience)}
+  .wkOutBox .sub{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-top:2px}
+
+  .reset{display:block;margin:6px auto 0;background:none;border:none;color:var(--ink-soft);
+    font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:underline;
+    min-height:var(--tap)}
+
+  #panel.collapsed .action,#panel.collapsed .chips,#panel.collapsed .hint,
+  #panel.collapsed details,#panel.collapsed .reset,#panel.collapsed .glyphs{display:none}
+  #panel.collapsed .hero .sub{display:none}
+
+  @media (min-width:900px){
+    #panel{left:auto;right:36px;bottom:auto;top:50%;transform:translateY(-50%);
+      width:400px;border-radius:14px;max-height:88vh;padding:14px 20px}
+    .grabberBtn{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;animation:none !important} }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="title">𓂀 CURSE OF RA 𓂀</div>
+<div id="previewPill"></div>
+
+<div id="panel">
+  <button class="grabberBtn" id="collapseBtn" aria-label="Collapse or expand panel"><div class="grabber"></div></button>
+  <div class="glyphs" aria-hidden="true">𓂠 𓋹 𓃠 𓆣 𓅓 𓎽 𓂹 𓃠 𓋹 𓂠</div>
+
+  <div class="hero">
+    <div class="cue">𓁹 the curse lifts at 𓁹</div>
+    <div class="out" id="out">–:–</div>
+    <div class="count" id="count"></div>
+    <div class="bar"><i id="dayBar"></i></div>
+    <div class="sub" id="sub"></div>
+  </div>
+
+  <button class="action" id="actionBtn">𓃠 Clock in now</button>
+
+  <div class="chips">
+    <label class="chip" id="chipCi"><span>In</span><b id="ciV">–:–</b><input type="time" id="ci" aria-label="Clock-in time"></label>
+    <label class="chip off" id="chipLo"><span>Lunch</span><b id="loV">–:–</b><input type="time" id="lo" aria-label="Lunch out time" disabled></label>
+    <label class="chip off" id="chipLi"><span>Back</span><b id="liV">–:–</b><input type="time" id="li" aria-label="Lunch back-in time" disabled></label>
+  </div>
+  <div class="hint" id="hint"></div>
+
+  <details>
+    <summary>Weekly 40-hour check</summary>
+    <div class="wkRow">
+      <label for="wkH">Hours at punch-in</label>
+      <input type="text" id="wkH" placeholder="39:12" inputmode="numeric">
+      <span></span>
+    </div>
+    <div class="wkRow">
+      <label for="wkT">Punch-in time</label>
+      <input type="time" id="wkT">
+      <button class="miniBtn" id="wkNow">Now</button>
+    </div>
+    <div class="wkOutBox">
+      <div class="out" id="wkOut">–:–</div>
+      <div class="sub" id="wkSub"></div>
+    </div>
+  </details>
+
+  <button class="reset" id="reset">break the curse</button>
+</div>
+
+<div id="errBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99;
+  background:#7c1f0e;color:#fff;font-family:monospace;font-size:12px;padding:8px 12px;
+  white-space:pre-wrap;max-height:40vh;overflow:auto"></div>
+<script>
+  window.__showErr = function(msg){
+    var b = document.getElementById('errBanner');
+    if(b){ b.style.display='block'; b.textContent = (b.textContent? b.textContent+'\n':'') + msg; }
+  };
+  window.addEventListener('error', function(e){
+    __showErr('Error: ' + (e.message||'?') + (e.filename? '  @'+e.filename.split('/').pop()+':'+e.lineno : ''));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    __showErr('Promise: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+  });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+  onerror="__showErr('Three.js failed to load from CDN — check your network/allowlist.')"></script>
+<script>
+if(typeof THREE === 'undefined'){
+  __showErr('THREE is undefined — the 3D library did not load, so the scene cannot start.');
+  throw new Error('THREE not loaded');
+}
+/* ============ Scene: dusk over the Nile ============ */
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x241a12);
+scene.fog = new THREE.Fog(0x241a12, 26, 64);
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 120);
+
+const amb = new THREE.AmbientLight(0x7a6248, 1.2);
+scene.add(amb);
+const key = new THREE.DirectionalLight(0xffc98a, 1.2);
+key.position.set(7,10,10); key.castShadow = true; key.shadow.mapSize.set(1024,1024);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x5a4a7e, 0.45);
+fill.position.set(-8,4,6); scene.add(fill);
+const rim = new THREE.PointLight(0x39e6a3, 1.1, 44);
+rim.position.set(0,7,-6); scene.add(rim);
+
+/* materials */
+const goldMat    = new THREE.MeshStandardMaterial({color:0xe6bd45, metalness:.85, roughness:.28});
+const darkGold   = new THREE.MeshStandardMaterial({color:0xb08d2e, metalness:.8,  roughness:.4});
+const papyrusMat = new THREE.MeshStandardMaterial({color:0xf2e6c0, roughness:.9});
+const lapisMat   = new THREE.MeshStandardMaterial({color:0x1d2a66, metalness:.5, roughness:.35});
+const faienceMat = new THREE.MeshStandardMaterial({color:0x35e0a6, metalness:.3, roughness:.35, emissive:0x35e0a6, emissiveIntensity:0.55});
+const obsidian   = new THREE.MeshStandardMaterial({color:0x9a7433, metalness:.6, roughness:.42});
+const sandstone  = new THREE.MeshStandardMaterial({color:0x60518c, roughness:1});
+
+/* desert floor + pyramids */
+const floorY = -9;
+const floorMat = new THREE.MeshStandardMaterial({color:0x5c4a33, roughness:1});
+const sandFloor = new THREE.Mesh(new THREE.PlaneGeometry(160,90), floorMat);
+sandFloor.rotation.x = -Math.PI/2; sandFloor.position.y = floorY;
+sandFloor.receiveShadow = true; scene.add(sandFloor);
+/* --- crumbling temple interior --- */
+const ceilY = 14;
+/* enclosing pyramid-shaft walls — they lean inward, and fade away at the collapse */
+const wallMat = sandstone.clone(); wallMat.transparent = true; wallMat.opacity = 1;
+const backWall = new THREE.Mesh(new THREE.PlaneGeometry(90,50), wallMat);
+backWall.position.set(0, floorY+20, -15); backWall.receiveShadow = true;
+backWall.rotateOnWorldAxis(new THREE.Vector3(1,0,0), 0.14); /* leans in like a pyramid face */
+scene.add(backWall);
+const walls = [backWall];
+[[-24, 0.22],[24, -0.22]].forEach(([x, lean])=>{
+  const w = new THREE.Mesh(new THREE.PlaneGeometry(70,50), wallMat);
+  w.position.set(x, floorY+20, -2);
+  w.rotation.y = x<0 ? Math.PI/2 : -Math.PI/2;
+  w.rotateOnWorldAxis(new THREE.Vector3(0,0,1), lean);
+  scene.add(w); walls.push(w);
+});
+/* torch sconces flanking the clock */
+const torchMeshes = [], torchLights = [];
+const flameMat = new THREE.MeshBasicMaterial({color:0xffa63c, transparent:true, opacity:.95,
+  blending:THREE.AdditiveBlending, depthWrite:false});
+[[-10.5, 2.5],[10.5, 2.5]].forEach(([x,z])=>{
+  const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.22,4.5,10), darkGold);
+  stand.position.set(x, floorY+2.25, z); scene.add(stand);
+  const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.3,0.5,12), darkGold);
+  bowl.position.set(x, floorY+4.6, z); scene.add(bowl);
+  const flame = new THREE.Mesh(new THREE.ConeGeometry(0.42,1.3,10), flameMat);
+  flame.position.set(x, floorY+5.5, z); scene.add(flame);
+  torchMeshes.push(flame);
+  const tl = new THREE.PointLight(0xff9a3c, 1.5, 26);
+  tl.position.set(x, floorY+5.4, z); scene.add(tl);
+  torchLights.push(tl);
+});
+/* the sun, waiting outside — revealed when the tomb falls */
+const sunMat = new THREE.MeshBasicMaterial({color:0xfff3c8, transparent:true, opacity:0,
+  blending:THREE.AdditiveBlending, depthWrite:false});
+const sunMesh = new THREE.Mesh(new THREE.CircleGeometry(7,40), sunMat);
+sunMesh.position.set(16, 22, -60);
+scene.add(sunMesh);
+/* columns with capitals — grouped at the base so they can topple */
+const cols = [];
+[[-12,-5],[12,-5],[-17,2],[17,2]].forEach(([x,z],idx)=>{
+  const g = new THREE.Group();
+  g.position.set(x, floorY, z);
+  const h = ceilY - floorY;
+  const col = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.3,h,18), sandstone);
+  col.position.y = h/2; col.castShadow = true; col.receiveShadow = true;
+  const capT = new THREE.Mesh(new THREE.BoxGeometry(3.4,0.8,3.4), sandstone);
+  capT.position.y = h - 0.4;
+  const capB = new THREE.Mesh(new THREE.BoxGeometry(3.6,0.7,3.6), sandstone);
+  capB.position.y = 0.35;
+  g.add(col, capT, capB);
+  scene.add(g);
+  cols.push({g, dir: (idx%2 ? 1 : -1)*(0.9 + Math.random()*0.5), delay: Math.random()*0.35});
+});
+/* ceiling slabs — some tilted, gaps where the roof has failed */
+const slabs = [];
+[[-14,0,0],[-4.5,-2,0.10],[5,1,-0.14],[15,-1,0],[0,-8,0.06]].forEach(([x,z,tilt])=>{
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(9.2,0.9,10), sandstone);
+  slab.position.set(x, ceilY + Math.abs(tilt)*6, z);
+  slab.rotation.z = tilt;
+  slab.castShadow = true;
+  scene.add(slab);
+  slabs.push({m:slab, y0:slab.position.y, r0:tilt,
+    rz:(Math.random()-0.5)*2.2, rx:(Math.random()-0.5)*1.4,
+    delay: Math.random()*0.45});
+});
+/* one slab has already fallen, leaning against the floor */
+const fallen = new THREE.Mesh(new THREE.BoxGeometry(7,0.9,6), sandstone);
+fallen.position.set(-13.5, floorY+2.2, 4);
+fallen.rotation.set(0.15, 0.5, 0.95);
+fallen.castShadow = true; scene.add(fallen);
+/* rubble stones */
+for(let i=0;i<14;i++){
+  const r = 0.3 + Math.random()*0.8;
+  const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(r,0), sandstone);
+  rock.position.set((Math.random()-0.5)*34, floorY + r*0.6, -6 + Math.random()*12);
+  rock.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+  rock.castShadow = true;
+  scene.add(rock);
+}
+/* where the sand pours from the broken ceiling */
+const emitters = [[-8.8, -0.5],[3.8, 2.2],[10.5, -3],[-2.5, -6]];
+const sandPileMat = new THREE.MeshStandardMaterial({color:0xcdb076, roughness:1});
+emitters.forEach(([x,z])=>{
+  const pile = new THREE.Mesh(new THREE.ConeGeometry(1.6+Math.random(), 1.1, 20), sandPileMat);
+  pile.position.set(x, floorY+0.55, z);
+  scene.add(pile);
+});
+/* dusty light shafts through the broken roof */
+emitters.slice(0,2).forEach(([x,z])=>{
+  const shaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.9, 2.6, ceilY-floorY, 20, 1, true),
+    new THREE.MeshBasicMaterial({color:0xe8d9a8, transparent:true, opacity:0.07,
+      blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide}));
+  shaft.position.set(x, (floorY+ceilY)/2, z);
+  scene.add(shaft);
+});
+
+/* ============ The golden clock ============ */
+const clockGroup = new THREE.Group();
+scene.add(clockGroup);
+
+const bezelMat = goldMat.clone();
+bezelMat.emissive = new THREE.Color(0xe6bd45);
+bezelMat.emissiveIntensity = 0.05;
+const bezel = new THREE.Mesh(new THREE.TorusGeometry(5,0.42,24,90), bezelMat);
+bezel.castShadow = true; clockGroup.add(bezel);
+const face = new THREE.Mesh(new THREE.CylinderGeometry(5,5,0.35,72), papyrusMat);
+face.rotation.x = Math.PI/2; face.position.z = -0.18; clockGroup.add(face);
+const housing = new THREE.Mesh(new THREE.CylinderGeometry(5.15,4.6,1.6,72), darkGold);
+housing.rotation.x = Math.PI/2; housing.position.z = -1.1; housing.castShadow = true;
+clockGroup.add(housing);
+/* sun-disc of Ra at 12 (instead of a crown) */
+const sunDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,0.2,32), goldMat);
+sunDisc.rotation.x = Math.PI/2; sunDisc.position.set(0,6.1,-0.3); sunDisc.castShadow = true;
+clockGroup.add(sunDisc);
+for(let i=0;i<8;i++){
+  const ray = new THREE.Mesh(new THREE.ConeGeometry(0.09,0.5,4), goldMat);
+  const a = (i/8)*Math.PI*2;
+  ray.position.set(Math.sin(a)*1.05, 6.1 + Math.cos(a)*1.05, -0.3);
+  ray.rotation.z = -a;
+  clockGroup.add(ray);
+}
+
+/* tick marks — lapis */
+for(let i=0;i<60;i++){
+  const major = i%5===0;
+  const tick = new THREE.Mesh(
+    new THREE.BoxGeometry(major?0.16:0.055, major?0.65:0.3, 0.06),
+    major?lapisMat:new THREE.MeshStandardMaterial({color:0x9a8a60, roughness:.8}));
+  const a = (i/60)*Math.PI*2, r = major?4.25:4.4;
+  tick.position.set(Math.sin(a)*r, Math.cos(a)*r, 0.02);
+  tick.rotation.z = -a;
+  clockGroup.add(tick);
+}
+
+/* Plain readable numerals 1-12 */
+for(let i=0;i<12;i++){
+  const n = i===0 ? 12 : i;
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#1d2a66';
+  ctx.font = '600 118px Papyrus, "Uncial Antiqua", Marcellus, fantasy, serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(String(n), 128, 140);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.4),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv), transparent:true}));
+  const a = (i/12)*Math.PI*2;
+  plane.position.set(Math.sin(a)*3.25, Math.cos(a)*3.25, 0.03);
+  clockGroup.add(plane);
+}
+
+/* hands: lapis hour/minute, faience second */
+function makeHand(len,w,mat,tail){
+  const g = new THREE.Group();
+  const geo = new THREE.BoxGeometry(w,len,0.09);
+  geo.translate(0,len/2-tail,0);
+  const m = new THREE.Mesh(geo,mat); m.castShadow = true; g.add(m);
+  return g;
+}
+const hourHand = makeHand(2.5,0.3,lapisMat,0.5); hourHand.position.z = 0.12;
+const minuteHand = makeHand(3.9,0.18,lapisMat,0.6); minuteHand.position.z = 0.22;
+const secondHand = makeHand(4.1,0.06,faienceMat,0.9); secondHand.position.z = 0.3;
+const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.25,20), goldMat);
+cap.rotation.x = Math.PI/2; cap.position.z = 0.32;
+clockGroup.add(hourHand, minuteHand, secondHand, cap);
+
+const marker = new THREE.Mesh(new THREE.ConeGeometry(0.28,0.7,4), faienceMat);
+marker.visible = false;
+clockGroup.add(marker);
+
+/* pendulum with ankh bob */
+const pendulum = new THREE.Group();
+pendulum.position.set(0,-4.7,-0.7);
+const rodGeo = new THREE.CylinderGeometry(0.09,0.09,3.0,12);
+rodGeo.translate(0,-1.5,0);
+const rod = new THREE.Mesh(rodGeo, darkGold); rod.castShadow = true;
+const ankh = new THREE.Group(); ankh.position.y = -3.4;
+const loop_ = new THREE.Mesh(new THREE.TorusGeometry(0.5,0.11,10,32), goldMat);
+loop_.position.y = 0.55;
+const armH = new THREE.Mesh(new THREE.BoxGeometry(1.5,0.2,0.16), goldMat);
+const armV = new THREE.Mesh(new THREE.BoxGeometry(0.2,1.1,0.16), goldMat);
+armV.position.y = -0.55;
+ankh.add(loop_, armH, armV);
+ankh.children.forEach(m=>m.castShadow=true);
+pendulum.add(rod, ankh);
+clockGroup.add(pendulum);
+
+/* gears of the temple mechanism */
+function makeGear(r, teeth, thick, mat){
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(r,r,thick,32), mat);
+  body.rotation.x = Math.PI/2; body.castShadow = true; g.add(body);
+  for(let i=0;i<teeth;i++){
+    const tooth = new THREE.Mesh(new THREE.BoxGeometry(r*0.24, r*0.3, thick), mat);
+    const a = (i/teeth)*Math.PI*2;
+    tooth.position.set(Math.sin(a)*(r*1.1), Math.cos(a)*(r*1.1), 0);
+    tooth.rotation.z = -a;
+    g.add(tooth);
+  }
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(r*0.22,r*0.22,thick*1.6,16), darkGold);
+  hub.rotation.x = Math.PI/2; g.add(hub);
+  return g;
+}
+const gears = [
+  {mesh:makeGear(1.9,12,0.35,darkGold), pos:[-7.6, 3.6,-3.2], speed: 0.35},
+  {mesh:makeGear(1.2, 9,0.3, goldMat),  pos:[-6.1, 1.1,-3.0], speed:-0.55},
+  {mesh:makeGear(2.4,14,0.4, darkGold), pos:[ 7.4,-2.6,-3.5], speed:-0.28},
+  {mesh:makeGear(1.0, 8,0.3, goldMat),  pos:[ 6.6, 4.4,-2.8], speed: 0.7},
+];
+gears.forEach(g=>{ g.mesh.position.set(...g.pos); clockGroup.add(g.mesh); });
+
+/* ============ Bastet guardians ============ */
+function makeCat(){
+  const c = new THREE.Group();
+  const eyeMat = new THREE.MeshStandardMaterial({color:0x2fe6a8,
+    emissive:0x2fe6a8, emissiveIntensity:1.3, roughness:.3});
+  /* plinth */
+  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.5,0.4,24), goldMat);
+  plinth.position.y = 0.2; plinth.castShadow = true; c.add(plinth);
+  /* body: seated cone */
+  const body = new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.7, 24), obsidian);
+  body.position.y = 1.75; body.castShadow = true; c.add(body);
+  const chest = new THREE.Mesh(new THREE.SphereGeometry(0.68, 20, 16), obsidian);
+  chest.position.set(0, 1.85, 0.28); chest.castShadow = true; c.add(chest);
+  /* head group (so it can turn) */
+  const headG = new THREE.Group(); headG.position.set(0, 3.35, 0.12);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.56, 20, 16), obsidian);
+  head.castShadow = true; headG.add(head);
+  const snout = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), obsidian);
+  snout.position.set(0, -0.08, 0.5); headG.add(snout);
+  [-1,1].forEach(s=>{
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.5, 4), obsidian);
+    ear.position.set(s*0.32, 0.55, 0); ear.rotation.z = -s*0.25; ear.castShadow = true;
+    headG.add(ear);
+    const earTip = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.24, 4), goldMat);
+    earTip.position.set(s*0.36, 0.68, 0); earTip.rotation.z = -s*0.25;
+    headG.add(earTip);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), eyeMat);
+    eye.position.set(s*0.22, 0.06, 0.47);
+    headG.add(eye);
+  });
+  c.add(headG);
+  /* gold collar + earring */
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.44,0.09,10,28), goldMat);
+  collar.rotation.x = Math.PI/2 - 0.25; collar.position.set(0, 2.85, 0.1);
+  c.add(collar);
+  /* tail curling around the base */
+  const tailG = new THREE.Group(); tailG.position.set(0.95, 0.55, 0.35);
+  const tail = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.1, 10, 24, Math.PI*1.15), obsidian);
+  tail.rotation.y = 0.4; tail.castShadow = true;
+  const tailTip = new THREE.Mesh(new THREE.SphereGeometry(0.11,8,8), goldMat);
+  tailTip.position.set(Math.cos(Math.PI*1.15)*0.75, Math.sin(Math.PI*1.15)*0.75, 0);
+  tailG.add(tail, tailTip);
+  c.add(tailG);
+  return {group:c, head:headG, tail:tailG};
+}
+const catL = makeCat(), catR = makeCat();
+catL.group.scale.setScalar(1.7); catR.group.scale.setScalar(1.7);
+catR.group.scale.x = -1.7; /* mirror the tail to the other side */
+scene.add(catL.group, catR.group);
+
+/* sand grains streaming from the broken ceiling */
+const DUST = 320;
+const dustPos = new Float32Array(DUST*3);
+const dustVel = new Float32Array(DUST);
+const dustEmit = new Uint8Array(DUST);
+function respawnGrain(i, randomHeight){
+  const e = emitters[dustEmit[i]];
+  dustPos[i*3]   = e[0] + (Math.random()-0.5)*1.2;
+  dustPos[i*3+1] = randomHeight ? floorY + Math.random()*(ceilY-floorY) : ceilY - 0.3;
+  dustPos[i*3+2] = e[1] + (Math.random()-0.5)*1.2;
+}
+for(let i=0;i<DUST;i++){
+  dustEmit[i] = i % emitters.length;
+  dustVel[i] = 2.5 + Math.random()*3.5;
+  respawnGrain(i, true);
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos,3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  color:0xe3c68a, size:0.09, transparent:true, opacity:0.85,
+  blending:THREE.AdditiveBlending, depthWrite:false}));
+scene.add(dust);
+
+/* falling debris chunks — a reusable pool of rocks that drop as the tomb fails */
+const debris = [];
+for(let i=0;i<24;i++){
+  const r = 0.25 + Math.random()*0.55;
+  const m = new THREE.Mesh(new THREE.DodecahedronGeometry(r,0), sandstone);
+  m.castShadow = true; m.visible = false;
+  scene.add(m);
+  debris.push({m, active:false, vy:0, spin:{x:0,y:0,z:0}});
+}
+function dropDebris(prob){
+  if(Math.random() > prob) return;
+  const d = debris.find(x=>!x.active);
+  if(!d) return;
+  d.active = true; d.m.visible = true;
+  d.vy = -0.05 - Math.random()*0.12;
+  d.m.position.set((Math.random()-0.5)*30, ceilY - 0.5, -6 + Math.random()*12);
+  d.m.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+  d.spin = {x:(Math.random()-0.5)*0.2, y:(Math.random()-0.5)*0.2, z:(Math.random()-0.5)*0.2};
+}
+
+/* ---- Environment phases: tomb interior -> crumbling -> open desert ---- */
+const ENV = {
+  inside:  {bg:new THREE.Color(0x241a12), fogN:26, fogF:64,
+            amb:[new THREE.Color(0x7a6248),1.2], key:[new THREE.Color(0xffc98a),1.2],
+            fill:[new THREE.Color(0x5a4a7e),0.45], floor:new THREE.Color(0x5c4a33),
+            wallOp:1, torch:1},
+  outside: {bg:new THREE.Color(0x9cc4ee), fogN:50, fogF:140,
+            amb:[new THREE.Color(0xc2d6f2),1.75], key:[new THREE.Color(0xfff2d0),2.3],
+            fill:[new THREE.Color(0x9db8e8),0.6], floor:new THREE.Color(0xd9b877),
+            wallOp:0, torch:0}
+};
+let envTarget = ENV.inside;
+let crumbleF = 0; /* 0..1 across the final three minutes */
+
+/* ---- THE COLLAPSE: when the curse lifts, the temple comes down ---- */
+let collapseAnim = null, templeDown = false;
+function collapseTemple(){
+  if(templeDown) return;
+  templeDown = true;
+  collapseAnim = {t0: performance.now(), dur: 3000};
+  envTarget = ENV.outside; /* daylight floods in */
+  rumble();
+}
+function restoreTemple(){
+  templeDown = false; collapseAnim = null;
+  envTarget = ENV.inside;
+  slabs.forEach(sl=>{ sl.m.position.y = sl.y0; sl.m.rotation.set(0,0,sl.r0); });
+  cols.forEach(c=>{ c.g.rotation.z = 0; });
+}
+const easeInQ = p => p*p*p;
+function rumble(){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
+  o.type = 'sawtooth'; o.frequency.value = 36;
+  f.type = 'lowpass'; f.frequency.value = 90;
+  const t0 = audioCtx.currentTime;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(0.28, t0+0.15);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+2.6);
+  o.connect(f); f.connect(g); g.connect(audioCtx.destination);
+  o.start(t0); o.stop(t0+2.7);
+}
+
+/* showcase spin */
+let spinAnim = null;
+function showcaseSpin(){ spinAnim = {t0:performance.now(), dur:2400}; }
+const easeInOut = p => p<0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;
+
+/* ---- responsive layout: frame the temple in the free space ---- */
+const panelEl = document.getElementById('panel');
+let view = {cx:0, cy:1.5, lookY:0, dist:18};
+function layout(){
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+  const tanF = Math.tan(camera.fov*Math.PI/360);
+  if(innerWidth >= 900){
+    clockGroup.scale.setScalar(1);
+    clockGroup.position.set(-2.6, 1.2, 0);
+    view = {cx:-2.6, cy:1.2, lookY:-1.2, dist:24};
+  } else {
+    /* fit by SCALING the clock into whatever strip the panel leaves free */
+    const H = innerHeight;
+    const tpx = 96; /* headroom for the title */
+    const panelH = Math.min(panelEl.offsetHeight, H*0.8);
+    const D = 20;
+    const ndcTop = 1 - 2*tpx/H;          /* screen-space top of the free strip */
+    const ndcBot = 2*panelH/H - 1;       /* screen-space top edge of the panel */
+    const stripTopW = ndcTop*D*tanF;     /* strip bounds in world units (lookY = 0) */
+    const stripBotW = ndcBot*D*tanF;
+    const stripH = Math.max(3, stripTopW - stripBotW);
+    const dialTop = 7.9, dialBot = -5.7; /* sun disc to bezel bottom, clock-local */
+    const sc = Math.min(1, stripH/(dialTop - dialBot + 1.2));
+    clockGroup.scale.setScalar(sc);
+    const centerW = (stripTopW + stripBotW)/2;
+    const dialCenterRel = (dialTop + dialBot)/2 * sc;
+    clockGroup.position.set(0, centerW - dialCenterRel, 0);
+    view = {cx:0, cy:clockGroup.position.y, lookY:0, dist:D};
+  }
+  /* seat the guardians on the sand, flanking the clock */
+  catL.group.position.set(view.cx - 7.2, floorY, 1.2);
+  catR.group.position.set(view.cx + 7.2, floorY, 1.2);
+  catL.group.rotation.y =  0.35;
+  catR.group.rotation.y = -0.35;
+}
+layout();
+addEventListener('resize', layout);
+new ResizeObserver(layout).observe(panelEl);
+
+/* ============ Time helpers ============ */
+const $ = id => document.getElementById(id);
+let clockOutMin = null;
+
+const toMin = v => { if(!v) return null; const [h,m] = v.split(':').map(Number); return h*60+m; };
+const toHHMM = min => {
+  min = ((min%1440)+1440)%1440;
+  return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
+};
+const fmt12 = min => {
+  min = ((min%1440)+1440)%1440;
+  let h = Math.floor(min/60), m = min%60;
+  const ap = h>=12?'PM':'AM'; h = h%12; if(h===0) h = 12;
+  return `${h}:${String(m).padStart(2,'0')} ${ap}`;
+};
+const fmtDur = min => `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}m`;
+const nowHHMM = () => {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+};
+
+/* ============ Punch state machine ============ */
+const chipMap = [['ci','ciV'],['lo','loV'],['li','liV']];
+function refreshUI(){
+  const ci=toMin($('ci').value), lo=toMin($('lo').value), li=toMin($('li').value);
+  for(const [id,vid] of chipMap){
+    const v = toMin($(id).value);
+    $(vid).textContent = v===null ? '\u2013:\u2013' : fmt12(v);
+  }
+  $('lo').disabled = ci===null;  $('chipLo').classList.toggle('off', ci===null);
+  $('li').disabled = lo===null;  $('chipLi').classList.toggle('off', lo===null);
+  if(ci!==null) $('lo').min = toHHMM(ci+1);
+  if(lo!==null) $('li').min = toHHMM(lo+1);
+  const btn = $('actionBtn');
+  if(ci===null){ btn.textContent='\u{130E0} Clock in now'; btn.disabled=false; }
+  else if(lo===null){ btn.textContent='\u{130E0} Lunch out now'; btn.disabled=false; }
+  else if(li===null){ btn.textContent='\u{130E0} Back from lunch now'; btn.disabled=false; }
+  else { btn.textContent='\u{132F9} All punches carved'; btn.disabled=true; }
+  calc();
+  if(typeof saveState === 'function') saveState();
+}
+function note(msg){
+  $('hint').textContent = msg;
+  clearTimeout(note._t); note._t = setTimeout(()=>{ $('hint').textContent=''; }, 4000);
+}
+$('actionBtn').addEventListener('click', ()=>{
+  const id = !$('ci').value ? 'ci' : !$('lo').value ? 'lo' : !$('li').value ? 'li' : null;
+  if(!id) return;
+  $(id).value = nowHHMM();
+  refreshUI();
+  if(id==='li' && clockOutMin!==null) flashClockOut();
+});
+function clampChip(id, floorId, label){
+  const v=toMin($(id).value), f=toMin($(floorId).value);
+  if(v!==null && f!==null && v<=f){
+    $(id).value = toHHMM(f+1);
+    note(`adjusted to stay after ${label} (${fmt12(f)})`);
+  }
+}
+$('ci').addEventListener('change', ()=>{
+  const ci=toMin($('ci').value), lo=toMin($('lo').value);
+  if(ci!==null && lo!==null && lo<=ci){
+    $('lo').value=''; $('li').value='';
+    note('lunch cleared \u2014 it was before clock-in');
+  }
+  refreshUI();
+});
+$('lo').addEventListener('change', ()=>{
+  clampChip('lo','ci','clock-in');
+  const lo=toMin($('lo').value), li=toMin($('li').value);
+  if(lo!==null && li!==null && li<=lo){ $('li').value=''; note('back-in cleared \u2014 it was before lunch out'); }
+  refreshUI();
+});
+$('li').addEventListener('change', ()=>{
+  clampChip('li','lo','lunch out');
+  refreshUI();
+  if(clockOutMin!==null) flashClockOut();
+});
+['wkH','wkT'].forEach(id => $(id).addEventListener('input', ()=>{ calcWeek(); if(typeof saveState==='function') saveState(); }));
+$('wkNow').addEventListener('click', ()=>{ $('wkT').value = nowHHMM(); calcWeek(); saveState(); });
+$('collapseBtn').addEventListener('click', ()=>{ panelEl.classList.toggle('collapsed'); });
+$('reset').addEventListener('click', ()=>{
+  ['ci','lo','li','wkH','wkT'].forEach(id => $(id).value='');
+  $('hint').textContent='';
+  try{ localStorage.removeItem('cor-state'); }catch(e){}
+  refreshUI(); calcWeek();
+});
+/* ============ Visitor identity (per-browser, per-day) ============ */
+function setCookie(k,v,days){
+  try{
+    const d = new Date(); d.setTime(d.getTime()+days*864e5);
+    document.cookie = `${k}=${encodeURIComponent(v)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+  }catch(e){}
+}
+function getCookie(k){
+  try{
+    const hit = document.cookie.split('; ').find(r=>r.startsWith(k+'='));
+    return hit ? decodeURIComponent(hit.split('=')[1]) : null;
+  }catch(e){ return null; }
+}
+/* read from either store, prefer whichever exists */
+function persistGet(k){
+  try{ const v = localStorage.getItem(k); if(v!==null) return v; }catch(e){}
+  return getCookie(k);
+}
+function persistSet(k,v,days){
+  try{ localStorage.setItem(k,v); }catch(e){}
+  setCookie(k,v,days||400);
+}
+function newId(){
+  if(crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'v-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+}
+const visitor = (function(){
+  let id = persistGet('cor-visitor');
+  const isNew = !id;
+  if(isNew){ id = newId(); persistSet('cor-visitor', id, 400); persistSet('cor-first-seen', new Date().toISOString(), 400); }
+  return {id, isNew, firstSeen: persistGet('cor-first-seen')};
+})();
+
+/* ============ Persistence (active on GitHub Pages / saved file) ============ */
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+function saveState(){
+  try{
+    localStorage.setItem('cor-state', JSON.stringify({
+      d: todayStr(),
+      ci: $('ci').value, lo: $('lo').value, li: $('li').value,
+      wkH: $('wkH').value, wkT: $('wkT').value
+    }));
+  }catch(e){/* storage unavailable (artifact preview) — memory-only */}
+}
+function loadState(){
+  try{
+    const st = JSON.parse(localStorage.getItem('cor-state')||'null');
+    if(st && st.d === todayStr()){
+      $('ci').value = st.ci||''; $('lo').value = st.lo||''; $('li').value = st.li||'';
+      $('wkH').value = st.wkH||''; $('wkT').value = st.wkT||'';
+    } else if(st){
+      localStorage.removeItem('cor-state'); /* new day, fresh wall */
+    }
+  }catch(e){}
+}
+loadState();
+
+/* record today's visit and craft a greeting */
+const visitLog = (function(){
+  let log = {};
+  try{ log = JSON.parse(persistGet('cor-visits')||'{}'); }catch(e){ log = {}; }
+  const today = todayStr();
+  const firstToday = !log[today];
+  log[today] = (log[today]||0) + 1;
+  /* keep only the last 30 days so it never bloats */
+  const keys = Object.keys(log).sort();
+  while(keys.length > 30){ delete log[keys.shift()]; }
+  persistSet('cor-visits', JSON.stringify(log), 400);
+  const daysSeen = Object.keys(log).length;
+  return {firstToday, todayCount: log[today], daysSeen};
+})();
+
+(function greet(){
+  const pill = $('previewPill');
+  let msg;
+  if(visitor.isNew){
+    msg = '\uD80C\uDCA0 The tomb records a new soul';
+  } else if(visitLog.firstToday){
+    msg = `\uD80C\uDCE0 Return to the tomb \u00b7 day ${visitLog.daysSeen}`;
+  } else {
+    msg = `\uD80C\uDCF9 Welcome back, visit ${visitLog.todayCount} today`;
+  }
+  pill.textContent = msg;
+  pill.classList.add('show');
+  pill.dataset.greeting = '1';
+  setTimeout(()=>{ if(pill.dataset.greeting==='1'){ pill.dataset.greeting=''; pill.classList.remove('show'); } }, 4200);
+})();
+
+refreshUI();
+calcWeek();
+
+/* ============ Calculator ============ */
+function calc(){
+  const ci = toMin($('ci').value), lo = toMin($('lo').value), li = toMin($('li').value);
+  const TARGET = 480;
+  if(ci===null){
+    $('out').textContent='–:–';
+    $('sub').textContent='One tap on the cartouche logs each punch.';
+    $('count').textContent=''; clockOutMin=null; marker.visible=false; return;
+  }
+  if(lo!==null && li!==null){
+    const morning = lo-ci, lunch = li-lo;
+    clockOutMin = li + (TARGET - morning);
+    $('out').textContent = fmt12(clockOutMin);
+    $('sub').innerHTML =
+      `morning ${fmtDur(morning)} · lunch ${fmtDur(lunch)} (excl.)<br>`+
+      `check: ${fmtDur(morning)} + ${fmtDur(clockOutMin-li)} = ${fmtDur(morning + clockOutMin - li)} ✓`;
+  } else if(lo!==null){
+    clockOutMin = null; marker.visible = false;
+    $('out').textContent = '–:–';
+    $('sub').textContent = `On lunch since ${fmt12(lo)} — tap the button when you're back.`;
+    $('count').textContent = ''; return;
+  } else {
+    clockOutMin = ci + TARGET;
+    $('out').textContent = fmt12(clockOutMin);
+    $('sub').textContent = 'No lunch yet — add it when you take it.';
+  }
+  const a = ((clockOutMin%720)/720)*Math.PI*2;
+  marker.position.set(Math.sin(a)*5.55, Math.cos(a)*5.55, 0);
+  marker.rotation.z = -a + Math.PI;
+  marker.visible = true;
+  tickCountdown();
+}
+
+function tickCountdown(){
+  const bar = $('dayBar'), cnt = $('count');
+  if(clockOutMin===null){ cnt.textContent=''; bar.style.width='0%'; tickCountdown._done=false; crumbleF=0; envTarget=ENV.inside; if(templeDown) restoreTemple(); return; }
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
+  const diff = clockOutMin - nowMin;
+  /* progress across the whole shift (8h + lunch) */
+  const ci = toMin($('ci').value);
+  if(ci!==null){
+    const span = clockOutMin - ci;
+    const pct = Math.max(0, Math.min(100, ((nowMin - ci)/span)*100));
+    bar.style.width = pct.toFixed(1)+'%';
+  }
+  if(diff <= 0){
+    const over = -diff;
+    const om = Math.floor(over), os = Math.floor((over*60)%60);
+    cnt.innerHTML = `☀ Daylight — flee the tomb ✓ <span class="overtime">(+${om}m ${String(os).padStart(2,'0')}s over)</span>`;
+    if(!tickCountdown._done){ tickCountdown._done = true; showcaseSpin(); chime(); collapseTemple(); }
+    return;
+  }
+  if(tickCountdown._done && templeDown) restoreTemple(); /* time was edited back — rebuild */
+  tickCountdown._done = false;
+  crumbleF = diff <= 3 ? 1 - diff/3 : 0;   /* the final three minutes */
+  if(crumbleF > 0 && !tickCountdown._warned){ tickCountdown._warned = true; rumble(); }
+  if(crumbleF === 0) tickCountdown._warned = false;
+  const h = Math.floor(diff/60), m = Math.floor(diff%60), sec = Math.floor((diff*60)%60);
+  cnt.textContent = `${h}h ${String(m).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s until it lifts` +
+    (crumbleF > 0 ? ' \u00b7 \u26a0 the tomb trembles' : '');
+}
+setInterval(tickCountdown, 1000);
+
+/* temple chime when the curse lifts */
+let audioCtx = null;
+addEventListener('pointerdown', ()=>{ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }, {once:true});
+function chime(){
+  if(!audioCtx) return;
+  [523.25, 659.25, 783.99].forEach((f,i)=>{  /* C5-E5-G5 */
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    const t0 = audioCtx.currentTime + i*0.18;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.18, t0+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+1.4);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t0); o.stop(t0+1.5);
+  });
+}
+
+function calcWeek(){
+  const raw = ($('wkH').value||'').trim();
+  const at = toMin($('wkT').value);
+  const m = raw.match(/^(\d{1,3})[:.](\d{2})$/);
+  if(!m || at===null){
+    $('wkOut').textContent='–:–';
+    $('wkSub').textContent = (raw||$('wkT').value) ? 'Hours as HH:MM, e.g. 39:12' : '';
+    return;
+  }
+  const have = (+m[1])*60 + (+m[2]);
+  const need = 2400 - have;
+  if(need<=0){ $('wkOut').textContent='Done!'; $('wkSub').textContent = `Already at ${fmtDur(have)} — past 40h.`; return; }
+  $('wkOut').textContent = fmt12(at+need);
+  $('wkSub').textContent = `40:00 − ${m[1]}:${m[2]} = ${fmtDur(need)} more`;
+}
+
+/* ============ Live preview: clock follows the picker ============ */
+const FIELD_LABELS = {ci:'Clocked in', lo:'Lunch out', li:'Lunch back in', wkT:'Punch-in'};
+let previewMin = null;
+
+function setPreview(id){
+  const v = toMin($(id).value);
+  const pill = $('previewPill');
+  if(v===null){ previewMin = null; pill.classList.remove('show'); return; }
+  previewMin = v;
+  pill.dataset.greeting = '';
+  pill.textContent = `${FIELD_LABELS[id]} · ${fmt12(v)}`;
+  pill.classList.add('show');
+}
+function clearPreview(force){
+  if(flashClockOut._active && !force) return;
+  previewMin = null;
+  $('previewPill').classList.remove('show');
+}
+['ci','lo','li','wkT'].forEach(id=>{
+  const el = $(id);
+  el.addEventListener('focus', ()=>setPreview(id));
+  el.addEventListener('input', ()=>setPreview(id));
+  el.addEventListener('blur', ()=>setTimeout(()=>clearPreview(false), 400));
+});
+function flashClockOut(){
+  if(clockOutMin===null) return;
+  previewMin = clockOutMin;
+  const pill = $('previewPill');
+  pill.textContent = `☥ Curse lifts · ${fmt12(clockOutMin)}`;
+  pill.classList.add('show');
+  showcaseSpin();
+  flashClockOut._active = true;
+  clearTimeout(flashClockOut._t);
+  flashClockOut._t = setTimeout(()=>{ flashClockOut._active=false; clearPreview(true); }, 2600);
+}
+
+/* ============ Render loop ============ */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TWO_PI = Math.PI*2;
+let dispH = 0, dispM = 0, dispS = 0;
+function approach(cur, target, k){
+  let d = ((target - cur) % TWO_PI + TWO_PI) % TWO_PI;
+  if(d > Math.PI) d -= TWO_PI;
+  return cur + d*k;
+}
+function loop(now){
+  requestAnimationFrame(loop);
+  try{ loopBody(now); }
+  catch(err){
+    if(!loop._reported){ loop._reported = true; __showErr('Render loop: ' + (err && err.stack ? err.stack : err)); }
+  }
+}
+function loopBody(now){
+  let tH, tM, tS;
+  if(previewMin !== null){
+    const h = Math.floor(previewMin/60)%12, m = previewMin%60;
+    tH = ((h + m/60)/12)*TWO_PI;
+    tM = (m/60)*TWO_PI;
+    tS = 0;
+  } else {
+    const d = new Date();
+    const s = d.getSeconds() + d.getMilliseconds()/1000;
+    const mnt = d.getMinutes() + s/60;
+    const hr = (d.getHours()%12) + mnt/60;
+    tH = (hr/12)*TWO_PI;
+    tM = (mnt/60)*TWO_PI;
+    tS = (s/60)*TWO_PI;
+  }
+  const k = reduceMotion ? 1 : 0.14;
+  dispH = approach(dispH, tH, k);
+  dispM = approach(dispM, tM, k);
+  dispS = approach(dispS, tS, k);
+  hourHand.rotation.z = -dispH;
+  minuteHand.rotation.z = -dispM;
+  secondHand.rotation.z = -dispS;
+
+  const t = now*0.001;
+
+  /* clock: idle sway + flourish */
+  let ySpin = 0, spinP = 0;
+  if(spinAnim){
+    const p = Math.min(1, (now - spinAnim.t0)/spinAnim.dur);
+    spinP = p;
+    ySpin = easeInOut(p)*TWO_PI;
+    if(p>=1) spinAnim = null;
+  }
+  if(!reduceMotion){
+    clockGroup.rotation.y = Math.sin(t*0.28)*0.28 + ySpin;
+    clockGroup.rotation.x = Math.sin(t*0.19)*0.06;
+    clockGroup.position.y = view.cy + Math.sin(t*0.55)*0.14;
+  } else {
+    clockGroup.rotation.y = ySpin;
+  }
+
+  /* pendulum + gears */
+  pendulum.rotation.z = reduceMotion ? 0 : Math.sin(t*3.9)*0.24;
+  if(!reduceMotion) gears.forEach(g => { g.mesh.rotation.z += g.speed*0.01; });
+
+  /* Bastet guardians: tail sway, slow head turns, hop during flourish */
+  if(!reduceMotion){
+    [catL, catR].forEach((cat,i)=>{
+      cat.tail.rotation.z = Math.sin(t*1.4 + i*2.1)*0.22;
+      if(previewMin !== null){
+        /* both guardians fix their gaze on the dial */
+        const toward = (i===0 ? 0.55 : -0.55);
+        cat.head.rotation.y += (toward - cat.head.rotation.y)*0.08;
+        cat.head.rotation.x += (0.18 - cat.head.rotation.x)*0.08;
+      } else {
+        cat.head.rotation.y = Math.sin(t*0.35 + i*3)*0.35;
+        cat.head.rotation.x = Math.sin(t*0.5 + i)*0.08;
+      }
+      const hop = spinAnim ? Math.abs(Math.sin(spinP*Math.PI*3))*0.9 : 0;
+      cat.group.position.y = floorY + hop;
+    });
+  }
+
+  /* environment cross-fade between tomb and open desert */
+  const ek = reduceMotion ? 1 : 0.025;
+  scene.background.lerp(envTarget.bg, ek);
+  scene.fog.color.copy(scene.background);
+  scene.fog.near += (envTarget.fogN - scene.fog.near)*ek;
+  scene.fog.far  += (envTarget.fogF - scene.fog.far)*ek;
+  amb.color.lerp(envTarget.amb[0], ek);   amb.intensity += (envTarget.amb[1]-amb.intensity)*ek;
+  key.color.lerp(envTarget.key[0], ek);   key.intensity += (envTarget.key[1]-key.intensity)*ek;
+  fill.color.lerp(envTarget.fill[0], ek); fill.intensity += (envTarget.fill[1]-fill.intensity)*ek;
+  floorMat.color.lerp(envTarget.floor, ek);
+  wallMat.opacity += (envTarget.wallOp - wallMat.opacity)*ek;
+  walls.forEach(w=>{ w.visible = wallMat.opacity > 0.02; });
+  sunMat.opacity += ((1-envTarget.wallOp) - sunMat.opacity)*ek;
+  /* torches gutter — harder as the tomb fails, dead once outside */
+  const flick = 0.75 + Math.sin(t*11)*0.15 + Math.sin(t*23+1.7)*0.1*(1+crumbleF*2);
+  torchLights.forEach((tl,i)=>{ tl.intensity = envTarget.torch===0
+      ? Math.max(0, tl.intensity - 0.03)
+      : (1.3 + crumbleF*0.6) * (flick + (i?0.06:-0.04)); });
+  torchMeshes.forEach((f,i)=>{
+    f.scale.y = 0.85 + Math.sin(t*13+i*2)*0.18*(1+crumbleF);
+    f.material.opacity = envTarget.torch===0 ? Math.max(0, f.material.opacity-0.03) : 0.95;
+  });
+  /* pre-collapse tremors: slabs shiver in the final minutes */
+  if(crumbleF > 0 && !templeDown){
+    slabs.forEach((sl,i)=>{ sl.m.rotation.z = sl.r0 + Math.sin(now*0.02 + i*2)*0.02*crumbleF; });
+  }
+
+  /* the collapse: slabs plunge, columns topple, sand goes wild */
+  let cShake = crumbleF > 0 && !templeDown ? crumbleF*0.14 : 0;
+  let sandBoost = 1 + crumbleF*3.5;
+  if(collapseAnim){
+    const cp = Math.min(1, (now - collapseAnim.t0)/collapseAnim.dur);
+    cShake = Math.max(cShake, (1 - cp)*0.45);
+    sandBoost = 1 + 8*Math.sin(Math.min(1,cp*1.4)*Math.PI);
+    slabs.forEach(sl=>{
+      const q = Math.max(0, Math.min(1, (cp - sl.delay)/(1 - sl.delay)));
+      const e = easeInQ(q);
+      sl.m.position.y = sl.y0 - e*(sl.y0 - (floorY + 0.5));
+      sl.m.rotation.z = sl.r0 + e*sl.rz;
+      sl.m.rotation.x = e*sl.rx;
+    });
+    cols.forEach(c=>{
+      const q = Math.max(0, Math.min(1, (cp - c.delay)/(1 - c.delay)));
+      c.g.rotation.z = easeInQ(q)*c.dir*(Math.PI/2 - 0.12);
+    });
+    if(cp >= 1) collapseAnim = null; /* rubble stays down (templeDown) */
+  }
+
+  /* sand falling from the ceiling */
+  if(!reduceMotion){
+    const arr = dustGeo.attributes.position.array;
+    for(let i=0;i<DUST;i++){
+      arr[i*3+1] -= dustVel[i]*0.016*sandBoost;
+      arr[i*3]   += Math.sin(t*2.2 + i)*0.004*sandBoost;
+      if(arr[i*3+1] < floorY + 0.4) respawnGrain(i, false);
+    }
+    dustGeo.attributes.position.needsUpdate = true;
+  }
+
+  /* falling debris chunks */
+  if(!reduceMotion && (crumbleF > 0 || collapseAnim)){
+    dropDebris(collapseAnim ? 0.25 : crumbleF*0.04);
+  }
+  for(const d of debris){
+    if(!d.active) continue;
+    d.vy -= 0.03;
+    d.m.position.y += d.vy;
+    d.m.rotation.x += d.spin.x; d.m.rotation.y += d.spin.y; d.m.rotation.z += d.spin.z;
+    if(d.m.position.y < floorY + 0.3){ d.active = false; d.m.visible = false; }
+  }
+
+  /* guardians face the daylight once the tomb opens */
+  if(!reduceMotion && envTarget === ENV.outside){
+    [catL, catR].forEach(cat=>{
+      cat.head.rotation.y += (0.7 - cat.head.rotation.y)*0.05;
+      cat.head.rotation.x += (-0.15 - cat.head.rotation.x)*0.05;
+    });
+  }
+
+  /* bezel glow */
+  bezelMat.emissiveIntensity = previewMin !== null
+    ? 0.3 + Math.sin(t*5)*0.15
+    : 0.06 + Math.sin(t*1.4)*0.03;
+
+  /* camera: slow orbit */
+  if(!reduceMotion){
+    camera.position.x = view.cx + Math.sin(t*0.13)*1.6;
+    camera.position.y = view.lookY + 0.8 + Math.sin(t*0.1)*0.2;
+    camera.position.z = view.dist + Math.sin(t*0.07)*0.8;
+  } else {
+    camera.position.set(view.cx, view.lookY + 0.8, view.dist);
+  }
+  if(cShake > 0){
+    camera.position.x += Math.sin(now*0.11)*cShake;
+    camera.position.y += Math.sin(now*0.137)*cShake*0.7;
+  }
+  camera.lookAt(view.cx, view.lookY, 0);
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

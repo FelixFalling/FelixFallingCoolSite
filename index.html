@@ -135,6 +135,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // preserve ordering (React before ReactDOM before Babel before text/babel).
     const doc = new DOMParser().parseFromString(template, 'text/html');
     document.documentElement.replaceWith(doc.documentElement);
+
+    // Just for fun: a little floating link to the Curse of Ra clock.
+    const funLink = document.createElement('a');
+    funLink.href = 'clockmaker.html';
+    funLink.textContent = '\u{1F551} Curse of Ra';
+    funLink.title = 'A little something for fun';
+    funLink.style.cssText = 'position:fixed;bottom:14px;left:14px;font:13px/1 -apple-system,BlinkMacSystemFont,sans-serif;color:#fff;background:#2e2656;text-decoration:none;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:10001;opacity:0.85';
+    document.body.appendChild(funLink);
+
     const dead = Array.from(document.scripts);
     for (const old of dead) {
       const s = document.createElement('script');
