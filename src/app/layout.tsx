@@ -18,7 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: browser extensions (Dark Reader, Grammarly, …)
+    // add attributes to <html> before React hydrates. This silences the
+    // resulting harmless mismatch warning for the <html> element.
+    <html lang="en" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

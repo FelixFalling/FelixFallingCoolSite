@@ -256,6 +256,26 @@ if(typeof THREE === 'undefined'){
   __showErr('THREE is undefined — the 3D library did not load, so the scene cannot start.');
   throw new Error('THREE not loaded');
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  ✎  SETTINGS YOU CAN EDIT
+ *  ---------------------------------------------------------------------------
+ *  These are the safe knobs. Change the values here and reload — you never need
+ *  to dig into the 3D machinery below to customize the basics.
+ *
+ *  Want to change the COLORS too? They live a little further down:
+ *    • search for "materials"  → the temple / clock / gold colors
+ *    • search for "const ENV"  → the lighting + background of the temple
+ * ═══════════════════════════════════════════════════════════════════════════ */
+const SETTINGS = {
+  workDayHours:  8,    // length of a full work day — used to predict clock-out
+  workWeekHours: 40,   // target for the "weekly hours" checker
+  greeting: '𓂀 The tomb stirs as you enter',  // message that fades in on load
+};
+// Derived values (leave these) — the clock counts in minutes, not hours.
+const WORK_DAY_MINUTES  = Math.round(SETTINGS.workDayHours  * 60);
+const WORK_WEEK_MINUTES = Math.round(SETTINGS.workWeekHours * 60);
+
 /* ============ Scene: dusk over the Nile ============ */
 /* ---- WebGL bring-up, with a graceful fallback ----------------------------
    The 3D scene needs a working WebGL context, which depends on the browser
@@ -305,16 +325,18 @@ renderer.domElement.addEventListener('webglcontextrestored', function(){
 }, false);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x241a12);
-scene.fog = new THREE.Fog(0x241a12, 26, 64);
+/* Start already in the warm, lit "inside the temple" look (matches ENV.inside
+   below) so the first frame shows the colored stone chamber, not a black void. */
+scene.background = new THREE.Color(0x2b1f14);
+scene.fog = new THREE.Fog(0x2b1f14, 30, 88);
 const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 120);
 
-const amb = new THREE.AmbientLight(0x7a6248, 1.2);
+const amb = new THREE.AmbientLight(0x6e5942, 0.85);
 scene.add(amb);
-const key = new THREE.DirectionalLight(0xffc98a, 1.2);
+const key = new THREE.DirectionalLight(0xffce95, 1.25);
 key.position.set(7,10,10); key.castShadow = true; key.shadow.mapSize.set(1024,1024);
 scene.add(key);
-const fill = new THREE.DirectionalLight(0x5a4a7e, 0.45);
+const fill = new THREE.DirectionalLight(0x5f5142, 0.4);
 fill.position.set(-8,4,6); scene.add(fill);
 const rim = new THREE.PointLight(0x39e6a3, 1.1, 44);
 rim.position.set(0,7,-6); scene.add(rim);
@@ -326,11 +348,11 @@ const papyrusMat = new THREE.MeshStandardMaterial({color:0xf2e6c0, roughness:.9}
 const lapisMat   = new THREE.MeshStandardMaterial({color:0x1d2a66, metalness:.5, roughness:.35});
 const faienceMat = new THREE.MeshStandardMaterial({color:0x35e0a6, metalness:.3, roughness:.35, emissive:0x35e0a6, emissiveIntensity:0.55});
 const obsidian   = new THREE.MeshStandardMaterial({color:0x9a7433, metalness:.6, roughness:.42});
-const sandstone  = new THREE.MeshStandardMaterial({color:0x60518c, roughness:1});
+const sandstone  = new THREE.MeshStandardMaterial({color:0x93794f, roughness:1}); // warm carved sandstone
 
 /* desert floor + pyramids */
 const floorY = -9;
-const floorMat = new THREE.MeshStandardMaterial({color:0x5c4a33, roughness:1});
+const floorMat = new THREE.MeshStandardMaterial({color:0x6f5638, roughness:1});
 const sandFloor = new THREE.Mesh(new THREE.PlaneGeometry(160,90), floorMat);
 sandFloor.rotation.x = -Math.PI/2; sandFloor.position.y = floorY;
 sandFloor.receiveShadow = true; scene.add(sandFloor);
@@ -641,9 +663,9 @@ function dropDebris(prob){
 
 /* ---- Environment phases: tomb interior -> crumbling -> open desert ---- */
 const ENV = {
-  inside:  {bg:new THREE.Color(0x241a12), fogN:26, fogF:64,
-            amb:[new THREE.Color(0x7a6248),1.2], key:[new THREE.Color(0xffc98a),1.2],
-            fill:[new THREE.Color(0x5a4a7e),0.45], floor:new THREE.Color(0x5c4a33),
+  inside:  {bg:new THREE.Color(0x2b1f14), fogN:30, fogF:88,
+            amb:[new THREE.Color(0x6e5942),0.85], key:[new THREE.Color(0xffce95),1.25],
+            fill:[new THREE.Color(0x5f5142),0.4], floor:new THREE.Color(0x6f5638),
             wallOp:1, torch:1},
   outside: {bg:new THREE.Color(0x9cc4ee), fogN:50, fogF:140,
             amb:[new THREE.Color(0xc2d6f2),1.75], key:[new THREE.Color(0xfff2d0),2.3],
@@ -669,6 +691,13 @@ function restoreTemple(){
   cols.forEach(c=>{ c.g.rotation.z = 0; });
 }
 const easeInQ = p => p*p*p;
+
+// Web Audio context. Declared up here (not down by the sound helpers) so that
+// rumble()/chime() are safe to call during startup: `let` is NOT hoisted, so a
+// call before its declaration line runs throws a "before initialization" error.
+// Stays null until the first user gesture (pointerdown) creates it.
+let audioCtx = null;
+addEventListener('pointerdown', ()=>{ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }, {once:true});
 function rumble(){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator(), g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
@@ -815,92 +844,23 @@ $('reset').addEventListener('click', ()=>{
   try{ localStorage.removeItem('cor-state'); }catch(e){}
   refreshUI(); calcWeek();
 });
-/* ============ Visitor identity (per-browser, per-day) ============ */
-function setCookie(k,v,days){
-  try{
-    const d = new Date(); d.setTime(d.getTime()+days*864e5);
-    document.cookie = `${k}=${encodeURIComponent(v)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
-  }catch(e){}
-}
-function getCookie(k){
-  try{
-    const hit = document.cookie.split('; ').find(r=>r.startsWith(k+'='));
-    return hit ? decodeURIComponent(hit.split('=')[1]) : null;
-  }catch(e){ return null; }
-}
-/* read from either store, prefer whichever exists */
-function persistGet(k){
-  try{ const v = localStorage.getItem(k); if(v!==null) return v; }catch(e){}
-  return getCookie(k);
-}
-function persistSet(k,v,days){
-  try{ localStorage.setItem(k,v); }catch(e){}
-  setCookie(k,v,days||400);
-}
-function newId(){
-  if(crypto && crypto.randomUUID) return crypto.randomUUID();
-  return 'v-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
-}
-const visitor = (function(){
-  let id = persistGet('cor-visitor');
-  const isNew = !id;
-  if(isNew){ id = newId(); persistSet('cor-visitor', id, 400); persistSet('cor-first-seen', new Date().toISOString(), 400); }
-  return {id, isNew, firstSeen: persistGet('cor-first-seen')};
-})();
+/* ============ Session state (in-memory only) ================================
+   Persistence was removed on purpose. It used cookies for visitor tracking and
+   restored the previous visit's punches from localStorage — and that
+   restore-on-revisit path is exactly what made the clock break on the second
+   visit. Nothing here touches cookies or storage now, so every visit starts
+   clean and the page can never be broken by leftover saved state.
 
-/* ============ Persistence (active on GitHub Pages / saved file) ============ */
-const todayStr = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-};
-function saveState(){
-  try{
-    localStorage.setItem('cor-state', JSON.stringify({
-      d: todayStr(),
-      ci: $('ci').value, lo: $('lo').value, li: $('li').value,
-      wkH: $('wkH').value, wkT: $('wkT').value
-    }));
-  }catch(e){/* storage unavailable (artifact preview) — memory-only */}
-}
-function loadState(){
-  try{
-    const st = JSON.parse(localStorage.getItem('cor-state')||'null');
-    if(st && st.d === todayStr()){
-      $('ci').value = st.ci||''; $('lo').value = st.lo||''; $('li').value = st.li||'';
-      $('wkH').value = st.wkH||''; $('wkT').value = st.wkT||'';
-    } else if(st){
-      localStorage.removeItem('cor-state'); /* new day, fresh wall */
-    }
-  }catch(e){}
-}
-loadState();
+   saveState()/loadState() are kept as harmless no-ops so the existing call
+   sites (refreshUI, the week inputs, the reset button) don't need to change. */
+function saveState(){ /* intentionally does nothing — no persistence */ }
+function loadState(){ /* intentionally does nothing — no persistence */ }
 
-/* record today's visit and craft a greeting */
-const visitLog = (function(){
-  let log = {};
-  try{ log = JSON.parse(persistGet('cor-visits')||'{}'); }catch(e){ log = {}; }
-  const today = todayStr();
-  const firstToday = !log[today];
-  log[today] = (log[today]||0) + 1;
-  /* keep only the last 30 days so it never bloats */
-  const keys = Object.keys(log).sort();
-  while(keys.length > 30){ delete log[keys.shift()]; }
-  persistSet('cor-visits', JSON.stringify(log), 400);
-  const daysSeen = Object.keys(log).length;
-  return {firstToday, todayCount: log[today], daysSeen};
-})();
-
+/* A brief welcome, shown once per page load (no storage, so always the same). */
 (function greet(){
   const pill = $('previewPill');
-  let msg;
-  if(visitor.isNew){
-    msg = '\uD80C\uDCA0 The tomb records a new soul';
-  } else if(visitLog.firstToday){
-    msg = `\uD80C\uDCE0 Return to the tomb \u00b7 day ${visitLog.daysSeen}`;
-  } else {
-    msg = `\uD80C\uDCF9 Welcome back, visit ${visitLog.todayCount} today`;
-  }
-  pill.textContent = msg;
+  if(!pill) return;
+  pill.textContent = SETTINGS.greeting;
   pill.classList.add('show');
   pill.dataset.greeting = '1';
   setTimeout(()=>{ if(pill.dataset.greeting==='1'){ pill.dataset.greeting=''; pill.classList.remove('show'); } }, 4200);
@@ -912,7 +872,7 @@ calcWeek();
 /* ============ Calculator ============ */
 function calc(){
   const ci = toMin($('ci').value), lo = toMin($('lo').value), li = toMin($('li').value);
-  const TARGET = 480;
+  const TARGET = WORK_DAY_MINUTES; // full work day, from SETTINGS at the top
   if(ci===null){
     $('out').textContent='–:–';
     $('sub').textContent='One tap on the cartouche logs each punch.';
@@ -973,9 +933,7 @@ function tickCountdown(){
 }
 setInterval(tickCountdown, 1000);
 
-/* temple chime when the curse lifts */
-let audioCtx = null;
-addEventListener('pointerdown', ()=>{ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }, {once:true});
+/* temple chime when the curse lifts (audioCtx is declared near the top) */
 function chime(){
   if(!audioCtx) return;
   [523.25, 659.25, 783.99].forEach((f,i)=>{  /* C5-E5-G5 */
@@ -1000,10 +958,11 @@ function calcWeek(){
     return;
   }
   const have = (+m[1])*60 + (+m[2]);
-  const need = 2400 - have;
-  if(need<=0){ $('wkOut').textContent='Done!'; $('wkSub').textContent = `Already at ${fmtDur(have)} — past 40h.`; return; }
+  const need = WORK_WEEK_MINUTES - have; // weekly target, from SETTINGS at the top
+  const weekLabel = `${Math.floor(WORK_WEEK_MINUTES/60)}:${String(WORK_WEEK_MINUTES%60).padStart(2,'0')}`;
+  if(need<=0){ $('wkOut').textContent='Done!'; $('wkSub').textContent = `Already at ${fmtDur(have)} — past ${weekLabel}.`; return; }
   $('wkOut').textContent = fmt12(at+need);
-  $('wkSub').textContent = `40:00 − ${m[1]}:${m[2]} = ${fmtDur(need)} more`;
+  $('wkSub').textContent = `${weekLabel} − ${m[1]}:${m[2]} = ${fmtDur(need)} more`;
 }
 
 /* ============ Live preview: clock follows the picker ============ */
