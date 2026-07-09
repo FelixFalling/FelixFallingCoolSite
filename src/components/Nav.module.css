@@ -1,0 +1,45 @@
+/* Styles scoped to Nav.tsx. Class names here can't collide with other files. */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250, 247, 240, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(31, 56, 100, 0.1);
+}
+
+.inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--navy);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.links {
+  display: flex;
+  gap: 22px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.link {
+  color: #44506a;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--navy);
+}

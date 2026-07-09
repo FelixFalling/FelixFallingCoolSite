@@ -214,6 +214,29 @@
 <div id="errBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99;
   background:#7c1f0e;color:#fff;font-family:monospace;font-size:12px;padding:8px 12px;
   white-space:pre-wrap;max-height:40vh;overflow:auto"></div>
+
+<!-- Shown (by showNoWebGL) when WebGL/3D isn't available, instead of a black screen. -->
+<div id="webglMsg" style="display:none;position:fixed;inset:0;z-index:120;
+  align-items:center;justify-content:center;background:#241a12;color:#f2e6c0;
+  font-family:Georgia,'Times New Roman',serif;text-align:center;padding:24px">
+  <div style="max-width:460px">
+    <div style="font-size:46px;line-height:1;margin-bottom:14px">&#x13080;</div>
+    <h2 style="margin:0 0 10px;font-size:22px;color:#e6bd45">The vision will not form</h2>
+    <p style="margin:0 0 14px;line-height:1.55;font-size:15px">
+      This clock needs 3D graphics (WebGL), which your browser isn&rsquo;t providing
+      right now. It&rsquo;s almost always because <b>hardware acceleration is turned off</b>.
+    </p>
+    <p style="margin:0 0 18px;line-height:1.55;font-size:13px;opacity:.8">
+      In Chrome: <b>Settings &rarr; System &rarr;</b> turn on
+      &ldquo;Use graphics acceleration when available,&rdquo; then reload.
+    </p>
+    <p data-detail style="margin:0 0 18px;font-family:monospace;font-size:11px;opacity:.5"></p>
+    <button onclick="location.reload()" style="background:#e6bd45;color:#241a12;border:0;
+      padding:10px 22px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">
+      Try again
+    </button>
+  </div>
+</div>
 <script>
   window.__showErr = function(msg){
     var b = document.getElementById('errBanner');
@@ -234,12 +257,52 @@ if(typeof THREE === 'undefined'){
   throw new Error('THREE not loaded');
 }
 /* ============ Scene: dusk over the Nile ============ */
-const renderer = new THREE.WebGLRenderer({antialias:true});
+/* ---- WebGL bring-up, with a graceful fallback ----------------------------
+   The 3D scene needs a working WebGL context, which depends on the browser
+   having GPU / hardware acceleration available. When it isn't (acceleration
+   switched off, or the GPU blocklisted after a driver update) the old code
+   left a silent BLACK SCREEN. Now we detect that and show a helpful message,
+   and we automatically recover if the GPU context is lost while running. */
+function showNoWebGL(detail){
+  const el = document.getElementById('webglMsg');
+  if(!el) return;
+  el.style.display = 'flex';
+  if(detail){ el.querySelector('[data-detail]').textContent = detail; }
+}
+let renderer;
+try{
+  renderer = new THREE.WebGLRenderer({
+    antialias:true,
+    powerPreference:'high-performance',
+    failIfMajorPerformanceCaveat:false, // allow software fallback rather than fail outright
+  });
+}catch(err){
+  showNoWebGL(String((err && err.message) || err));
+  throw new Error('WebGL unavailable: ' + err);
+}
+if(!renderer.getContext()){
+  showNoWebGL('The browser did not provide a WebGL context.');
+  throw new Error('WebGL context is null');
+}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.getElementById('scene').appendChild(renderer.domElement);
+
+/* Pause rendering while the GPU context is gone, resume when it returns.
+   Calling preventDefault() on 'lost' is what lets the browser fire 'restored'. */
+let contextLost = false;
+renderer.domElement.addEventListener('webglcontextlost', function(e){
+  e.preventDefault();
+  contextLost = true;
+  showNoWebGL('The GPU context was lost — waiting for the browser to restore it…');
+}, false);
+renderer.domElement.addEventListener('webglcontextrestored', function(){
+  contextLost = false;
+  const el = document.getElementById('webglMsg');
+  if(el) el.style.display = 'none';
+}, false);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x241a12);
@@ -996,6 +1059,7 @@ function loop(now){
   }
 }
 function loopBody(now){
+  if(contextLost) return; // GPU context gone — skip until 'webglcontextrestored'
   let tH, tM, tS;
   if(previewMin !== null){
     const h = Math.floor(previewMin/60)%12, m = previewMin%60;

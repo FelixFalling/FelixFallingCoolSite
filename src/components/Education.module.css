@@ -1,0 +1,42 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 22px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.degree {
+  margin: 0 0 4px;
+  font-size: 17px;
+  color: var(--navy);
+}
+
+.year {
+  font-size: 13px;
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.detail {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--slate);
+}
+
+.honors {
+  margin: 18px 0 0;
+  font-size: 14px;
+  color: #4a5871;
+}

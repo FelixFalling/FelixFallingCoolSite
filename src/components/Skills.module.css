@@ -1,0 +1,16 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px 32px;
+  font-size: 14.5px;
+}
+
+.heading {
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.skills {
+  color: var(--slate);
+}

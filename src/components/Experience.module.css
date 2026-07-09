@@ -1,0 +1,42 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.role {
+  margin: 0;
+  font-size: 18px;
+  color: var(--navy);
+}
+
+.period {
+  font-size: 13px;
+  color: var(--teal);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.location {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.bullets {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  color: var(--slate);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}

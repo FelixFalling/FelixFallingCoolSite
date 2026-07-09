@@ -1,0 +1,37 @@
+import { resume } from "@/data/resume";
+import Reveal from "./Reveal";
+import styles from "./Projects.module.css";
+
+export default function Projects() {
+  return (
+    <Reveal id="projects">
+      <h2 className="section-title">Projects</h2>
+      <div className={styles.grid}>
+        {resume.projects.map((project, i) => (
+          <article key={i} className={`card ${styles.card}`}>
+            <div className={styles.eyebrow}>{project.eyebrow}</div>
+            <h3 className={styles.title}>{project.title}</h3>
+            <p className={styles.description}>{project.description}</p>
+            {project.link && (
+              <a
+                className={styles.link}
+                href={project.link.href}
+                target="_blank"
+                rel="noopener"
+              >
+                {project.link.label}
+              </a>
+            )}
+            <div className={styles.tags}>
+              {project.tags.map((tag, j) => (
+                <span key={j} className="tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </Reveal>
+  );
+}

@@ -1,0 +1,51 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 22px;
+}
+
+/* Column layout so the tags can be pushed to the bottom of each card. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  color: var(--navy);
+}
+
+.description {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--slate);
+}
+
+.link {
+  font-size: 13.5px;
+  color: var(--navy);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto; /* push tags to the bottom regardless of text length */
+  padding-top: 6px;
+}
