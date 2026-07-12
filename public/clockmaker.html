@@ -20,13 +20,46 @@
     --ink:#3e2c12; --ink-soft:#6f5730;
     --carve-hi:rgba(255,244,214,.55); --carve-sh:rgba(58,40,15,.5);
     --gold:#c39a2a; --gold-lt:#eec857; --faience:#0f7a68;
-    --warn:#7c1f0e;
+    --warn:#7c1f0e; --overtime:#a2270f;
+    /* subtle inset tints on the panel surface (they flip to light tints in dark mode) */
+    --inset:rgba(58,40,15,.15); --inset-strong:rgba(58,40,15,.35);
+    --carve-line:rgba(62,44,18,.5);
     --tap:48px; --gap:12px;
   }
+  /* ===== DARK MODE =====
+     The clock reads the same saved "theme" as the main site (a tiny script in
+     <head> sets data-theme on <html> before paint). This darkens the control
+     panel + overlays; the 3D temple keeps its warm, torch-lit look. */
+  :root[data-theme="dark"]{
+    --stone:#2c3446; --stone-lt:#3a4454; --stone-dk:#232a38;
+    --ink:#e8edf6; --ink-soft:#aab6c9;
+    --carve-hi:rgba(255,255,255,.10); --carve-sh:rgba(0,0,0,.45);
+    --gold:#d6b445; --gold-lt:#f0d074; --faience:#33d8c0;
+    --warn:#ff9d87; --overtime:#ff8f76;
+    --inset:rgba(255,255,255,.06); --inset-strong:rgba(255,255,255,.14);
+    --carve-line:rgba(255,255,255,.28);
+  }
+  /* Native pickers (time inputs) should render dark UI in dark mode. */
+  :root[data-theme="dark"] .chip input,
+  :root[data-theme="dark"] .wkRow input{color-scheme:dark}
   *{margin:0;padding:0;box-sizing:border-box}
+  /* No double-tap-zoom delay on any control; consistent keyboard focus rings. */
+  button,summary,.chip,.chip input,.wkRow input{touch-action:manipulation}
+  .grabberBtn:focus-visible,.miniBtn:focus-visible,.reset:focus-visible,
+  summary:focus-visible,#themeBtn:focus-visible{
+    outline:3px solid var(--faience);outline-offset:2px}
   html,body{height:100%;overflow:hidden;background:#2e2656;color:var(--ink);
     font-family:var(--egypt);-webkit-tap-highlight-color:transparent}
   #scene{position:fixed;inset:0}
+
+  /* Light/dark toggle, top-right. Mirrors the button in the main site's nav. */
+  #themeBtn{position:fixed;top:calc(14px + env(safe-area-inset-top));right:16px;z-index:4;
+    width:38px;height:38px;border-radius:999px;padding:0;cursor:pointer;
+    border:1px solid var(--carve-line);
+    background:linear-gradient(180deg,var(--stone-lt),var(--stone));color:var(--ink);
+    font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  #themeBtn:hover{filter:brightness(1.06)}
 
   .title{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;
     font-family:var(--egypt);font-size:clamp(15px,2.2vw,21px);letter-spacing:.14em;
@@ -59,13 +92,13 @@
       linear-gradient(200deg,transparent 64%,rgba(58,40,15,.12) 64.5%,transparent 65.3%)}
   .grabberBtn{display:block;width:100%;background:none;border:none;cursor:pointer;
     padding:2px 0 8px}
-  .grabber{width:44px;height:5px;border-radius:3px;background:rgba(62,44,18,.5);margin:0 auto}
+  .grabber{width:44px;height:5px;border-radius:3px;background:var(--carve-line);margin:0 auto}
   .glyphs{text-align:center;font-size:15px;letter-spacing:.5em;white-space:nowrap;
-    overflow:hidden;color:rgba(62,44,18,.55);margin-bottom:var(--gap);
+    overflow:hidden;color:var(--carve-line);margin-bottom:var(--gap);
     text-shadow:0 1px 0 var(--carve-hi)}
 
   /* ---------- Hero ---------- */
-  .hero{background:rgba(58,40,15,.14);border-radius:12px;padding:12px;text-align:center;
+  .hero{background:var(--inset);border-radius:12px;padding:12px;text-align:center;
     box-shadow:inset 0 4px 10px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
   .hero .cue{font-family:var(--egypt);font-size:12px;letter-spacing:.18em;
     color:var(--ink-soft);text-transform:uppercase;text-shadow:0 1px 0 var(--carve-hi)}
@@ -73,13 +106,13 @@
     color:var(--faience);line-height:1.1;margin:2px 0;
     text-shadow:0 1px 0 var(--carve-hi)}
   .hero .count{font-family:var(--mono);font-size:15px;color:var(--ink)}
-  .bar{height:9px;border-radius:5px;background:rgba(58,40,15,.35);margin-top:10px;overflow:hidden;
+  .bar{height:9px;border-radius:5px;background:var(--inset-strong);margin-top:10px;overflow:hidden;
     box-shadow:inset 0 2px 4px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
   .bar i{display:block;height:100%;width:0%;border-radius:5px;
     background:linear-gradient(90deg,var(--gold),var(--faience));transition:width .8s ease}
   .hero .sub{font-family:var(--mono);font-size:12px;color:var(--ink-soft);
     margin-top:8px;line-height:1.7}
-  .overtime{color:#a2270f !important}
+  .overtime{color:var(--overtime) !important}
 
   /* ---------- The single action ---------- */
   .action{display:block;width:100%;margin-top:var(--gap);
@@ -96,7 +129,7 @@
 
   /* ---------- Punch chips: tap to edit ---------- */
   .chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:var(--gap)}
-  .chip{position:relative;background:rgba(58,40,15,.16);border-radius:10px;
+  .chip{position:relative;background:var(--inset);border-radius:10px;
     padding:8px 4px;text-align:center;cursor:pointer;
     box-shadow:inset 0 3px 6px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
   .chip span{display:block;font-family:var(--egypt);font-size:11px;letter-spacing:.14em;
@@ -135,7 +168,7 @@
   .wkRow label{font-family:var(--egypt);font-size:14px;align-self:center;
     text-shadow:0 1px 0 var(--carve-hi)}
   .wkRow input{font-family:var(--mono);font-size:16px;color:var(--ink);
-    background:rgba(58,40,15,.16);border:none;border-radius:10px;padding:0 10px;
+    background:var(--inset);border:none;border-radius:10px;padding:0 10px;
     min-height:var(--tap);width:130px;color-scheme:light;
     box-shadow:inset 0 3px 6px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
   .wkRow input:focus-visible{outline:2px solid var(--faience)}
@@ -143,7 +176,7 @@
     border-radius:999px;min-height:var(--tap);padding:0 14px;cursor:pointer;
     font-family:var(--egypt);font-size:13px;color:#2a1f0c;
     box-shadow:inset 0 1px 0 rgba(255,250,220,.8),inset 0 -2px 3px rgba(107,83,16,.6)}
-  .wkOutBox{background:rgba(58,40,15,.14);border-radius:10px;padding:10px;text-align:center;
+  .wkOutBox{background:var(--inset);border-radius:10px;padding:10px;text-align:center;
     box-shadow:inset 0 3px 8px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
   .wkOutBox .out{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--faience)}
   .wkOutBox .sub{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-top:2px}
@@ -157,17 +190,59 @@
   #panel.collapsed .hero .sub{display:none}
 
   @media (min-width:900px){
+    /* Cap the height so the centered panel always clears the fixed top-row
+       controls (title / greeting pill / theme button ≈ top 64px) on short
+       windows — content scrolls inside instead of colliding. */
     #panel{left:auto;right:36px;bottom:auto;top:50%;transform:translateY(-50%);
-      width:400px;border-radius:14px;max-height:88vh;padding:14px 20px}
+      width:400px;border-radius:14px;padding:14px 20px;
+      max-height:min(88vh, calc(100vh - 128px))}
     .grabberBtn{display:none}
+    /* Center the greeting/preview pill over the 3D scene (the area left of
+       the 436px-wide panel column) so it never sits on the panel. */
+    #previewPill{left:calc((100vw - 436px)/2)}
   }
   @media (prefers-reduced-motion:reduce){ *{transition:none !important;animation:none !important} }
 </style>
+<script>
+  /* Apply the saved theme (shared with the main site via the "theme" key)
+     before the page paints, so there's no flash. Falls back to the OS setting.
+     A ?theme=dark or ?theme=light in the URL wins for that load (not saved). */
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      if (t !== 'light' && t !== 'dark') {
+        t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      var q = new URLSearchParams(location.search).get('theme');
+      if (q === 'light' || q === 'dark') t = q;
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 <div id="scene"></div>
 <div class="title">𓂀 CURSE OF RA 𓂀</div>
-<div id="previewPill"></div>
+<div id="previewPill" role="status"></div>
+<button id="themeBtn" type="button" aria-label="Toggle light or dark mode" title="Toggle light / dark">🌙</button>
+<script>
+  /* Wire the theme toggle. Kept separate from the 3D scene so it works even if
+     WebGL/Three.js fails to load. Writes the same "theme" key the site uses. */
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    function syncIcon() {
+      btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+    syncIcon();
+    btn.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      syncIcon();
+    });
+  })();
+</script>
 
 <div id="panel">
   <button class="grabberBtn" id="collapseBtn" aria-label="Collapse or expand panel"><div class="grabber"></div></button>
@@ -176,7 +251,7 @@
   <div class="hero">
     <div class="cue">𓁹 the curse lifts at 𓁹</div>
     <div class="out" id="out">–:–</div>
-    <div class="count" id="count"></div>
+    <div class="count" id="count" role="timer"></div>
     <div class="bar"><i id="dayBar"></i></div>
     <div class="sub" id="sub"></div>
   </div>
@@ -188,7 +263,7 @@
     <label class="chip off" id="chipLo"><span>Lunch</span><b id="loV">–:–</b><input type="time" id="lo" aria-label="Lunch out time" disabled></label>
     <label class="chip off" id="chipLi"><span>Back</span><b id="liV">–:–</b><input type="time" id="li" aria-label="Lunch back-in time" disabled></label>
   </div>
-  <div class="hint" id="hint"></div>
+  <div class="hint" id="hint" aria-live="polite"></div>
 
   <details>
     <summary>Weekly 40-hour check</summary>
@@ -806,6 +881,11 @@ $('actionBtn').addEventListener('click', ()=>{
   const id = !$('ci').value ? 'ci' : !$('lo').value ? 'lo' : !$('li').value ? 'li' : null;
   if(!id) return;
   $(id).value = nowHHMM();
+  /* Same-minute taps would record a zero-length step (e.g. back-from-lunch at
+     the exact minute of lunch-out). Manual edits are already clamped by the
+     change handlers — apply the identical rule to button punches. */
+  if(id==='lo') clampChip('lo','ci','clock-in');
+  if(id==='li') clampChip('li','lo','lunch out');
   refreshUI();
   if(id==='li' && clockOutMin!==null) flashClockOut();
 });
@@ -907,12 +987,19 @@ function tickCountdown(){
   if(clockOutMin===null){ cnt.textContent=''; bar.style.width='0%'; tickCountdown._done=false; crumbleF=0; envTarget=ENV.inside; if(templeDown) restoreTemple(); return; }
   const now = new Date();
   const nowMin = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
-  const diff = clockOutMin - nowMin;
+  /* Minutes until the curse lifts. clockOutMin can pass midnight (e.g. clock in
+     at 8 PM → out at "28:00"), while nowMin wraps back to 0 at 12 AM — so wrap
+     the difference into a day and read anything beyond 12 h as overtime. A real
+     shift countdown never legitimately exceeds 12 h, so this is unambiguous. */
+  let diff = clockOutMin - nowMin;
+  diff = ((diff % 1440) + 1440) % 1440;   /* 0..1439, wrapping past midnight */
+  if(diff > 720) diff -= 1440;            /* >12 h "remaining" ⇒ actually over */
   /* progress across the whole shift (8h + lunch) */
   const ci = toMin($('ci').value);
   if(ci!==null){
     const span = clockOutMin - ci;
-    const pct = Math.max(0, Math.min(100, ((nowMin - ci)/span)*100));
+    const elapsed = ((nowMin - ci) % 1440 + 1440) % 1440; /* survives midnight */
+    const pct = span > 0 ? Math.max(0, Math.min(100, (elapsed/span)*100)) : 100;
     bar.style.width = pct.toFixed(1)+'%';
   }
   if(diff <= 0){
@@ -931,7 +1018,16 @@ function tickCountdown(){
   cnt.textContent = `${h}h ${String(m).padStart(2,'0')}m ${String(sec).padStart(2,'0')}s until it lifts` +
     (crumbleF > 0 ? ' \u00b7 \u26a0 the tomb trembles' : '');
 }
-setInterval(tickCountdown, 1000);
+setInterval(function(){
+  try{ tickCountdown(); }
+  catch(err){
+    /* Report once instead of spamming the banner every second. */
+    if(!tickCountdown._errReported){
+      tickCountdown._errReported = true;
+      __showErr('Countdown: ' + (err && err.message ? err.message : err));
+    }
+  }
+}, 1000);
 
 /* temple chime when the curse lifts (audioCtx is declared near the top) */
 function chime(){
@@ -955,6 +1051,11 @@ function calcWeek(){
   if(!m || at===null){
     $('wkOut').textContent='–:–';
     $('wkSub').textContent = (raw||$('wkT').value) ? 'Hours as HH:MM, e.g. 39:12' : '';
+    return;
+  }
+  if(+m[2] > 59){ /* "39:75" fits the pattern but isn't a real duration */
+    $('wkOut').textContent='–:–';
+    $('wkSub').textContent = 'Minutes must be 00–59';
     return;
   }
   const have = (+m[1])*60 + (+m[2]);

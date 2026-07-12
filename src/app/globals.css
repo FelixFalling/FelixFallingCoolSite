@@ -1,26 +1,123 @@
 /* ──────────────────────────────────────────────────────────────────────────
- *  GLOBAL STYLES
+ *  GLOBAL STYLES & THEME
  * ──────────────────────────────────────────────────────────────────────────
- *  The color palette lives in :root as CSS variables — change a value here
- *  and it updates everywhere it's used. Component-specific styles live in each
- *  component's own `.module.css` file next to it.
+ *  Every color in the site is a CSS variable ("token") defined once here, so
+ *  the whole design can switch between LIGHT and DARK by swapping these values.
+ *
+ *  • :root                    → the LIGHT theme values (the default)
+ *  • :root[data-theme="dark"] → the DARK overrides
+ *
+ *  A tiny script in the page <head> sets data-theme on <html> before the page
+ *  paints (from the saved choice, or the system preference), so there's no
+ *  flash of the wrong theme. The moon/sun button in the nav flips it.
+ *
+ *  To retune a color: change it in ONE place below and it updates everywhere.
  */
 
 :root {
-  --sand: #faf7f0; /* page background */
-  --ink: #2b3648; /* default body text */
-  --navy: #1f3864; /* headings, primary buttons */
-  --navy-hover: #2a4a7f;
-  --teal: #3e7c7a; /* accents, eyebrows */
-  --teal-deep: #2e615f;
-  --slate: #37435a; /* paragraph text */
-  --muted: #6b7688; /* secondary/meta text */
+  color-scheme: light;
 
-  --card-bg: #ffffff;
+  /* Surfaces */
+  --sand: #faf7f0; /* page background */
+  --card-bg: #ffffff; /* cards */
   --card-border: rgba(31, 56, 100, 0.1);
   --card-shadow: 0 2px 10px rgba(31, 56, 100, 0.05);
+  --surface-2: rgba(62, 124, 122, 0.1); /* tags, ghost button */
+
+  /* Text */
+  --ink: #2b3648; /* default body text */
+  --navy: #1f3864; /* headings + brand (NOT backgrounds — see --primary) */
+  --slate: #37435a; /* paragraph text */
+  --muted: #6b7688; /* secondary / meta text */
+  --text-title: #35507e; /* hero job title */
+  --text-subtle: #4a5871; /* hero specialties, honors line */
+
+  /* Accents */
+  --teal: #3e7c7a;
+  --teal-deep: #2e615f;
+  --rule: rgba(62, 124, 122, 0.4); /* the fading line beside section titles */
+
+  /* Primary action (filled buttons) — a real background, kept separate from
+     --navy so it can stay vivid in dark mode instead of turning light. */
+  --primary: #1f3864;
+  --primary-hover: #2a4a7f;
+  --on-primary: #ffffff;
+
+  /* Nav bar */
+  --nav-bg: rgba(250, 247, 240, 0.92);
+  --nav-link: #44506a;
+
+  /* Hero */
+  --hero-from: #eaf2f4;
+  --hero-via: #dceaec;
+  --hero-to: #cfe3e6;
+  --photo-from: #b9d6d8;
+  --photo-to: #8fbcbe;
+  --photo-text: #356062;
+
+  /* Footer (a dark band in both themes) */
+  --footer-bg: #1f3864;
+  --footer-text: #dce6f2;
+  --footer-title: #ffffff;
+  --footer-subtitle: #afc2dc;
+  --footer-link-border: rgba(255, 255, 255, 0.35);
+  --footer-copyright: #7e93b5;
+
+  /* Ocean waves under the hero (the "sand" layer uses --sand so it always
+     matches the page background it washes onto). */
+  --wave-far: #a9cbcd;
+  --wave-mid: #5e9c9f;
+  --wave-break: #3e7c7a;
+  --wave-foam: #ffffff;
 
   --content-width: 960px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --sand: #0e131d;
+  --card-bg: #171e2b;
+  --card-border: rgba(255, 255, 255, 0.09);
+  --card-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  --surface-2: rgba(99, 184, 180, 0.14);
+
+  --ink: #c4ccdb;
+  --navy: #e9eff8;
+  --slate: #b8c2d4;
+  --muted: #8a94a6;
+  --text-title: #9dc0ea;
+  --text-subtle: #a9b4c9;
+
+  --teal: #63b8b4;
+  --teal-deep: #7ececa;
+  --rule: rgba(99, 184, 180, 0.35);
+
+  --primary: #3360a8;
+  --primary-hover: #3f70bd;
+  --on-primary: #ffffff;
+
+  --nav-bg: rgba(14, 19, 29, 0.9);
+  --nav-link: #aeb8ca;
+
+  --hero-from: #121d2e;
+  --hero-via: #142433;
+  --hero-to: #163041;
+  --photo-from: #23506a;
+  --photo-to: #2d6b6e;
+  --photo-text: #d6f0f0;
+
+  --footer-bg: #080c14;
+  --footer-text: #aab6cc;
+  --footer-title: #eef3fb;
+  --footer-subtitle: #8a94a6;
+  --footer-link-border: rgba(255, 255, 255, 0.2);
+  --footer-copyright: #6b7688;
+
+  --wave-far: #26414f;
+  --wave-mid: #2c5f62;
+  --wave-break: #3a7c7a;
+  --wave-foam: #7ececa;
 }
 
 * {
@@ -37,6 +134,8 @@ body {
   color: var(--ink);
   font-family: Helvetica, Arial, sans-serif;
   line-height: 1.6;
+  /* Smoothly cross-fade colors when the theme is toggled. */
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
@@ -68,7 +167,7 @@ a {
   content: "";
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(62, 124, 122, 0.4), transparent);
+  background: linear-gradient(90deg, var(--rule), transparent);
 }
 
 /* Card used by Experience / Projects / Education. */
@@ -78,12 +177,13 @@ a {
   border-radius: 10px;
   box-shadow: var(--card-shadow);
   padding: 24px 26px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 /* Small pill tag used on projects. */
 .tag {
   font-size: 12px;
-  background: rgba(62, 124, 122, 0.1);
+  background: var(--surface-2);
   color: var(--teal-deep);
   padding: 3px 10px;
   border-radius: 20px;

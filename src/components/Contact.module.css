@@ -1,8 +1,9 @@
 .footer {
   position: relative;
-  background: var(--navy);
-  color: #dce6f2;
+  background: var(--footer-bg);
+  color: var(--footer-text);
   overflow: hidden;
+  transition: background-color 0.25s ease;
 }
 
 .wave {
@@ -32,13 +33,13 @@
 .title {
   margin: 0 0 10px;
   font-size: 26px;
-  color: #ffffff;
+  color: var(--footer-title);
 }
 
 .subtitle {
   margin: 0 0 28px;
   font-size: 16px;
-  color: #afc2dc;
+  color: var(--footer-subtitle);
 }
 
 .links {
@@ -50,9 +51,9 @@
 }
 
 .link {
-  color: #ffffff;
+  color: var(--footer-title);
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--footer-link-border);
   padding: 10px 20px;
   border-radius: 6px;
   transition: background 0.15s ease;
@@ -65,5 +66,5 @@
 .copyright {
   margin-top: 44px;
   font-size: 12.5px;
-  color: #7e93b5;
+  color: var(--footer-copyright);
 }

@@ -4,19 +4,24 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(250, 247, 240, 0.92);
+  background: var(--nav-bg);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(31, 56, 100, 0.1);
+  border-bottom: 1px solid var(--card-border);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 24px;
-  height: 56px;
+  padding: 8px 24px;
+  /* min-height (not height): on narrow screens the links wrap onto extra
+     rows and the bar must grow with them instead of spilling outside. */
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 18px;
 }
 
 .brand {
@@ -27,15 +32,24 @@
   letter-spacing: 0.02em;
 }
 
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px 18px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .links {
   display: flex;
-  gap: 22px;
+  gap: 4px 18px;
   font-size: 14px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .link {
-  color: #44506a;
+  color: var(--nav-link);
   text-decoration: none;
   transition: color 0.15s ease;
 }

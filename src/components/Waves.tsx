@@ -37,11 +37,14 @@ interface Layer {
 }
 
 // Back-to-front: faint far swell → deeper teal → breaking wave with foam → sand.
+// Fills are theme tokens (defined in globals.css) so the waves recolor in dark
+// mode. The top "sand" layer uses --sand — the page background — so the waves
+// always look like they wash onto the page itself, in either theme.
 const LAYERS: Layer[] = [
-  { fill: "#A9CBCD", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 34, swell: "waveSwell2", swellDur: 9, opacity: 0.5, foam: false },
-  { fill: "#5E9C9F", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 22, swell: "waveSwell", swellDur: 7, opacity: 0.65, foam: false },
-  { fill: "#3E7C7A", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 15, swell: "waveSwell2", swellDur: 5.5, opacity: 0.85, foam: true },
-  { fill: "#FAF7F0", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 11, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false },
+  { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 34, swell: "waveSwell2", swellDur: 9, opacity: 0.5, foam: false },
+  { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 22, swell: "waveSwell", swellDur: 7, opacity: 0.65, foam: false },
+  { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 15, swell: "waveSwell2", swellDur: 5.5, opacity: 0.85, foam: true },
+  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 11, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false },
 ];
 
 function WaveLayer({ layer }: { layer: Layer }) {
@@ -75,12 +78,13 @@ function WaveLayer({ layer }: { layer: Layer }) {
           preserveAspectRatio="none"
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
         >
-          <path d={d} fill={layer.fill} opacity={layer.opacity} transform="translate(0,0)" />
-          <path d={d} fill={layer.fill} opacity={layer.opacity} transform="translate(1200,0)" />
+          {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
+          <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} transform="translate(0,0)" />
+          <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} transform="translate(1200,0)" />
           {layer.foam && (
             <>
-              <path d={openCrest} fill="none" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" opacity={0.7} transform="translate(0,0)" />
-              <path d={openCrest} fill="none" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" opacity={0.7} transform="translate(1200,0)" />
+              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5} strokeLinecap="round" opacity={0.7} transform="translate(0,0)" />
+              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5} strokeLinecap="round" opacity={0.7} transform="translate(1200,0)" />
             </>
           )}
         </svg>

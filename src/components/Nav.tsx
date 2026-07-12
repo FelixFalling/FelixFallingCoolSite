@@ -1,4 +1,5 @@
 import { resume } from "@/data/resume";
+import ThemeToggle from "./ThemeToggle";
 import styles from "./Nav.module.css";
 
 /** Sticky top navigation. Links jump to each section by its `id`. */
@@ -18,12 +19,15 @@ export default function Nav() {
         <a href="#top" className={styles.brand}>
           {resume.name}
         </a>
-        <div className={styles.links}>
-          {links.map((link) => (
-            <a key={link.href} href={link.href} className={styles.link}>
-              {link.label}
-            </a>
-          ))}
+        <div className={styles.right}>
+          <div className={styles.links}>
+            {links.map((link) => (
+              <a key={link.href} href={link.href} className={styles.link}>
+                {link.label}
+              </a>
+            ))}
+          </div>
+          <ThemeToggle />
         </div>
       </div>
     </nav>
