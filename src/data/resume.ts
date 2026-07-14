@@ -60,13 +60,13 @@ export interface Resume {
 }
 
 export const resume: Resume = {
-  name: "Your Name",
-  jobTitle: "Job Title",
+  name: "Flying Felix",
+  jobTitle: "Software Developer",
   location: "City, ST · Detail",
-  specialties: "Specialty one · specialty two · specialty three",
+  specialties: "Testing Software· UI · Backend · DevOps",
   about:
-    "A short professional summary: who you are, what you build, and what you " +
-    "bring to a team. Two to four sentences.",
+    "Welcome To My Cool Little website I'm going to be build my portfolio" +
+    "Something Something.",
   showPhoto: true,
 
   links: {
