@@ -2,10 +2,10 @@
  * The soft atmospheric layers of the hero coast scene — everything that isn't
  * the water or the rocks. Four small, self-contained pieces, all decorative:
  *
- *   • <MoonStars/> — a moon and faint stars that appear ONLY in dark mode.
- *   • <Clouds/>    — soft clouds drifting slowly across the upper sky.
- *   • <Gulls/>     — a few tiny birds crossing the scene.
- *   • <Fog/>       — thick, rolling fog banked low over the water.
+ *   • <Stars/>  — faint stars that appear ONLY in dark mode.
+ *   • <Clouds/> — soft clouds drifting slowly across the upper sky.
+ *   • <Gulls/>  — a few tiny birds crossing the scene.
+ *   • <Fog/>    — thick, rolling fog banked low over the water.
  *
  * Colors come from tokens in globals.css so they recolor with the theme. --mist
  * is stored as a bare "R, G, B" triple so each layer can pick its own alpha with
@@ -19,8 +19,8 @@ function blob(alpha: number): string {
   return `radial-gradient(ellipse at center, rgba(var(--mist), ${alpha}) 0%, rgba(var(--mist), 0) 70%)`;
 }
 
-/* ── Moon + stars (dark mode only) ─────────────────────────────────────────
- * The whole group fades in via --moon-opacity, which is 0 in light and 1 in
+/* ── Stars (dark mode only) ────────────────────────────────────────────────
+ * The whole group fades in via --star-opacity, which is 0 in light and 1 in
  * dark — so no JavaScript is needed to know the theme (and no hydration flash). */
 const STARS = [
   { top: "12%", left: "18%", size: 2 },
@@ -32,30 +32,18 @@ const STARS = [
   { top: "22%", left: "8%", size: 1.5 },
 ];
 
-export function MoonStars() {
+export function Stars() {
   return (
     <div
       aria-hidden="true"
       style={{
         position: "absolute",
         inset: 0,
-        opacity: "var(--moon-opacity)",
+        opacity: "var(--star-opacity)",
         transition: "opacity 0.25s ease",
         pointerEvents: "none",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          top: "16%",
-          right: "14%",
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: "radial-gradient(circle at 38% 38%, var(--moon), rgba(120,150,150,0.15) 78%)",
-          boxShadow: "0 0 40px 10px rgba(200, 225, 225, 0.18)",
-        }}
-      />
       {STARS.map((s, i) => (
         <div
           key={i}

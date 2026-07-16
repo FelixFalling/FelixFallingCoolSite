@@ -77,9 +77,8 @@
   /* Coastal scene extras (the hero diorama). */
   --sea-stack: #7f9a9c; /* offshore rock silhouette — hazy grey-blue in fog */
   --mist: 255, 255, 255; /* fog color as R,G,B — layers set their own alpha */
-  --moon: #f3f7f7; /* moon disc (only shown in dark, see --moon-opacity) */
   --star: #e9f2f2; /* faint stars (dark only) */
-  --moon-opacity: 0; /* moon + stars hidden in light; the dark theme flips to 1 */
+  --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
   --content-width: 960px;
 }
@@ -135,9 +134,8 @@
 
   --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
   --mist: 150, 180, 185; /* fog glows faintly cool at night */
-  --moon: #dbe9e6;
   --star: #cfe2e0;
-  --moon-opacity: 1; /* moon + stars appear in dark mode */
+  --star-opacity: 1; /* stars appear in dark mode */
 }
 
 * {

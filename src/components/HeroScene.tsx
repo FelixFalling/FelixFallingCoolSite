@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { MoonStars, Clouds, Gulls, Fog } from "./Atmosphere";
+import { Stars, Clouds, Gulls, Fog } from "./Atmosphere";
 import SeaStacks from "./SeaStacks";
 import Waves from "./Waves";
 
@@ -9,7 +9,7 @@ import Waves from "./Waves";
  * HeroScene — assembles the coastal diorama behind the hero text and, on desktop,
  * makes it react to the mouse.
  *
- * Layering, back → front: moon/stars (sky) → clouds → gulls → sea stacks → waves
+ * Layering, back → front: stars (sky) → clouds → gulls → sea stacks → waves
  * → fog. Each layer positions itself; this component just stacks them in order
  * (later = painted on top) and tracks the cursor.
  *
@@ -81,7 +81,7 @@ export default function HeroScene() {
       aria-hidden="true"
       style={{ position: "absolute", inset: 0, zIndex: 1, overflow: "hidden", pointerEvents: "none" }}
     >
-      <MoonStars />
+      <Stars />
       <Clouds />
       <Gulls />
       <SeaStacks />
