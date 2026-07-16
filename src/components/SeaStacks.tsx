@@ -22,8 +22,8 @@ const SHAPES = {
   // A craggy twin-peaked mass.
   crag:
     "M14 100 L18 60 L26 44 L32 54 L40 30 L48 50 L56 34 L64 58 L72 48 L82 100 Z",
-  // A slim pointed needle.
-  needle: "M34 100 L40 40 L50 14 L58 44 L66 100 Z",
+  // A pointed stack — slimmer than the others, but still broad at the base.
+  needle: "M26 100 L36 42 L48 12 L62 40 L74 100 Z",
 } as const;
 
 interface Rock {
@@ -37,14 +37,15 @@ interface Rock {
 }
 
 // Near rocks first (larger, lower, more solid), then the hazier far cluster. The
-// `bottom` values sit the bases up in the water — roughly the middle of the wave
-// strip — so the rocks stand offshore and the surf breaks around them.
+// `bottom` values put the bases down at the shoreline — the waves render in
+// front, so the breaking surf laps around each rock's feet. Wide boxes relative
+// to their height keep the rocks chunky (Haystack Rock is a mound, not a spire).
 const ROCKS: Rock[] = [
-  { shape: "monolith", left: 62, bottom: 96, width: 132, height: 150, opacity: 0.62, blur: 0.4 },
-  { shape: "crag", left: 20, bottom: 100, width: 100, height: 100, opacity: 0.5, blur: 0.6 },
-  { shape: "needle", left: 78, bottom: 108, width: 44, height: 88, opacity: 0.4, blur: 0.9 },
-  { shape: "crag", left: 40, bottom: 116, width: 60, height: 58, opacity: 0.3, blur: 1.2 },
-  { shape: "needle", left: 8, bottom: 120, width: 28, height: 56, opacity: 0.26, blur: 1.4 },
+  { shape: "monolith", left: 63, bottom: 54, width: 190, height: 165, opacity: 0.7, blur: 0.3 },
+  { shape: "crag", left: 17, bottom: 58, width: 160, height: 108, opacity: 0.6, blur: 0.45 },
+  { shape: "needle", left: 80, bottom: 68, width: 66, height: 100, opacity: 0.5, blur: 0.7 },
+  { shape: "crag", left: 40, bottom: 92, width: 95, height: 64, opacity: 0.35, blur: 1.1 },
+  { shape: "needle", left: 5, bottom: 98, width: 46, height: 62, opacity: 0.3, blur: 1.3 },
 ];
 
 export default function SeaStacks() {
