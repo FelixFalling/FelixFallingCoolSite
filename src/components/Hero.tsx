@@ -1,5 +1,5 @@
 import { resume } from "@/data/resume";
-import Waves from "./Waves";
+import HeroScene from "./HeroScene";
 import styles from "./Hero.module.css";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -42,9 +42,7 @@ export default function Hero() {
         )}
       </div>
 
-      <div className={styles.waves}>
-        <Waves />
-      </div>
+      <HeroScene />
     </header>
   );
 }

@@ -17,58 +17,69 @@
 :root {
   color-scheme: light;
 
+  /* LIGHT THEME — "overcast Oregon coast, midday fog": cool, desaturated,
+     silver-grey with deep spruce-teal accents. */
+
   /* Surfaces */
-  --sand: #faf7f0; /* page background */
-  --card-bg: #ffffff; /* cards */
-  --card-border: rgba(31, 56, 100, 0.1);
-  --card-shadow: 0 2px 10px rgba(31, 56, 100, 0.05);
-  --surface-2: rgba(62, 124, 122, 0.1); /* tags, ghost button */
+  --sand: #edf1f1; /* page background — a cool fog-grey, not warm cream */
+  --card-bg: #f8fbfb; /* cards — a touch lighter than the page */
+  --card-border: rgba(40, 64, 74, 0.12);
+  --card-shadow: 0 2px 12px rgba(35, 55, 65, 0.06);
+  --surface-2: rgba(58, 111, 107, 0.1); /* tags, ghost button */
 
   /* Text */
-  --ink: #2b3648; /* default body text */
-  --navy: #1f3864; /* headings + brand (NOT backgrounds — see --primary) */
-  --slate: #37435a; /* paragraph text */
-  --muted: #6b7688; /* secondary / meta text */
-  --text-title: #35507e; /* hero job title */
-  --text-subtle: #4a5871; /* hero specialties, honors line */
+  --ink: #2a3743; /* default body text — cool charcoal */
+  --navy: #1e3a42; /* headings + brand — deep slate-teal (NOT backgrounds) */
+  --slate: #384b53; /* paragraph text */
+  --muted: #64757d; /* secondary / meta text */
+  --text-title: #2f5560; /* hero job title — deep teal */
+  --text-subtle: #45585f; /* hero specialties, honors line */
 
   /* Accents */
-  --teal: #3e7c7a;
-  --teal-deep: #2e615f;
-  --rule: rgba(62, 124, 122, 0.4); /* the fading line beside section titles */
+  --teal: #3a6f6b; /* deep spruce-teal */
+  --teal-deep: #2b5450;
+  --rule: rgba(58, 111, 107, 0.4); /* the fading line beside section titles */
 
   /* Primary action (filled buttons) — a real background, kept separate from
      --navy so it can stay vivid in dark mode instead of turning light. */
-  --primary: #1f3864;
-  --primary-hover: #2a4a7f;
+  --primary: #22505a; /* deep sea */
+  --primary-hover: #2c6470;
   --on-primary: #ffffff;
 
   /* Nav bar */
-  --nav-bg: rgba(250, 247, 240, 0.92);
-  --nav-link: #44506a;
+  --nav-bg: rgba(237, 241, 241, 0.9);
+  --nav-link: #3f525a;
 
-  /* Hero */
-  --hero-from: #eaf2f4;
-  --hero-via: #dceaec;
-  --hero-to: #cfe3e6;
-  --photo-from: #b9d6d8;
-  --photo-to: #8fbcbe;
-  --photo-text: #356062;
+  /* Hero — fog-silver sky at the top fading to cold sea-teal at the bottom. */
+  --hero-from: #dbe4e5;
+  --hero-via: #c4d5d5;
+  --hero-to: #9fc0c1;
+  --photo-from: #a7c6c6;
+  --photo-to: #6f9c9d;
+  --photo-text: #274a4c;
 
-  /* Footer (a dark band in both themes) */
-  --footer-bg: #1f3864;
-  --footer-text: #dce6f2;
-  --footer-title: #ffffff;
-  --footer-subtitle: #afc2dc;
-  --footer-link-border: rgba(255, 255, 255, 0.35);
-  --footer-copyright: #7e93b5;
+  /* Footer (a dark band in both themes) — deep teal-basalt. */
+  --footer-bg: #152c33;
+  --footer-text: #c6d5d6;
+  --footer-title: #f2f7f7;
+  --footer-subtitle: #93aab0;
+  --footer-link-border: rgba(255, 255, 255, 0.3);
+  --footer-copyright: #6f878d;
 
   /* Ocean waves under the hero (the "sand" layer uses --sand so it always
-     matches the page background it washes onto). */
-  --wave-far: #a9cbcd;
-  --wave-mid: #5e9c9f;
-  --wave-break: #3e7c7a;
-  --wave-foam: #ffffff;
+     matches the page background it washes onto). Back→front the water deepens;
+     the far band is the most desaturated so distance reads as haze. */
+  --wave-far: #b6cbcb; /* hazy, distant */
+  --wave-mid: #6b9c9b;
+  --wave-break: #3d716d; /* deepest, nearest crest */
+  --wave-foam: #e9f0ee; /* soft off-white — misty spray, not stark white */
+
+  /* Coastal scene extras (the hero diorama). */
+  --sea-stack: #7f9a9c; /* offshore rock silhouette — hazy grey-blue in fog */
+  --mist: 255, 255, 255; /* fog color as R,G,B — layers set their own alpha */
+  --moon: #f3f7f7; /* moon disc (only shown in dark, see --moon-opacity) */
+  --star: #e9f2f2; /* faint stars (dark only) */
+  --moon-opacity: 0; /* moon + stars hidden in light; the dark theme flips to 1 */
 
   --content-width: 960px;
 }
@@ -76,48 +87,57 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --sand: #0e131d;
-  --card-bg: #171e2b;
-  --card-border: rgba(255, 255, 255, 0.09);
-  --card-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
-  --surface-2: rgba(99, 184, 180, 0.14);
+  /* DARK THEME — "Oregon coast at night, moonlit fog": deep cold blue-greens,
+     muted, with a faint moonlit glow. */
 
-  --ink: #c4ccdb;
-  --navy: #e9eff8;
-  --slate: #b8c2d4;
-  --muted: #8a94a6;
-  --text-title: #9dc0ea;
-  --text-subtle: #a9b4c9;
+  --sand: #0c1418;
+  --card-bg: #141e23;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  --surface-2: rgba(95, 180, 174, 0.14);
 
-  --teal: #63b8b4;
-  --teal-deep: #7ececa;
-  --rule: rgba(99, 184, 180, 0.35);
+  --ink: #bcccce;
+  --navy: #e6f0f0;
+  --slate: #aebdc0;
+  --muted: #7f9296;
+  --text-title: #8fc2c0;
+  --text-subtle: #a0b4b6;
 
-  --primary: #3360a8;
-  --primary-hover: #3f70bd;
+  --teal: #5fb4ae;
+  --teal-deep: #7bceca;
+  --rule: rgba(95, 180, 174, 0.32);
+
+  --primary: #2a6a72;
+  --primary-hover: #357f88;
   --on-primary: #ffffff;
 
-  --nav-bg: rgba(14, 19, 29, 0.9);
-  --nav-link: #aeb8ca;
+  --nav-bg: rgba(12, 20, 24, 0.86);
+  --nav-link: #9fb2b5;
 
-  --hero-from: #121d2e;
-  --hero-via: #142433;
-  --hero-to: #163041;
-  --photo-from: #23506a;
-  --photo-to: #2d6b6e;
-  --photo-text: #d6f0f0;
+  --hero-from: #0e1a20;
+  --hero-via: #10242b;
+  --hero-to: #123038;
+  --photo-from: #1e4a54;
+  --photo-to: #27696a;
+  --photo-text: #d2eeee;
 
-  --footer-bg: #080c14;
-  --footer-text: #aab6cc;
+  --footer-bg: #070d10;
+  --footer-text: #9fb1b4;
   --footer-title: #eef3fb;
-  --footer-subtitle: #8a94a6;
+  --footer-subtitle: #7f9296;
   --footer-link-border: rgba(255, 255, 255, 0.2);
   --footer-copyright: #6b7688;
 
-  --wave-far: #26414f;
-  --wave-mid: #2c5f62;
-  --wave-break: #3a7c7a;
-  --wave-foam: #7ececa;
+  --wave-far: #223d44;
+  --wave-mid: #2b5c5e;
+  --wave-break: #387672;
+  --wave-foam: #6fbfbb; /* a soft moonlit glow on the crest */
+
+  --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
+  --mist: 150, 180, 185; /* fog glows faintly cool at night */
+  --moon: #dbe9e6;
+  --star: #cfe2e0;
+  --moon-opacity: 1; /* moon + stars appear in dark mode */
 }
 
 * {
@@ -227,12 +247,49 @@ a {
   }
 }
 
+/* ── Hero atmosphere keyframes (clouds, gulls, fog) ────────────────────────
+ * All three just slide their layer sideways across the sky/sea and loop. Each
+ * layer sits in an over-wide strip so a second copy scrolls in seamlessly (same
+ * trick as the waves). Fog also breathes its opacity a little as it drifts. */
+@keyframes cloudDrift {
+  from {
+    transform: translateX(-8%);
+  }
+  to {
+    transform: translateX(8%);
+  }
+}
+@keyframes gullDrift {
+  from {
+    transform: translate(-10%, 0);
+  }
+  to {
+    transform: translate(110%, -6%);
+  }
+}
+@keyframes mistDrift {
+  0% {
+    transform: translateX(-6%);
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(6%);
+    opacity: 0.75;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   .wave-drift,
-  .wave-swell {
+  .wave-swell,
+  .cloud-drift,
+  .gull-drift,
+  .mist-drift {
     animation: none !important;
   }
 }

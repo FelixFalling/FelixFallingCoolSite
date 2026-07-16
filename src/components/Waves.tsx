@@ -40,11 +40,13 @@ interface Layer {
 // Fills are theme tokens (defined in globals.css) so the waves recolor in dark
 // mode. The top "sand" layer uses --sand — the page background — so the waves
 // always look like they wash onto the page itself, in either theme.
+// Slow drift durations read as heavy, cold, unhurried water — a calmer sea than
+// a bright beach. The far band is faint (haze); the break band carries the foam.
 const LAYERS: Layer[] = [
-  { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 34, swell: "waveSwell2", swellDur: 9, opacity: 0.5, foam: false },
-  { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 22, swell: "waveSwell", swellDur: 7, opacity: 0.65, foam: false },
-  { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 15, swell: "waveSwell2", swellDur: 5.5, opacity: 0.85, foam: true },
-  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 11, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false },
+  { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 48, swell: "waveSwell2", swellDur: 11, opacity: 0.5, foam: false },
+  { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 32, swell: "waveSwell", swellDur: 9, opacity: 0.65, foam: false },
+  { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 21, swell: "waveSwell2", swellDur: 7, opacity: 0.85, foam: true },
+  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 16, swell: "waveSwell", swellDur: 6, opacity: 1, foam: false },
 ];
 
 function WaveLayer({ layer }: { layer: Layer }) {
@@ -82,9 +84,10 @@ function WaveLayer({ layer }: { layer: Layer }) {
           <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} transform="translate(0,0)" />
           <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} transform="translate(1200,0)" />
           {layer.foam && (
+            // Thin, soft, low-opacity foam — misty spray rather than a bright line.
             <>
-              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5} strokeLinecap="round" opacity={0.7} transform="translate(0,0)" />
-              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5} strokeLinecap="round" opacity={0.7} transform="translate(1200,0)" />
+              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} transform="translate(0,0)" />
+              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} transform="translate(1200,0)" />
             </>
           )}
         </svg>

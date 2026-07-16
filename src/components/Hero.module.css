@@ -8,7 +8,9 @@
 .inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 88px 24px 140px;
+  /* Extra bottom padding leaves the taller coastal scene (fog + waves) room to
+     breathe beneath the text/buttons. */
+  padding: 88px 24px 190px;
   position: relative;
   z-index: 2;
   display: flex;
@@ -111,13 +113,5 @@
   text-align: center;
 }
 
-/* Strip that holds the animated waves, pinned to the bottom of the hero. */
-.waves {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 170px;
-  z-index: 1;
-  pointer-events: none;
-}
+/* The full coastal scene (sky, stacks, waves, fog) is rendered by HeroScene,
+   which pins itself over the whole hero at z-index 1 — behind the text (z 2). */
