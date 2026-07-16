@@ -34,7 +34,9 @@
 
 .name {
   margin: 0 0 10px;
-  font-size: 46px;
+  /* clamp(min, preferred, max): scales with the viewport on phones but never
+     drops below 34px or grows past the desktop 46px. */
+  font-size: clamp(34px, 9vw, 46px);
   line-height: 1.12;
   color: var(--navy);
   letter-spacing: -0.01em;
@@ -115,3 +117,38 @@
 
 /* The full coastal scene (sky, stacks, waves, fog) is rendered by HeroScene,
    which pins itself over the whole hero at z-index 1 — behind the text (z 2). */
+
+/* ── Phone layout ──────────────────────────────────────────────────────────
+ * Tighter spacing, a smaller centered photo, and comfortably tappable buttons
+ * (≥44px tall, per mobile accessibility guidelines). */
+@media (max-width: 640px) {
+  .inner {
+    padding: 56px 20px 170px;
+    gap: 24px;
+  }
+
+  .title {
+    font-size: 19px;
+  }
+
+  .specialties {
+    font-size: 15px;
+    margin-bottom: 22px;
+  }
+
+  .btnPrimary,
+  .btnGhost {
+    padding: 13px 22px;
+  }
+
+  /* Center the photo when it wraps below the text, and shrink it so it doesn't
+     crowd the coastal scene. */
+  .photoWrap {
+    margin: 0 auto;
+  }
+
+  .photo {
+    width: 124px;
+    height: 124px;
+  }
+}

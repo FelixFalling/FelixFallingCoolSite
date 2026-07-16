@@ -65,7 +65,7 @@ export const resume: Resume = {
   location: "City, ST · Detail",
   specialties: "Testing Software· UI · Backend · DevOps",
   about:
-    "Welcome To My Cool Little website I'm going to be build my portfolio" +
+    "Welcome To My Cool Little website I'm going to be build my portfolio " +
     "Something Something.",
   showPhoto: true,
 

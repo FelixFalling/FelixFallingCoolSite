@@ -209,6 +209,27 @@ a {
   border-radius: 20px;
 }
 
+/* ── Phone layout ──────────────────────────────────────────────────────────
+ * Slightly tighter side padding and section rhythm on small screens, so the
+ * content gets more of the width without feeling cramped. */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 20px;
+  }
+
+  .section {
+    padding: 18px 0 44px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  .card {
+    padding: 20px 18px;
+  }
+}
+
 /* ── Wave animation keyframes (used by the Hero waves) ─────────────────────
  * Two drift directions so adjacent wave layers move against each other, plus
  * two gentle vertical "swell" bobs. Respects reduced-motion preferences. */

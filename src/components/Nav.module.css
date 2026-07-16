@@ -5,6 +5,8 @@
   top: 0;
   z-index: 100;
   background: var(--nav-bg);
+  /* -webkit- prefix: iOS Safari only applies backdrop blur with it. */
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--card-border);
   transition: background-color 0.25s ease, border-color 0.25s ease;
@@ -52,8 +54,28 @@
   color: var(--nav-link);
   text-decoration: none;
   transition: color 0.15s ease;
+  /* A little vertical padding makes each link an easier tap target. */
+  padding: 4px 0;
 }
 
 .link:hover {
   color: var(--navy);
+}
+
+/* ── Phone layout ──────────────────────────────────────────────────────────
+ * Tighter gaps and a slightly smaller font so the six links wrap into two
+ * tidy rows instead of three loose ones. */
+@media (max-width: 640px) {
+  .inner {
+    padding: 8px 16px;
+  }
+
+  .links {
+    font-size: 13.5px;
+    gap: 2px 14px;
+  }
+
+  .right {
+    gap: 6px 12px;
+  }
 }

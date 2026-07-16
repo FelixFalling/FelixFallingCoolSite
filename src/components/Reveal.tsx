@@ -24,7 +24,12 @@ export default function Reveal({
     if (!el) return;
 
     // Respect users who prefer no motion — show it immediately, no animation.
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Same if the browser lacks IntersectionObserver: never hide content we
+    // can't reveal again.
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !("IntersectionObserver" in window)
+    ) {
       el.style.opacity = "1";
       return;
     }
@@ -43,7 +48,10 @@ export default function Reveal({
           }
         }
       },
-      { threshold: 0.08 },
+      // rootMargin extends the "viewport" 120px downward, so a section starts
+      // fading in just before it scrolls into view — on phones this means the
+      // content is already appearing as you reach it, not lagging behind.
+      { threshold: 0.01, rootMargin: "0px 0px 120px 0px" },
     );
 
     observer.observe(el);
