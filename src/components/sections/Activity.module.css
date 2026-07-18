@@ -1,0 +1,34 @@
+/* The contribution chart is ~720px wide — on phones it scrolls sideways inside
+   its own box instead of stretching the page. */
+.chartScroll {
+  overflow-x: auto;
+  padding: 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.chart {
+  display: block;
+  min-width: 660px; /* keep the squares readable instead of shrinking to mush */
+  width: 100%;
+  height: auto;
+}
+
+.caption {
+  margin: 12px 0 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.caption a {
+  color: var(--teal-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.caption a:hover {
+  text-decoration: underline;
+}

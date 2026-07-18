@@ -53,7 +53,7 @@ test.describe("home page", () => {
   test("every section renders once scrolled to", async ({ page }) => {
     await page.goto("./");
     // Experience/Education are intentionally hidden for now (see page.tsx).
-    for (const id of ["about", "projects", "skills", "contact"]) {
+    for (const id of ["about", "projects", "skills", "activity", "contact"]) {
       const section = page.locator(`#${id}`);
       await section.scrollIntoViewIfNeeded();
       await expect(section).toBeVisible();

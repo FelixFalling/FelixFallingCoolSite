@@ -133,28 +133,30 @@ export const resume: Resume = {
       tags: ["Next.js", "TypeScript", "Playwright", "GitHub Actions"],
     },
     {
-      eyebrow: "Tool · Single file",
+      eyebrow: "Vibe-coded · Just for fun",
       title: "Curse of Ra",
       description:
         "A work-hours punch clock disguised as an animated Egyptian tomb — " +
         "tap the cartouche to clock in and out, and it tracks your day and " +
-        "your weekly 40 while the scene glitters around you. One " +
-        "self-contained HTML file, no frameworks, no dependencies.",
+        "your weekly 40 while the scene glitters around you. Vibe-coded " +
+        "with an AI pair as a side experiment: I directed, reviewed, and " +
+        "shipped it as one self-contained HTML file.",
       links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
       images: [{ src: "projects/clock-1.png", alt: "The Curse of Ra clock — an animated Egyptian tomb scene" }],
-      tags: ["HTML", "CSS animation", "Vanilla JS"],
+      tags: ["HTML", "CSS animation", "Vanilla JS", "AI-assisted"],
     },
     {
-      eyebrow: "Game · Single file",
+      eyebrow: "Vibe-coded · Just for fun",
       title: "The Wizard's Tower",
       description:
         "An endless-climb browser game: a very normal cat, a laser dot, and " +
         "a tower that never ends. Climb for points, bat everything off the " +
-        "shelves, dodge ghost librarians, unlock new cats — all in one " +
+        "shelves, dodge ghost librarians, unlock new cats. Another " +
+        "vibe-coding session — AI-paired, human-directed, one " +
         "dependency-free HTML file.",
       links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
       images: [{ src: "projects/wizard-1.png", alt: "The Wizard's Tower browser game title screen" }],
-      tags: ["JavaScript", "Game", "CSS"],
+      tags: ["JavaScript", "Game", "CSS", "AI-assisted"],
     },
   ],
 
