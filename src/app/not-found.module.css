@@ -1,0 +1,70 @@
+/* The 404 "lost at sea" page — a full-height stretch of foggy water. */
+
+.sea {
+  position: relative;
+  overflow: hidden;
+  /* Fill the viewport minus the nav, so the shoreline sits at the bottom. */
+  min-height: calc(100vh - 57px);
+  background: linear-gradient(180deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 190px;
+}
+
+.message {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 24px 24px 140px; /* keep the text above the waves */
+  max-width: 480px;
+}
+
+.code {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--teal);
+}
+
+.title {
+  margin: 6px 0 12px;
+  font-size: clamp(34px, 8vw, 44px);
+  color: var(--navy);
+}
+
+.text {
+  margin: 0 0 26px;
+  font-size: 16px;
+  color: var(--text-subtle);
+}
+
+.home {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 20px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: var(--on-primary);
+  transition: background 0.15s ease;
+}
+
+.home:hover {
+  background: var(--primary-hover);
+}

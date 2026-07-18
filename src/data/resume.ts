@@ -91,7 +91,9 @@ export const resume: Resume = {
   links: {
     github: "https://github.com/FelixFalling",
     // linkedin: intentionally omitted for now (see PRIVACY NOTE above)
-    resumePdf: undefined, // intentionally none — the PDF has personal details
+    // The PDF is the PSEUDONYMOUS one-pager (source: scripts/resume-pdf.html)
+    // — never upload the real resume here.
+    resumePdf: "resume.pdf",
   },
 
   // Hidden for now (see page.tsx) — fill these in when you're ready to share.
@@ -132,6 +134,9 @@ export const resume: Resume = {
         { label: "Search →", href: "https://github.com/FelixFalling/problem-solving-search" },
         { label: "Transfer-learning CNN →", href: "https://github.com/FelixFalling/Transfer-Learning" },
       ],
+      images: [
+        { src: "projects/queens-1.png", alt: "Fitness-over-generations plot from the genetic 8-queens solver, population size 1000" },
+      ],
       tags: ["Python", "NumPy", "Genetic algorithms", "TensorFlow"],
     },
     {
@@ -159,7 +164,10 @@ export const resume: Resume = {
         "with an AI pair as a side experiment: I directed, reviewed, and " +
         "shipped it as one self-contained HTML file.",
       links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
-      images: [{ src: "projects/clock-1.png", alt: "The Curse of Ra clock — an animated Egyptian tomb scene" }],
+      images: [
+        { src: "projects/clock-1.png", alt: "The Curse of Ra clock at night — a moonlit Egyptian tomb with a golden clock" },
+        { src: "projects/clock-2.png", alt: "The Curse of Ra clock by day — sunbeams lighting the tomb in gold" },
+      ],
       tags: ["HTML", "CSS animation", "Vanilla JS", "AI-assisted"],
     },
     {
@@ -172,7 +180,10 @@ export const resume: Resume = {
         "vibe-coding session — AI-paired, human-directed, one " +
         "dependency-free HTML file.",
       links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
-      images: [{ src: "projects/wizard-1.png", alt: "The Wizard's Tower browser game title screen" }],
+      images: [
+        { src: "projects/wizard-2.png", alt: "The Wizard's Tower gameplay — a cat chasing a laser dot up shelves, dodging ghost librarians" },
+        { src: "projects/wizard-1.png", alt: "The Wizard's Tower title screen with unlockable cat skins" },
+      ],
       tags: ["JavaScript", "Game", "CSS", "AI-assisted"],
     },
   ],

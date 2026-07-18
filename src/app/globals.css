@@ -31,7 +31,7 @@
   --ink: #2a3743; /* default body text — cool charcoal */
   --navy: #1e3a42; /* headings + brand — deep slate-teal (NOT backgrounds) */
   --slate: #384b53; /* paragraph text */
-  --muted: #64757d; /* secondary / meta text */
+  --muted: #5c6d75; /* secondary / meta text (4.7:1 on --sand — WCAG AA) */
   --text-title: #2f5560; /* hero job title — deep teal */
   --text-subtle: #45585f; /* hero specialties, honors line */
 
@@ -64,7 +64,7 @@
   --footer-title: #f2f7f7;
   --footer-subtitle: #93aab0;
   --footer-link-border: rgba(255, 255, 255, 0.3);
-  --footer-copyright: #6f878d;
+  --footer-copyright: #8ba1a7; /* 5.4:1 on the footer band — WCAG AA */
 
   /* Ocean waves under the hero (the "sand" layer uses --sand so it always
      matches the page background it washes onto). Back→front the water deepens;
@@ -125,7 +125,7 @@
   --footer-title: #eef3fb;
   --footer-subtitle: #7f9296;
   --footer-link-border: rgba(255, 255, 255, 0.2);
-  --footer-copyright: #6b7688;
+  --footer-copyright: #7d8a9c; /* 5.6:1 on the dark footer — WCAG AA */
 
   --wave-far: #223d44;
   --wave-mid: #2b5c5e;

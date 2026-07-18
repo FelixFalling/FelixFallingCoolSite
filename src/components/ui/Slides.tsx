@@ -41,7 +41,16 @@ export default function Slides({ images, title }: { images: ProjectImage[]; titl
 
   return (
     <figure className={styles.slides} aria-label={`${title} screenshots`}>
-      <div className={styles.track} ref={trackRef} onScroll={single ? undefined : handleScroll}>
+      {/* tabIndex + role: the track scrolls horizontally, so keyboard users
+          must be able to focus it and use arrow keys (or tab to the buttons). */}
+      <div
+        className={styles.track}
+        ref={trackRef}
+        onScroll={single ? undefined : handleScroll}
+        tabIndex={single ? undefined : 0}
+        role={single ? undefined : "region"}
+        aria-label={single ? undefined : `${title} screenshots (scrolls horizontally)`}
+      >
         {images.map((img) => (
           <img
             key={img.src}

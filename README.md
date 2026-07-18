@@ -101,9 +101,10 @@ Every test runs twice: on a desktop-sized browser and on an emulated phone
 (the `projects` in [`playwright.config.ts`](playwright.config.ts)). The specs
 are written to copy from:
 
-- `home.spec.ts` — page loads, sections render, links are right, no JS errors
+- `home.spec.ts` — page loads, sections render, links are right, no JS errors, 404 page
 - `theme.spec.ts` — dark/light switching, persistence, dark-only stars
 - `mobile.spec.ts` — no sideways scrolling, tappable buttons (phone project only)
+- `accessibility.spec.ts` — axe-core WCAG A/AA scans of both themes and the 404 page
 
 Tests import `resume.ts` directly, so they keep passing when you edit your
 content — they check structure and behavior, not hardcoded strings.

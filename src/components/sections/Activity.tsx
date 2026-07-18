@@ -20,7 +20,14 @@ export default function Activity() {
   return (
     <Reveal id="activity">
       <h2 className="section-title">GitHub Activity</h2>
-      <div className={styles.chartScroll}>
+      {/* tabIndex + role: the chart box scrolls sideways on small screens, so
+          keyboard users must be able to focus it and scroll with arrow keys. */}
+      <div
+        className={styles.chartScroll}
+        tabIndex={0}
+        role="region"
+        aria-label="GitHub contribution chart (scrolls horizontally)"
+      >
         <img
           className={styles.chart}
           src={CHART_URL}

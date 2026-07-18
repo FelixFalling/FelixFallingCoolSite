@@ -96,6 +96,15 @@ test.describe("home page", () => {
   });
 });
 
+test.describe("404 page", () => {
+  test("wrong URLs land on the lost-at-sea page with a way home", async ({ page }) => {
+    await page.goto("./this-page-does-not-exist/");
+    await expect(page.getByRole("heading", { name: "Lost at sea" })).toBeVisible();
+    await page.getByRole("link", { name: "← Back to shore" }).click();
+    await expect(page.locator("h1")).toHaveText(resume.name);
+  });
+});
+
 test.describe("reduced motion", () => {
   // Simulate a visitor whose OS is set to "reduce motion" — the waves must
   // freeze for them (that's what the media query in globals.css promises).

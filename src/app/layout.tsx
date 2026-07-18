@@ -62,6 +62,15 @@ const themeInitScript = `
 })();
 `;
 
+/**
+ * Privacy-friendly visit counts via GoatCounter — no cookies, no personal
+ * data, GDPR-safe. The dashboard lives at https://felixfalling.goatcounter.com
+ * (create the free account with that exact code to claim it; until then the
+ * script quietly no-ops). To remove analytics entirely, delete the <script>
+ * tag below.
+ */
+const GOATCOUNTER_URL = "https://felixfalling.goatcounter.com/count";
+
 export default function RootLayout({
   children,
 }: {
@@ -75,6 +84,7 @@ export default function RootLayout({
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
+        <script data-goatcounter={GOATCOUNTER_URL} async src="https://gc.zgo.at/count.js" />
       </body>
     </html>
   );
