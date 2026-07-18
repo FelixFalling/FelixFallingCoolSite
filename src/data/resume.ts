@@ -130,11 +130,12 @@ export const resume: Resume = {
         "CNN in TensorFlow that reached 97.35% accuracy.",
       links: [
         { label: "Game agent →", href: "https://github.com/FelixFalling/Tic-Tac-Toe-Agent" },
-        { label: "Genetic 8-queens →", href: "https://github.com/FelixFalling/eight_queens_problem" },
+        { label: "♛ Genetic 8-queens →", href: "https://github.com/FelixFalling/eight_queens_problem" },
         { label: "Search →", href: "https://github.com/FelixFalling/problem-solving-search" },
         { label: "Transfer-learning CNN →", href: "https://github.com/FelixFalling/Transfer-Learning" },
       ],
       images: [
+        { src: "projects/queens-board.png", alt: "Chessboard showing one valid 8-queens solution, with a queen chess piece emblem" },
         { src: "projects/queens-1.png", alt: "Fitness-over-generations plot from the genetic 8-queens solver, population size 1000" },
       ],
       tags: ["Python", "NumPy", "Genetic algorithms", "TensorFlow"],
