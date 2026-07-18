@@ -16,8 +16,20 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
  * onScroll handler below).
  *
  * With a single image it renders as a plain picture — no arrows, no dots.
+ *
+ * Pass `href` to make the pictures clickable: each slide becomes a link to
+ * the project (its code, usually), with a "View the project ↗" highlight on
+ * hover. The arrows and dots stay their own buttons — they never navigate.
  */
-export default function Slides({ images, title }: { images: ProjectImage[]; title: string }) {
+export default function Slides({
+  images,
+  title,
+  href,
+}: {
+  images: ProjectImage[];
+  title: string;
+  href?: string;
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
 
@@ -51,15 +63,28 @@ export default function Slides({ images, title }: { images: ProjectImage[]; titl
         role={single ? undefined : "region"}
         aria-label={single ? undefined : `${title} screenshots (scrolls horizontally)`}
       >
-        {images.map((img) => (
-          <img
-            key={img.src}
-            className={styles.slide}
-            src={`${BASE_PATH}/${img.src}`}
-            alt={img.alt}
-            loading="lazy"
-          />
-        ))}
+        {images.map((img) =>
+          href ? (
+            <a
+              key={img.src}
+              className={styles.slideLink}
+              href={href}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Open project: ${title}`}
+            >
+              <img className={styles.slideImg} src={`${BASE_PATH}/${img.src}`} alt={img.alt} loading="lazy" />
+            </a>
+          ) : (
+            <img
+              key={img.src}
+              className={styles.slide}
+              src={`${BASE_PATH}/${img.src}`}
+              alt={img.alt}
+              loading="lazy"
+            />
+          ),
+        )}
       </div>
 
       {!single && (

@@ -1,4 +1,4 @@
-import { resume } from "@/data/resume";
+import { resume, primaryProjectLink } from "@/data/resume";
 import Section from "@/components/ui/Section";
 import Card from "@/components/ui/Card";
 import Tag from "@/components/ui/Tag";
@@ -13,7 +13,13 @@ export default function Projects() {
         {resume.projects.map((project, i) => (
           <Card key={i} className={styles.card}>
             {project.images && project.images.length > 0 && (
-              <Slides images={project.images} title={project.title} />
+              // Clicking a screenshot opens the project (its code when it has
+              // a repo link — see primaryProjectLink in resume.ts).
+              <Slides
+                images={project.images}
+                title={project.title}
+                href={primaryProjectLink(project)?.href}
+              />
             )}
             <div className={styles.eyebrow}>{project.eyebrow}</div>
             <h3 className={styles.title}>{project.title}</h3>

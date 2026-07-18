@@ -30,6 +30,43 @@
   display: block;
 }
 
+/* When the slideshow got an href, each slide is a link wrapping its image.
+   Hovering (or keyboard-focusing) highlights it with a "View the project ↗"
+   overlay so it's obvious the picture is clickable. */
+.slideLink {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  display: block;
+}
+
+.slideImg {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+}
+
+.slideLink::after {
+  content: "View the project ↗";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 58, 66, 0.45);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.slideLink:hover::after,
+.slideLink:focus-visible::after {
+  opacity: 1;
+}
+
 /* Arrows — quiet until you hover the slideshow. */
 .arrow {
   position: absolute;

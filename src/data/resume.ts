@@ -76,6 +76,15 @@ export interface Resume {
 // tests agree on it (see basePath.mjs).
 import { BASE_PATH } from "../../basePath.mjs";
 
+/**
+ * Which link a project's clickable screenshots open: the code/repo link when
+ * there is one, otherwise the project's first link. Lives here (not in the
+ * component) so the site and the tests share one definition.
+ */
+export function primaryProjectLink(project: Project): { label: string; href: string } | undefined {
+  return project.links?.find((link) => /code|repo/i.test(link.label)) ?? project.links?.[0];
+}
+
 export const resume: Resume = {
   name: "Flying Felix",
   jobTitle: "Software Developer",
@@ -118,6 +127,22 @@ export const resume: Resume = {
         { src: "projects/ducky-1.jpg", alt: "Live detection feed — RGB view with a duck bounding box beside the depth view" },
       ],
       tags: ["Python", "YOLOv8", "OpenCV", "Arduino", "Synthetic data"],
+    },
+    {
+      eyebrow: "2025–26 · Capstone · Team lead",
+      title: "Wildfire Forecast Dashboard",
+      description:
+        "Led a 5-person Agile team building a geospatial AI wildfire " +
+        "forecasting system: physics-driven WRF-SFIRE simulations and " +
+        "deep-learning inference run on a SLURM-scheduled GPU cluster. " +
+        "Built Python (Pandas/NumPy) pipelines ingesting and validating " +
+        "50GB+ of geospatial data, and shipped the Dockerized visualization " +
+        "server behind the live site.",
+      links: [{ label: "Visit the live site →", href: "https://wdt.cecs.pdx.edu/" }],
+      images: [
+        { src: "projects/wildfire-1.png", alt: "The wildfire forecast dashboard — a WRF-SFIRE fire-spread simulation over a map" },
+      ],
+      tags: ["Python", "Deep learning", "HPC / SLURM", "Docker", "Geospatial"],
     },
     {
       eyebrow: "Collection · Python",

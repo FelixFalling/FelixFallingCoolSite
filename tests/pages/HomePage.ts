@@ -15,6 +15,11 @@ export class HomePage extends BasePage {
   readonly waveDrift: Locator;
   readonly ducks: Locator;
 
+  // ── Extras ──────────────────────────────────────────────────────────────
+  /** The floating "🕑 Curse of Ra" pill (matched exactly, so it can't collide
+      with the Curse of Ra project card's links). */
+  readonly curseOfRaLink: Locator;
+
   constructor(page: Page) {
     super(page);
     const hero = page.locator("header");
@@ -26,6 +31,8 @@ export class HomePage extends BasePage {
     this.stars = page.getByTestId("stars");
     this.waveDrift = page.locator(".wave-drift").first();
     this.ducks = page.locator("[data-duck]");
+
+    this.curseOfRaLink = page.getByRole("link", { name: "🕑 Curse of Ra", exact: true });
   }
 
   /** Text matching the hero's job title line. */

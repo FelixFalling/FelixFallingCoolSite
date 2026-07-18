@@ -7,9 +7,16 @@ import type { Page, Locator } from "@playwright/test";
  */
 export class ProjectCard {
   readonly root: Locator;
+  readonly title: string;
 
   constructor(page: Page, title: string) {
     this.root = page.locator("article", { hasText: title });
+    this.title = title;
+  }
+
+  /** The clickable screenshot link (every slide links to the project). */
+  get slideLink(): Locator {
+    return this.root.getByRole("link", { name: `Open project: ${this.title}` }).first();
   }
 
   /** A project link by its visible label ("View the code →", …). */

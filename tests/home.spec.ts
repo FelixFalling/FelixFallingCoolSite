@@ -1,5 +1,5 @@
 import { test, expect } from "./fixtures";
-import { resume } from "../src/data/resume";
+import { resume, primaryProjectLink } from "../src/data/resume";
 
 /**
  * Smoke tests for the home page: does everything render, link, and navigate?
@@ -77,15 +77,18 @@ test.describe("home page", () => {
       for (const link of project.links ?? []) {
         await expect(card.link(link.label)).toHaveAttribute("href", link.href);
       }
+      // Clicking a screenshot opens the project — its code link when it has
+      // one (primaryProjectLink is the same helper the site renders with).
+      const primary = primaryProjectLink(project);
+      if (project.images?.length && primary) {
+        await expect(card.slideLink).toHaveAttribute("href", primary.href);
+      }
     }
   });
 
-  test("the Curse of Ra clock link is there", async ({ homePage, page }) => {
+  test("the Curse of Ra clock link is there", async ({ homePage }) => {
     await homePage.goto();
-    await expect(page.getByRole("link", { name: /Curse of Ra/ })).toHaveAttribute(
-      "href",
-      /clockmaker\.html$/,
-    );
+    await expect(homePage.curseOfRaLink).toHaveAttribute("href", /clockmaker\.html$/);
   });
 });
 
