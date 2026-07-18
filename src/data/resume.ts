@@ -35,7 +35,7 @@ export interface Project {
   eyebrow: string; // small label above the title, e.g. "2024 · Personal"
   title: string;
   description: string;
-  link?: { label: string; href: string }; // optional "View repo →" style link
+  links?: { label: string; href: string }[]; // "View repo →", "Watch demo →", …
   images?: ProjectImage[]; // screenshots shown as a swipeable slideshow
   tags: string[];
 }
@@ -72,8 +72,9 @@ export interface Resume {
 }
 
 // The base path GitHub Pages serves from — used to build links to the
-// standalone pages in /public.
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+// standalone pages in /public. Imported from the repo root so the app and the
+// tests agree on it (see basePath.mjs).
+import { BASE_PATH } from "../../basePath.mjs";
 
 export const resume: Resume = {
   name: "Flying Felix",
@@ -98,6 +99,25 @@ export const resume: Resume = {
 
   projects: [
     {
+      eyebrow: "2026 · Team of 3",
+      title: "Rubber Duckie Terminator",
+      description:
+        "A real-time perception-to-actuation pipeline: a YOLOv8 detector " +
+        "trained entirely on synthetic Blender renders (1,000+ auto-labeled " +
+        "images — zero real photos) spots a rubber duck, an Intel RealSense " +
+        "depth camera localizes it in metric 3D, and an Arduino-driven " +
+        "two-servo laser turret tracks it live at 85–91% real-world " +
+        "detection. Live RGB + depth monitoring UI in OpenCV.",
+      links: [
+        { label: "Watch the demo →", href: "https://www.youtube.com/watch?v=oliByOs1Yvc" },
+        { label: "View the code →", href: "https://github.com/FelixFalling/Rubber-Duckie-Terminator" },
+      ],
+      images: [
+        { src: "projects/ducky-1.jpg", alt: "Live detection feed — RGB view with a duck bounding box beside the depth view" },
+      ],
+      tags: ["Python", "YOLOv8", "OpenCV", "Arduino", "Synthetic data"],
+    },
+    {
       eyebrow: "2026 · This website",
       title: "This Portfolio Site",
       description:
@@ -105,7 +125,7 @@ export const resume: Resume = {
         "scene: layered waves, drifting fog, sea stacks, and a light/dark " +
         "theme. Tested with Playwright on desktop and mobile, and deployed to " +
         "GitHub Pages by CI on every push.",
-      link: { label: "View the code →", href: "https://github.com/FelixFalling/FelixFallingCoolSite" },
+      links: [{ label: "View the code →", href: "https://github.com/FelixFalling/FelixFallingCoolSite" }],
       images: [
         { src: "projects/site-light.png", alt: "The portfolio homepage in light mode — fog and sea stacks under the hero" },
         { src: "projects/site-dark.png", alt: "The portfolio homepage in dark mode — moonlit waves and stars" },
@@ -120,7 +140,7 @@ export const resume: Resume = {
         "tap the cartouche to clock in and out, and it tracks your day and " +
         "your weekly 40 while the scene glitters around you. One " +
         "self-contained HTML file, no frameworks, no dependencies.",
-      link: { label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` },
+      links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
       images: [{ src: "projects/clock-1.png", alt: "The Curse of Ra clock — an animated Egyptian tomb scene" }],
       tags: ["HTML", "CSS animation", "Vanilla JS"],
     },
@@ -132,7 +152,7 @@ export const resume: Resume = {
         "a tower that never ends. Climb for points, bat everything off the " +
         "shelves, dodge ghost librarians, unlock new cats — all in one " +
         "dependency-free HTML file.",
-      link: { label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` },
+      links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
       images: [{ src: "projects/wizard-1.png", alt: "The Wizard's Tower browser game title screen" }],
       tags: ["JavaScript", "Game", "CSS"],
     },

@@ -16,15 +16,20 @@ export default function Projects() {
             <div className={styles.eyebrow}>{project.eyebrow}</div>
             <h3 className={styles.title}>{project.title}</h3>
             <p className={styles.description}>{project.description}</p>
-            {project.link && (
-              <a
-                className={styles.link}
-                href={project.link.href}
-                target="_blank"
-                rel="noopener"
-              >
-                {project.link.label}
-              </a>
+            {project.links && project.links.length > 0 && (
+              <div className={styles.links}>
+                {project.links.map((link) => (
+                  <a
+                    key={link.href}
+                    className={styles.link}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             )}
             <div className={styles.tags}>
               {project.tags.map((tag, j) => (

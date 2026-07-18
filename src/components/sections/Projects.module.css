@@ -33,6 +33,13 @@
   color: var(--slate);
 }
 
+/* A project can have several links (demo video, repo, live page…). */
+.links {
+  display: flex;
+  gap: 6px 18px;
+  flex-wrap: wrap;
+}
+
 .link {
   font-size: 13.5px;
   color: var(--navy);

@@ -12,10 +12,10 @@
  *      as long as you use <Link> and next/image, and we expose it as
  *      NEXT_PUBLIC_BASE_PATH for the few plain <a href> links to static files.
  *
- * If you ever rename the repo, change BASE_PATH in one place below.
+ * If you ever rename the repo, change BASE_PATH in basePath.mjs.
  */
 
-const BASE_PATH = "/FelixFallingCoolSite";
+import { BASE_PATH } from "./basePath.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

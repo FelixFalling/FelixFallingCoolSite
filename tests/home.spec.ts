@@ -72,8 +72,11 @@ test.describe("home page", () => {
         const loaded = await img.evaluate((el: HTMLImageElement) => el.naturalWidth > 0);
         expect(loaded, `${project.title} screenshot should load`).toBe(true);
       }
-      if (project.link) {
-        await expect(card.getByRole("link", { name: project.link.label })).toBeVisible();
+      for (const link of project.links ?? []) {
+        await expect(card.getByRole("link", { name: link.label })).toHaveAttribute(
+          "href",
+          link.href,
+        );
       }
     }
   });
