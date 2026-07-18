@@ -1,0 +1,6 @@
+.text {
+  margin: 0;
+  font-size: 17px;
+  max-width: 720px;
+  color: var(--slate);
+}

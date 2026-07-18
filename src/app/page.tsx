@@ -1,12 +1,12 @@
-import Nav from "@/components/Nav";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Experience from "@/components/Experience";
-import Projects from "@/components/Projects";
-import Education from "@/components/Education";
-import Skills from "@/components/Skills";
-import Contact from "@/components/Contact";
-import FunLink from "@/components/FunLink";
+import Nav from "@/components/ui/Nav";
+import Hero from "@/components/sections/Hero";
+import About from "@/components/sections/About";
+import Experience from "@/components/sections/Experience";
+import Projects from "@/components/sections/Projects";
+import Education from "@/components/sections/Education";
+import Skills from "@/components/sections/Skills";
+import Contact from "@/components/sections/Contact";
+import FunLink from "@/components/ui/FunLink";
 
 /**
  * The home page. It's just an ordered list of the section components — read

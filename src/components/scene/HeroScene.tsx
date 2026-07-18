@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Stars, Clouds, Gulls, Fog } from "./Atmosphere";
+import Stars from "./Stars";
+import Clouds from "./Clouds";
+import Gulls from "./Gulls";
+import Fog from "./Fog";
 import SeaStacks from "./SeaStacks";
 import Waves from "./Waves";
 

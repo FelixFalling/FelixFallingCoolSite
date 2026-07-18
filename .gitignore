@@ -147,3 +147,8 @@ vite.config.ts.timestamp-*
 
 # Next.js generated types
 next-env.d.ts
+
+# Playwright test output
+/test-results/
+/playwright-report/
+/playwright/.cache/

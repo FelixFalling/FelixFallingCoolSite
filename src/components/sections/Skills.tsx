@@ -1,5 +1,5 @@
 import { resume } from "@/data/resume";
-import Reveal from "./Reveal";
+import Reveal from "@/components/ui/Reveal";
 import styles from "./Skills.module.css";
 
 export default function Skills() {

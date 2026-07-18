@@ -1,5 +1,5 @@
 import { resume } from "@/data/resume";
-import HeroScene from "./HeroScene";
+import HeroScene from "@/components/scene/HeroScene";
 import styles from "./Hero.module.css";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
