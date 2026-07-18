@@ -50,7 +50,10 @@ export default function Fog() {
         overflow: "hidden",
         // Parallax: fog is near and enveloping, so it shifts most toward the cursor.
         transform: "translate(calc(var(--mx, 0) * 16px), calc(var(--my, 0) * 9px))",
-        transition: "transform 0.3s ease-out",
+        // Live weather: --fog-scale (set by HeroScene) thins the whole fog
+        // layer when the real Oregon coast is having a clear day.
+        opacity: "var(--fog-scale, 1)",
+        transition: "transform 0.3s ease-out, opacity 2s ease",
       }}
     >
       {FOG.map((f, i) => (

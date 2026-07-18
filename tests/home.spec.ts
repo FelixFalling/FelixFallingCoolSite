@@ -96,6 +96,16 @@ test.describe("home page", () => {
   });
 });
 
+test.describe("easter egg", () => {
+  test("typing 'duck' makes it rain ducks", async ({ page }) => {
+    await page.goto("./");
+    await expect(page.locator("[data-duck]")).toHaveCount(0);
+    await page.keyboard.type("duck");
+    // The flock spawns 16 ducks that fall, bob, and fade away.
+    await expect(page.locator("[data-duck]")).toHaveCount(16);
+  });
+});
+
 test.describe("404 page", () => {
   test("wrong URLs land on the lost-at-sea page with a way home", async ({ page }) => {
     await page.goto("./this-page-does-not-exist/");

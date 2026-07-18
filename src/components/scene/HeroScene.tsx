@@ -7,6 +7,11 @@ import Gulls from "./Gulls";
 import Fog from "./Fog";
 import SeaStacks from "./SeaStacks";
 import Waves from "./Waves";
+import Lighthouse from "./Lighthouse";
+import Sailboat from "./Sailboat";
+import Rain from "./Rain";
+import DuckRain from "./DuckRain";
+import { useCoastalWeather } from "./weather";
 
 /**
  * HeroScene — assembles the coastal diorama behind the hero text and, on desktop,
@@ -28,6 +33,9 @@ import Waves from "./Waves";
  */
 export default function HeroScene() {
   const rootRef = useRef<HTMLDivElement>(null);
+  // Live conditions at Newport, OR — thins the fog on clear days, speeds the
+  // waves in wind, and switches the rain layer on. Defaults until loaded.
+  const weather = useCoastalWeather();
 
   useEffect(() => {
     const root = rootRef.current;
@@ -82,18 +90,34 @@ export default function HeroScene() {
     <div
       ref={rootRef}
       aria-hidden="true"
-      style={{ position: "absolute", inset: 0, zIndex: 1, overflow: "hidden", pointerEvents: "none" }}
+      style={
+        {
+          position: "absolute",
+          inset: 0,
+          zIndex: 1,
+          overflow: "hidden",
+          pointerEvents: "none",
+          // Weather knobs the layers read: Fog dims by --fog-scale, and the
+          // Waves divide their animation durations by --wave-speed.
+          "--fog-scale": weather.fogScale,
+          "--wave-speed": weather.waveSpeed,
+        } as React.CSSProperties
+      }
     >
       <Stars />
       <Clouds />
       <Gulls />
+      <Sailboat />
       <SeaStacks />
+      <Lighthouse />
       {/* The waves live in a fixed-height strip at the bottom so they keep their
           proportions instead of stretching to the full hero height. */}
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}>
         <Waves />
       </div>
       <Fog />
+      {weather.raining && <Rain />}
+      <DuckRain />
     </div>
   );
 }

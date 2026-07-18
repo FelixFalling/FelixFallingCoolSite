@@ -85,6 +85,13 @@ On desktop the scene drifts toward your cursor (parallax). Phones get the
 ambient version, and visitors with "reduce motion" set in their OS get a still
 scene — that's handled by the `prefers-reduced-motion` block in `globals.css`.
 
+The scene is also **alive**: a lighthouse sweeps its beam at night
+(`Lighthouse.tsx`), a sailboat crosses the horizon every couple of minutes
+(`Sailboat.tsx`), and the fog, wave speed, and rain match the *actual current
+weather* on the Oregon coast via Open-Meteo (`weather.ts` — free API, no key;
+if the request fails the scene just keeps its defaults). And there's at least
+one easter egg. Try typing something a certain terminator would hunt for.
+
 ## Automated tests (Playwright)
 
 Real-browser tests live in [`tests/`](tests/). They start the dev server

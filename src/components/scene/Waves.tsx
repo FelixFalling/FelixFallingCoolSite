@@ -62,7 +62,9 @@ function WaveLayer({ layer }: { layer: Layer }) {
         bottom: 0,
         width: "200%",
         height: "100%",
-        animation: `${layer.drift} ${layer.driftDur}s linear infinite`,
+        // The durations divide by --wave-speed (set from live wind data in
+        // HeroScene) — windier on the real coast means faster water here.
+        animation: `${layer.drift} calc(${layer.driftDur}s / var(--wave-speed, 1)) linear infinite`,
         willChange: "transform",
       }}
     >
@@ -71,7 +73,7 @@ function WaveLayer({ layer }: { layer: Layer }) {
         style={{
           position: "absolute",
           inset: 0,
-          animation: `${layer.swell} ${layer.swellDur}s ease-in-out infinite`,
+          animation: `${layer.swell} calc(${layer.swellDur}s / var(--wave-speed, 1)) ease-in-out infinite`,
           willChange: "transform",
         }}
       >

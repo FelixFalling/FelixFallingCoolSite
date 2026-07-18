@@ -300,6 +300,59 @@ a {
   }
 }
 
+/* ── Scene-magic keyframes (lighthouse, sailboat, rain, ducks) ───────────── */
+/* The lighthouse beam: one slow full rotation, like the real thing. */
+@keyframes beamSweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* The sailboat's crossing: its full-width strip slides one scene-width. */
+@keyframes sailAcross {
+  from {
+    transform: translateX(-8%);
+  }
+  to {
+    transform: translateX(108%);
+  }
+}
+/* Rain: the double-height streak pattern slides down its own height. */
+@keyframes rainFall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(50%);
+  }
+}
+/* The rubber ducks: fall in, splash at --duck-splash, bob, drift off. */
+@keyframes duckFall {
+  0% {
+    transform: translateY(-10vh) rotate(-8deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(var(--duck-splash, 74vh)) rotate(7deg);
+  }
+  70% {
+    transform: translateY(calc(var(--duck-splash, 74vh) - 2.4vh)) rotate(-6deg);
+  }
+  78% {
+    transform: translateY(var(--duck-splash, 74vh)) rotate(5deg);
+  }
+  86% {
+    transform: translateY(calc(var(--duck-splash, 74vh) - 1.2vh)) rotate(-4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--duck-splash, 74vh)) rotate(0deg);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -308,7 +361,10 @@ a {
   .wave-swell,
   .cloud-drift,
   .gull-drift,
-  .mist-drift {
+  .mist-drift,
+  .beam-sweep,
+  .sail-drift,
+  .rain-fall {
     animation: none !important;
   }
 }
