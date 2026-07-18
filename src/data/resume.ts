@@ -118,6 +118,23 @@ export const resume: Resume = {
       tags: ["Python", "YOLOv8", "OpenCV", "Arduino", "Synthetic data"],
     },
     {
+      eyebrow: "Collection · Python",
+      title: "Classic AI, From Scratch",
+      description:
+        "AI and ML fundamentals implemented by hand: heuristic search, a " +
+        "genetic algorithm for the eight-queens problem with population-size " +
+        "experiments, a tic-tac-toe game agent with legal-move and goal-state " +
+        "logic, and hand-rolled gradient descent — plus a transfer-learning " +
+        "CNN in TensorFlow that reached 97.35% accuracy.",
+      links: [
+        { label: "Game agent →", href: "https://github.com/FelixFalling/Tic-Tac-Toe-Agent" },
+        { label: "Genetic 8-queens →", href: "https://github.com/FelixFalling/eight_queens_problem" },
+        { label: "Search →", href: "https://github.com/FelixFalling/problem-solving-search" },
+        { label: "Transfer-learning CNN →", href: "https://github.com/FelixFalling/Transfer-Learning" },
+      ],
+      tags: ["Python", "NumPy", "Genetic algorithms", "TensorFlow"],
+    },
+    {
       eyebrow: "2026 · This website",
       title: "This Portfolio Site",
       description:

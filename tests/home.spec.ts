@@ -67,10 +67,16 @@ test.describe("home page", () => {
       const card = page.locator("article", { hasText: project.title });
       if (project.images?.length) {
         // The first slide of the slideshow should be a real, loaded image.
+        // Slides load lazily, so scroll the card into view and poll until the
+        // browser has actually fetched the file (naturalWidth > 0).
         const img = card.getByRole("img", { name: project.images[0].alt });
+        await img.scrollIntoViewIfNeeded();
         await expect(img).toBeVisible();
-        const loaded = await img.evaluate((el: HTMLImageElement) => el.naturalWidth > 0);
-        expect(loaded, `${project.title} screenshot should load`).toBe(true);
+        await expect
+          .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth), {
+            message: `${project.title} screenshot should load`,
+          })
+          .toBeGreaterThan(0);
       }
       for (const link of project.links ?? []) {
         await expect(card.getByRole("link", { name: link.label })).toHaveAttribute(
