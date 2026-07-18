@@ -1,12 +1,11 @@
 import { resume } from "@/data/resume";
-import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
 import styles from "./About.module.css";
 
 export default function About() {
   return (
-    <Reveal id="about">
-      <h2 className="section-title">About</h2>
+    <Section id="about" title="About">
       <p className={styles.text}>{resume.about}</p>
-    </Reveal>
+    </Section>
   );
 }

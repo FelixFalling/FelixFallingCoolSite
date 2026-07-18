@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Nav from "@/components/ui/Nav";
+import Button from "@/components/ui/Button";
 import Waves from "@/components/scene/Waves";
 import Shore from "@/components/scene/Shore";
 import styles from "./not-found.module.css";
@@ -37,9 +37,7 @@ export default function NotFound() {
             This page drifted out with the tide — or it never existed at all.
             The fog makes it hard to tell.
           </p>
-          <Link className={styles.home} href="/">
-            ← Back to shore
-          </Link>
+          <Button href="/">← Back to shore</Button>
         </div>
       </main>
     </>

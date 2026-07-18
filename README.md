@@ -47,14 +47,22 @@ src/
                         lighthouse always stands on its rock)
       Clouds.tsx  Gulls.tsx  Stars.tsx (stars = dark mode only)
       weather.ts  Rain.tsx  DuckRain.tsx (live weather + the easter egg)
-    ui/                 shared pieces used around the page
+    ui/                 shared building blocks used across pages
+      Button.tsx        THE button (primary/ghost) — hero + 404 use it
+      Section.tsx       the section scaffold (reveal + title) every section uses
+      Card.tsx  Tag.tsx  ExternalLink.tsx   small shared pieces
       Nav.tsx           sticky top nav
       ThemeToggle.tsx   the ☀️/🌙 button
       Reveal.tsx        fades sections in as you scroll to them
+      Slides.tsx        the project screenshot slideshow
       FunLink.tsx       the "Curse of Ra" pill (links to the clock page)
   data/
     resume.ts           ← YOUR CONTENT
-tests/                  Playwright browser tests (see below)
+tests/                  Playwright tests — Page Object Model (see below)
+  fixtures.ts           wires page objects into every test
+  pages/                one class per page (HomePage, NotFoundPage, BasePage)
+  components/           objects for shared UI (NavBar, Footer, ProjectCard)
+  *.spec.ts             the tests themselves
 public/
   clockmaker.html       the Curse of Ra clock (standalone page)
 ```
@@ -107,8 +115,26 @@ npx playwright show-report  # open the HTML report from the last run
 ```
 
 Every test runs twice: on a desktop-sized browser and on an emulated phone
-(the `projects` in [`playwright.config.ts`](playwright.config.ts)). The specs
-are written to copy from:
+(the `projects` in [`playwright.config.ts`](playwright.config.ts)).
+
+**The framework follows the Page Object Model (POM)** — the industry-standard
+test architecture. Each page gets a class owning its locators and user
+actions (`tests/pages/`), shared UI gets component objects (`tests/components/`),
+and [`tests/fixtures.ts`](tests/fixtures.ts) injects them so a test reads like
+a user story:
+
+```ts
+import { test, expect } from "./fixtures";
+
+test("shows my name", async ({ homePage }) => {
+  await homePage.goto();
+  await expect(homePage.heroName).toBeVisible();
+});
+```
+
+House rules: page objects hold locators + actions, **assertions stay in the
+specs**; locators prefer accessible roles/names over CSS selectors; a selector
+only ever needs changing in one place. The specs to copy from:
 
 - `home.spec.ts` — page loads, sections render, links are right, no JS errors, 404 page
 - `theme.spec.ts` — dark/light switching, persistence, dark-only stars

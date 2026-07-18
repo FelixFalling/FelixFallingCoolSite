@@ -1,5 +1,6 @@
 import { resume } from "@/data/resume";
-import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
+import ExternalLink from "@/components/ui/ExternalLink";
 import styles from "./Activity.module.css";
 
 /**
@@ -18,8 +19,7 @@ const CHART_URL = `https://ghchart.rshah.org/3a6f6b/${GITHUB_USER}`;
 
 export default function Activity() {
   return (
-    <Reveal id="activity">
-      <h2 className="section-title">GitHub Activity</h2>
+    <Section id="activity" title="GitHub Activity">
       {/* tabIndex + role: the chart box scrolls sideways on small screens, so
           keyboard users must be able to focus it and scroll with arrow keys. */}
       <div
@@ -37,10 +37,8 @@ export default function Activity() {
       </div>
       <p className={styles.caption}>
         A year of commits, green-squares style —{" "}
-        <a href={resume.links.github} target="_blank" rel="noopener">
-          more experiments on GitHub →
-        </a>
+        <ExternalLink href={resume.links.github}>more experiments on GitHub →</ExternalLink>
       </p>
-    </Reveal>
+    </Section>
   );
 }

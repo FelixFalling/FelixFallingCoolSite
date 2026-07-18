@@ -1,15 +1,17 @@
 import { resume } from "@/data/resume";
-import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
+import Card from "@/components/ui/Card";
+import Tag from "@/components/ui/Tag";
+import ExternalLink from "@/components/ui/ExternalLink";
 import Slides from "@/components/ui/Slides";
 import styles from "./Projects.module.css";
 
 export default function Projects() {
   return (
-    <Reveal id="projects">
-      <h2 className="section-title">Projects</h2>
+    <Section id="projects" title="Projects">
       <div className={styles.grid}>
         {resume.projects.map((project, i) => (
-          <article key={i} className={`card ${styles.card}`}>
+          <Card key={i} className={styles.card}>
             {project.images && project.images.length > 0 && (
               <Slides images={project.images} title={project.title} />
             )}
@@ -19,28 +21,20 @@ export default function Projects() {
             {project.links && project.links.length > 0 && (
               <div className={styles.links}>
                 {project.links.map((link) => (
-                  <a
-                    key={link.href}
-                    className={styles.link}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener"
-                  >
+                  <ExternalLink key={link.href} className={styles.link} href={link.href}>
                     {link.label}
-                  </a>
+                  </ExternalLink>
                 ))}
               </div>
             )}
             <div className={styles.tags}>
               {project.tags.map((tag, j) => (
-                <span key={j} className="tag">
-                  {tag}
-                </span>
+                <Tag key={j}>{tag}</Tag>
               ))}
             </div>
-          </article>
+          </Card>
         ))}
       </div>
-    </Reveal>
+    </Section>
   );
 }

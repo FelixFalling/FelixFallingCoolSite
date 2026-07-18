@@ -1,0 +1,43 @@
+/* Styles for the shared Button component (see Button.tsx).
+   Moved here from Hero.module.css so every page's buttons match. */
+
+.primary,
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 11px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.primary:hover {
+  background: var(--primary-hover);
+}
+
+.ghost {
+  background: var(--surface-2);
+  color: var(--teal-deep);
+  border: 1px solid var(--teal);
+}
+
+.ghost:hover {
+  background: var(--surface-2);
+  filter: brightness(0.97);
+}
+
+/* Comfortable tap targets on phones (44px+ tall). */
+@media (max-width: 640px) {
+  .primary,
+  .ghost {
+    padding: 13px 22px;
+  }
+}

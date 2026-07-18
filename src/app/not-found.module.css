@@ -53,18 +53,4 @@
   color: var(--text-subtle);
 }
 
-.home {
-  display: inline-block;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-  padding: 11px 20px;
-  border-radius: 6px;
-  background: var(--primary);
-  color: var(--on-primary);
-  transition: background 0.15s ease;
-}
-
-.home:hover {
-  background: var(--primary-hover);
-}
+/* The way-home button is the shared ui/Button component. */

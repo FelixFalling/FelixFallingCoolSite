@@ -1,11 +1,10 @@
 import { resume } from "@/data/resume";
-import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
 import styles from "./Skills.module.css";
 
 export default function Skills() {
   return (
-    <Reveal id="skills">
-      <h2 className="section-title">Skills</h2>
+    <Section id="skills" title="Skills">
       <div className={styles.grid}>
         {resume.skills.map((group, i) => (
           <div key={i}>
@@ -14,6 +13,6 @@ export default function Skills() {
           </div>
         ))}
       </div>
-    </Reveal>
+    </Section>
   );
 }

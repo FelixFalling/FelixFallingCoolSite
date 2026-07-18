@@ -1,4 +1,5 @@
 import { resume } from "@/data/resume";
+import ExternalLink from "@/components/ui/ExternalLink";
 import styles from "./Contact.module.css";
 
 /** Footer wave: a single sand-colored crest where the navy footer meets the page. */
@@ -25,13 +26,13 @@ export default function Contact() {
         <h2 className={styles.title}>Get in touch</h2>
         <p className={styles.subtitle}>Open to software engineering opportunities.</p>
         <div className={styles.links}>
-          <a className={styles.link} href={resume.links.github} target="_blank" rel="noopener">
+          <ExternalLink className={styles.link} href={resume.links.github}>
             {prettyUrl(resume.links.github)}
-          </a>
+          </ExternalLink>
           {resume.links.linkedin && (
-            <a className={styles.link} href={resume.links.linkedin} target="_blank" rel="noopener">
+            <ExternalLink className={styles.link} href={resume.links.linkedin}>
               {prettyUrl(resume.links.linkedin)}
-            </a>
+            </ExternalLink>
           )}
         </div>
         <div className={styles.copyright}>

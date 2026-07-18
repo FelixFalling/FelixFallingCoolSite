@@ -1,5 +1,6 @@
 import { resume } from "@/data/resume";
 import HeroScene from "@/components/scene/HeroScene";
+import Button from "@/components/ui/Button";
 import styles from "./Hero.module.css";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -17,18 +18,18 @@ export default function Hero() {
           <p className={styles.specialties}>{resume.specialties}</p>
 
           <div className={styles.actions}>
-            <a className={styles.btnPrimary} href={links.github} target="_blank" rel="noopener">
+            <Button href={links.github} external>
               GitHub
-            </a>
+            </Button>
             {links.linkedin && (
-              <a className={styles.btnPrimary} href={links.linkedin} target="_blank" rel="noopener">
+              <Button href={links.linkedin} external>
                 LinkedIn
-              </a>
+              </Button>
             )}
             {links.resumePdf && (
-              <a className={styles.btnGhost} href={`${BASE_PATH}/${links.resumePdf}`} download>
+              <Button href={`${BASE_PATH}/${links.resumePdf}`} variant="ghost" download>
                 Download resume ↓
-              </a>
+              </Button>
             )}
           </div>
         </div>

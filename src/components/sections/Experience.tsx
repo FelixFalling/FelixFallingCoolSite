@@ -1,14 +1,14 @@
 import { resume } from "@/data/resume";
-import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
+import Card from "@/components/ui/Card";
 import styles from "./Experience.module.css";
 
 export default function Experience() {
   return (
-    <Reveal id="experience">
-      <h2 className="section-title">Experience</h2>
+    <Section id="experience" title="Experience">
       <div className={styles.list}>
         {resume.experience.map((job, i) => (
-          <article key={i} className="card">
+          <Card key={i}>
             <div className={styles.head}>
               <h3 className={styles.role}>
                 {job.company} — {job.title}
@@ -21,9 +21,9 @@ export default function Experience() {
                 <li key={j}>{bullet}</li>
               ))}
             </ul>
-          </article>
+          </Card>
         ))}
       </div>
-    </Reveal>
+    </Section>
   );
 }

@@ -1,24 +1,24 @@
 import { resume } from "@/data/resume";
-import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
+import Card from "@/components/ui/Card";
 import styles from "./Education.module.css";
 
 export default function Education() {
   return (
-    <Reveal id="education">
-      <h2 className="section-title">Education</h2>
+    <Section id="education" title="Education">
       <div className={styles.grid}>
         {resume.education.map((school, i) => (
-          <article key={i} className="card">
+          <Card key={i}>
             <div className={styles.head}>
               <h3 className={styles.degree}>{school.degree}</h3>
               <span className={styles.year}>{school.year}</span>
             </div>
             <div className={styles.detail}>{school.detail}</div>
             {school.note && <p className={styles.note}>{school.note}</p>}
-          </article>
+          </Card>
         ))}
       </div>
       {resume.honors && <p className={styles.honors}>{resume.honors}</p>}
-    </Reveal>
+    </Section>
   );
 }

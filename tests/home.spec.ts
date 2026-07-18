@@ -1,94 +1,87 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { resume } from "../src/data/resume";
 
 /**
  * Smoke tests for the home page: does everything render, link, and navigate?
  *
- * Note the import above — tests read from resume.ts, the same file the site
- * renders from. Update your resume and the tests stay correct automatically.
+ * Two things to notice about how these are written:
+ * 1. They receive `homePage` — a page object from fixtures.ts. All locators
+ *    live in tests/pages/HomePage.ts; the specs just act and assert.
+ * 2. They import resume.ts — the same data the site renders from — so
+ *    updating your resume never breaks a test.
  */
 
 test.describe("home page", () => {
-  test("loads with no browser console errors", async ({ page }) => {
+  test("loads with no browser console errors", async ({ homePage, page }) => {
     // Collect any JS errors the page throws while loading — a hydration bug or
     // broken import shows up here long before you'd spot it visually.
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.goto("./");
-    await expect(page.locator("h1")).toBeVisible();
+    await homePage.goto();
+    await expect(homePage.heroName).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  test("shows my name and job title in the hero", async ({ page }) => {
-    await page.goto("./");
-    await expect(page.locator("h1")).toHaveText(resume.name);
-    await expect(page.getByText(resume.jobTitle).first()).toBeVisible();
+  test("shows my name and job title in the hero", async ({ homePage }) => {
+    await homePage.goto();
+    await expect(homePage.heroName).toHaveText(resume.name);
+    await expect(homePage.jobTitle(resume.jobTitle)).toBeVisible();
   });
 
-  test("hero links match the data file", async ({ page }) => {
-    await page.goto("./");
-    const hero = page.locator("header");
-    await expect(hero.getByRole("link", { name: "GitHub" })).toHaveAttribute(
-      "href",
-      resume.links.github,
-    );
+  test("hero links match the data file", async ({ homePage }) => {
+    await homePage.goto();
+    await expect(homePage.githubButton).toHaveAttribute("href", resume.links.github);
     // LinkedIn is optional (and currently hidden for privacy) — the button
     // must only exist when the data file provides a URL.
-    const linkedin = hero.getByRole("link", { name: "LinkedIn" });
     if (resume.links.linkedin) {
-      await expect(linkedin).toHaveAttribute("href", resume.links.linkedin);
+      await expect(homePage.linkedinButton).toHaveAttribute("href", resume.links.linkedin);
     } else {
-      await expect(linkedin).toHaveCount(0);
+      await expect(homePage.linkedinButton).toHaveCount(0);
     }
   });
 
-  test("nav link scrolls to the section", async ({ page }) => {
-    await page.goto("./");
-    await page.getByRole("navigation").getByRole("link", { name: "Projects" }).click();
+  test("nav link scrolls to the section", async ({ homePage }) => {
+    await homePage.goto();
+    await homePage.nav.clickLink("Projects");
     // toBeInViewport = the section actually scrolled onto the screen.
-    await expect(page.locator("#projects")).toBeInViewport();
+    await expect(homePage.section("projects")).toBeInViewport();
   });
 
-  test("every section renders once scrolled to", async ({ page }) => {
-    await page.goto("./");
+  test("every section renders once scrolled to", async ({ homePage }) => {
+    await homePage.goto();
     // Experience/Education are intentionally hidden for now (see page.tsx).
     for (const id of ["about", "projects", "skills", "activity", "contact"]) {
-      const section = page.locator(`#${id}`);
-      await section.scrollIntoViewIfNeeded();
-      await expect(section).toBeVisible();
+      await homePage.scrollToSection(id);
+      await expect(homePage.section(id)).toBeVisible();
     }
   });
 
-  test("each project card shows its screenshots and link", async ({ page }) => {
-    await page.goto("./");
-    await page.locator("#projects").scrollIntoViewIfNeeded();
+  test("each project card shows its screenshots and link", async ({ homePage }) => {
+    await homePage.goto();
+    await homePage.scrollToSection("projects");
     for (const project of resume.projects) {
-      const card = page.locator("article", { hasText: project.title });
+      const card = homePage.projectCard(project.title);
       if (project.images?.length) {
-        // The first slide of the slideshow should be a real, loaded image.
         // Slides load lazily, so scroll the card into view and poll until the
         // browser has actually fetched the file (naturalWidth > 0).
-        const img = card.getByRole("img", { name: project.images[0].alt });
-        await img.scrollIntoViewIfNeeded();
-        await expect(img).toBeVisible();
+        const alt = project.images[0].alt;
+        await card.scrollTo();
+        await expect(card.slideImage(alt)).toBeVisible();
         await expect
-          .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth), {
+          .poll(() => card.slideHasLoaded(alt), {
             message: `${project.title} screenshot should load`,
           })
-          .toBeGreaterThan(0);
+          .toBe(true);
       }
       for (const link of project.links ?? []) {
-        await expect(card.getByRole("link", { name: link.label })).toHaveAttribute(
-          "href",
-          link.href,
-        );
+        await expect(card.link(link.label)).toHaveAttribute("href", link.href);
       }
     }
   });
 
-  test("the Curse of Ra clock link is there", async ({ page }) => {
-    await page.goto("./");
+  test("the Curse of Ra clock link is there", async ({ homePage, page }) => {
+    await homePage.goto();
     await expect(page.getByRole("link", { name: /Curse of Ra/ })).toHaveAttribute(
       "href",
       /clockmaker\.html$/,
@@ -97,21 +90,24 @@ test.describe("home page", () => {
 });
 
 test.describe("easter egg", () => {
-  test("typing 'duck' makes it rain ducks", async ({ page }) => {
-    await page.goto("./");
-    await expect(page.locator("[data-duck]")).toHaveCount(0);
-    await page.keyboard.type("duck");
+  test("typing 'duck' makes it rain ducks", async ({ homePage }) => {
+    await homePage.goto();
+    await expect(homePage.ducks).toHaveCount(0);
+    await homePage.typeDuckCode();
     // The flock spawns 16 ducks that fall, bob, and fade away.
-    await expect(page.locator("[data-duck]")).toHaveCount(16);
+    await expect(homePage.ducks).toHaveCount(16);
   });
 });
 
 test.describe("404 page", () => {
-  test("wrong URLs land on the lost-at-sea page with a way home", async ({ page }) => {
-    await page.goto("./this-page-does-not-exist/");
-    await expect(page.getByRole("heading", { name: "Lost at sea" })).toBeVisible();
-    await page.getByRole("link", { name: "← Back to shore" }).click();
-    await expect(page.locator("h1")).toHaveText(resume.name);
+  test("wrong URLs land on the lost-at-sea page with a way home", async ({
+    notFoundPage,
+    homePage,
+  }) => {
+    await notFoundPage.goto();
+    await expect(notFoundPage.heading).toBeVisible();
+    await notFoundPage.backToShoreButton.click();
+    await expect(homePage.heroName).toHaveText(resume.name);
   });
 });
 
@@ -119,10 +115,9 @@ test.describe("reduced motion", () => {
   // Simulate a visitor whose OS is set to "reduce motion" — the waves must
   // freeze for them (that's what the media query in globals.css promises).
   // emulateMedia must run BEFORE goto so the page loads with the setting on.
-  test("wave animation is disabled", async ({ page }) => {
+  test("wave animation is disabled", async ({ homePage, page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("./");
-    const wave = page.locator(".wave-drift").first();
-    await expect(wave).toHaveCSS("animation-name", "none");
+    await homePage.goto();
+    await expect(homePage.waveDrift).toHaveCSS("animation-name", "none");
   });
 });
