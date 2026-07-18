@@ -262,16 +262,16 @@ a {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-15px);
   }
 }
 @keyframes waveSwell2 {
   0%,
   100% {
-    transform: translateY(-6px);
+    transform: translateY(-9px);
   }
   50% {
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
 }
 
@@ -295,23 +295,51 @@ a {
     transform: translate(110%, -6%);
   }
 }
-/* ── Scene-magic keyframes (lighthouse, sailboat, rain, ducks) ───────────── */
-/* The lighthouse beam: one slow full rotation, like the real thing. */
-@keyframes beamSweep {
-  from {
-    transform: rotate(0deg);
+/* ── Scene-magic keyframes (lighthouse, rain, ducks) ─────────────────────── */
+/* The lighthouse light rotates in the horizontal plane, so from the shore its
+ * double cone foreshortens (scaleX → 0) as it turns toward or away from you,
+ * then stretches out the other way — one full turn every 9s. */
+@keyframes beamTurn {
+  0% {
+    transform: scaleX(1);
+    opacity: 0.9;
   }
-  to {
-    transform: rotate(360deg);
+  22% {
+    transform: scaleX(0.1);
+    opacity: 0.3;
+  }
+  28% {
+    transform: scaleX(-0.1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleX(-1);
+    opacity: 0.9;
+  }
+  72% {
+    transform: scaleX(-0.1);
+    opacity: 0.3;
+  }
+  78% {
+    transform: scaleX(0.1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0.9;
   }
 }
-/* The sailboat's crossing: its full-width strip slides one scene-width. */
-@keyframes sailAcross {
-  from {
-    transform: translateX(-8%);
+/* The lantern flashes brightest exactly when the beam points at the viewer —
+ * the 25% / 75% marks of beamTurn, where the cone is edge-on. */
+@keyframes lampFlash {
+  0%,
+  50%,
+  100% {
+    opacity: 0.45;
   }
-  to {
-    transform: translateX(108%);
+  25%,
+  75% {
+    opacity: 1;
   }
 }
 /* Rain: the double-height streak pattern slides down its own height. */
@@ -357,7 +385,7 @@ a {
   .cloud-drift,
   .gull-drift,
   .beam-sweep,
-  .sail-drift,
+  .lamp-flash,
   .rain-fall {
     animation: none !important;
   }

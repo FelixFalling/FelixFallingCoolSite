@@ -6,7 +6,6 @@ import Clouds from "./Clouds";
 import Gulls from "./Gulls";
 import Shore from "./Shore";
 import Waves from "./Waves";
-import Sailboat from "./Sailboat";
 import Rain from "./Rain";
 import DuckRain from "./DuckRain";
 import { useCoastalWeather } from "./weather";
@@ -103,7 +102,6 @@ export default function HeroScene() {
       <Stars />
       <Clouds />
       <Gulls />
-      <Sailboat />
       <Shore />
       {/* The waves live in a fixed-height strip at the bottom so they keep their
           proportions instead of stretching to the full hero height. */}

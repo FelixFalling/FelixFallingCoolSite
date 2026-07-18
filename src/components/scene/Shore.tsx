@@ -65,39 +65,48 @@ export default function Shore() {
           Kept left of the hero text column and scaled down so the tower's tip
           stays below the text at any screen width. */}
       <Cluster left="9%" bottom={50} scale={0.75}>
-        {/* The beam pivots exactly at the lantern (x=214, y=24 of the SVG →
-            bottom = 240 − 24 = 216 inside this wrapper). Dark mode only. */}
-        <div
-          className="beam-sweep"
-          style={{
-            position: "absolute",
-            left: 214,
-            bottom: 216,
-            width: 560,
-            height: 46,
-            transformOrigin: "0 50%",
-            background: "linear-gradient(90deg, rgba(233, 242, 242, 0.30), rgba(233, 242, 242, 0) 82%)",
-            clipPath: "polygon(0 46%, 100% 0, 100% 100%, 0 54%)",
-            animation: "beamSweep 14s linear infinite",
-            opacity: "var(--star-opacity)",
-            transition: "opacity 0.25s ease",
-            willChange: "transform",
-          }}
-        />
-        {/* The lantern's steady glow (dark mode only). */}
-        <div
-          style={{
-            position: "absolute",
-            left: 202,
-            bottom: 204,
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(233, 242, 242, 0.8), rgba(233, 242, 242, 0) 70%)",
-            opacity: "var(--star-opacity)",
-            transition: "opacity 0.25s ease",
-          }}
-        />
+        {/* The rotating light, dark mode only (the wrapper's opacity is the
+            theme gate, so the animations inside are free to fade the parts).
+
+            A real lighthouse lamp spins in the HORIZONTAL plane, so from the
+            shore you see its two opposed cones sweep sideways, foreshorten to
+            nothing as they turn toward you — and at that exact moment the
+            lantern flashes in your eyes. beamTurn squashes the double cone's
+            scaleX like a turning beam; lampFlash brightens the lantern in
+            sync (both 9s, matched in globals.css). */}
+        <div style={{ opacity: "var(--star-opacity)", transition: "opacity 0.25s ease" }}>
+          {/* Double light cone, centered on the lantern (x=214, y=216 from bottom). */}
+          <div
+            className="beam-sweep"
+            style={{
+              position: "absolute",
+              left: 214 - 430,
+              bottom: 216 - 20,
+              width: 860,
+              height: 40,
+              transformOrigin: "50% 50%",
+              background:
+                "linear-gradient(90deg, rgba(233, 242, 242, 0) 0%, rgba(233, 242, 242, 0.30) 44%, rgba(233, 242, 242, 0.45) 50%, rgba(233, 242, 242, 0.30) 56%, rgba(233, 242, 242, 0) 100%)",
+              clipPath: "polygon(0 0, 50% 44%, 100% 0, 100% 100%, 50% 56%, 0 100%)",
+              animation: "beamTurn 9s linear infinite",
+              willChange: "transform, opacity",
+            }}
+          />
+          {/* The lantern glow — flashes brightest as the beam points your way. */}
+          <div
+            className="lamp-flash"
+            style={{
+              position: "absolute",
+              left: 214 - 14,
+              bottom: 216 - 14,
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(233, 242, 242, 0.9), rgba(233, 242, 242, 0) 70%)",
+              animation: "lampFlash 9s linear infinite",
+            }}
+          />
+        </div>
         <svg width="360" height="240" viewBox="0 0 360 240" style={{ display: "block" }}>
           <g style={{ fill: "var(--sea-stack)" }}>
             {/* The crag: broad and heavy, with a flat summit under the tower. */}
