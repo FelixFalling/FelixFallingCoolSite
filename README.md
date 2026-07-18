@@ -41,10 +41,12 @@ src/
     scene/              the animated coastal diorama behind the hero
       HeroScene.tsx     assembles the layers + mouse parallax (the only file
                         here with JavaScript logic)
-      Waves.tsx         4 drifting wave layers        ← numbers to tweak
-      SeaStacks.tsx     the offshore rocks            ← numbers to tweak
-      Fog.tsx           rolling fog banks             ← fog thickness lives here
-      Clouds.tsx  Gulls.tsx  Stars.tsx (stars = dark mode only)
+      Waves.tsx         4 drifting wave layers, tiled at a fixed width so
+                        they flow on any screen size  ← numbers to tweak
+      Shore.tsx         the rocks + lighthouse (drawn together so the
+                        lighthouse always stands on its rock)
+      Clouds.tsx  Gulls.tsx  Sailboat.tsx  Stars.tsx (stars = dark only)
+      weather.ts  Rain.tsx  DuckRain.tsx (live weather + the easter egg)
     ui/                 shared pieces used around the page
       Nav.tsx           sticky top nav
       ThemeToggle.tsx   the ☀️/🌙 button
@@ -76,18 +78,18 @@ Tip while designing: force a theme from the URL with `?theme=dark` or
 ## How the coast scene works
 
 `HeroScene.tsx` stacks the layers back-to-front: stars → clouds → gulls →
-sea stacks → waves → fog. Each layer is a small file where the interesting
-parts are **plain data arrays** — positions, sizes, speeds, opacities — with
-comments explaining each number. Want a fifth wave? Add a line to `LAYERS` in
-`Waves.tsx`. Fog too thick? Lower the `alpha` values in `Fog.tsx`.
+sailboat → shore (rocks + lighthouse) → waves → rain. Each layer is a small
+file where the interesting parts are **plain data arrays** — positions, sizes,
+speeds, opacities — with comments explaining each number. Want a fifth wave?
+Add a line to `LAYERS` in `Waves.tsx`.
 
 On desktop the scene drifts toward your cursor (parallax). Phones get the
 ambient version, and visitors with "reduce motion" set in their OS get a still
 scene — that's handled by the `prefers-reduced-motion` block in `globals.css`.
 
-The scene is also **alive**: a lighthouse sweeps its beam at night
-(`Lighthouse.tsx`), a sailboat crosses the horizon every couple of minutes
-(`Sailboat.tsx`), and the fog, wave speed, and rain match the *actual current
+The scene is also **alive**: the lighthouse sweeps its beam at night
+(`Shore.tsx`), a sailboat crosses the horizon every couple of minutes
+(`Sailboat.tsx`), and the wave speed and rain match the *actual current
 weather* on the Oregon coast via Open-Meteo (`weather.ts` — free API, no key;
 if the request fails the scene just keeps its defaults). And there's at least
 one easter egg. Try typing something a certain terminator would hunt for.

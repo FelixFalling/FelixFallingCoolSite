@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Nav from "@/components/ui/Nav";
 import Waves from "@/components/scene/Waves";
-import SeaStacks from "@/components/scene/SeaStacks";
-import Fog from "@/components/scene/Fog";
+import Shore from "@/components/scene/Shore";
 import styles from "./not-found.module.css";
 
 /**
@@ -25,11 +24,10 @@ export default function NotFound() {
       <Nav />
       <main className={styles.sea}>
         <div className={styles.scene} aria-hidden="true">
-          <SeaStacks />
+          <Shore />
           <div className={styles.waves}>
             <Waves />
           </div>
-          <Fog />
         </div>
 
         <div className={styles.message}>

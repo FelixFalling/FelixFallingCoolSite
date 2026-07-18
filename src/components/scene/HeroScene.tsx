@@ -4,10 +4,8 @@ import { useEffect, useRef } from "react";
 import Stars from "./Stars";
 import Clouds from "./Clouds";
 import Gulls from "./Gulls";
-import Fog from "./Fog";
-import SeaStacks from "./SeaStacks";
+import Shore from "./Shore";
 import Waves from "./Waves";
-import Lighthouse from "./Lighthouse";
 import Sailboat from "./Sailboat";
 import Rain from "./Rain";
 import DuckRain from "./DuckRain";
@@ -33,8 +31,8 @@ import { useCoastalWeather } from "./weather";
  */
 export default function HeroScene() {
   const rootRef = useRef<HTMLDivElement>(null);
-  // Live conditions at Newport, OR — thins the fog on clear days, speeds the
-  // waves in wind, and switches the rain layer on. Defaults until loaded.
+  // Live conditions at Newport, OR — wind speeds up the waves, and rain
+  // switches the drizzle layer on. Defaults until loaded.
   const weather = useCoastalWeather();
 
   useEffect(() => {
@@ -97,9 +95,7 @@ export default function HeroScene() {
           zIndex: 1,
           overflow: "hidden",
           pointerEvents: "none",
-          // Weather knobs the layers read: Fog dims by --fog-scale, and the
-          // Waves divide their animation durations by --wave-speed.
-          "--fog-scale": weather.fogScale,
+          // Weather knob the Waves read: durations divide by --wave-speed.
           "--wave-speed": weather.waveSpeed,
         } as React.CSSProperties
       }
@@ -108,14 +104,12 @@ export default function HeroScene() {
       <Clouds />
       <Gulls />
       <Sailboat />
-      <SeaStacks />
-      <Lighthouse />
+      <Shore />
       {/* The waves live in a fixed-height strip at the bottom so they keep their
           proportions instead of stretching to the full hero height. */}
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}>
         <Waves />
       </div>
-      <Fog />
       {weather.raining && <Rain />}
       <DuckRain />
     </div>

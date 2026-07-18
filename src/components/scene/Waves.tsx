@@ -1,17 +1,26 @@
 /**
  * The animated ocean waves under the hero. Purely decorative.
  *
- * How it works: each "layer" is an SVG wave shape drawn twice side by side and
- * placed in a strip that's 200% wide. A CSS animation slides that strip left by
- * 50% forever, so as one copy scrolls off, its twin scrolls in — seamless drift.
- * A second, inner element gently bobs the whole layer up and down ("swell").
+ * How it works: each layer is a row of identical SVG "tiles", every tile
+ * exactly TILE (1200) pixels wide — one full wave period. Because the tiles
+ * have a FIXED pixel width, the crests keep their shape on any screen: an
+ * ultrawide monitor just sees more tiles, not a stretched-flat wave (the bug
+ * the previous version had). The drift animation slides the whole row left or
+ * right by exactly one tile, then loops — since the pattern repeats every
+ * tile, the jump back is invisible.
+ *
+ * A second, inner element gently bobs each layer up and down ("swell").
  * Layers drift in opposite directions and at different speeds, which is what
- * makes it read as water rather than a sliding image.
+ * makes it read as water rather than a sliding image. Live wind data speeds
+ * everything up via --wave-speed (see weather.ts).
  *
  * All the animation timing is data below — tweak the numbers to taste.
  */
 
-/** Build one irregular wave crest as an SVG path string. */
+const TILE = 1200; // px — one wave period; fixed so crests never flatten
+const TILES = 6; // covers screens up to ~6000px wide plus one tile of travel
+
+/** Build one irregular wave crest as an SVG path string (one 1200px period). */
 function wavePath(y: number, a1: number, a2: number, a3: number, a4: number): string {
   return (
     `M0 ${y}` +
@@ -33,15 +42,13 @@ interface Layer {
   swell: "waveSwell" | "waveSwell2";
   swellDur: number;
   opacity: number;
-  foam: boolean; // draw a white foam line on the crest
+  foam: boolean; // draw a soft foam line on the crest
 }
 
 // Back-to-front: faint far swell → deeper teal → breaking wave with foam → sand.
 // Fills are theme tokens (defined in globals.css) so the waves recolor in dark
 // mode. The top "sand" layer uses --sand — the page background — so the waves
 // always look like they wash onto the page itself, in either theme.
-// Slow drift durations read as heavy, cold, unhurried water — a calmer sea than
-// a bright beach. The far band is faint (haze); the break band carries the foam.
 const LAYERS: Layer[] = [
   { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 48, swell: "waveSwell2", swellDur: 11, opacity: 0.5, foam: false },
   { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 32, swell: "waveSwell", swellDur: 9, opacity: 0.65, foam: false },
@@ -60,10 +67,10 @@ function WaveLayer({ layer }: { layer: Layer }) {
         position: "absolute",
         left: 0,
         bottom: 0,
-        width: "200%",
+        width: TILE * TILES,
         height: "100%",
-        // The durations divide by --wave-speed (set from live wind data in
-        // HeroScene) — windier on the real coast means faster water here.
+        // Divided by --wave-speed (live wind data via HeroScene): windier on
+        // the real coast means faster water here.
         animation: `${layer.drift} calc(${layer.driftDur}s / var(--wave-speed, 1)) linear infinite`,
         willChange: "transform",
       }}
@@ -77,22 +84,21 @@ function WaveLayer({ layer }: { layer: Layer }) {
           willChange: "transform",
         }}
       >
-        <svg
-          viewBox="0 0 2400 200"
-          preserveAspectRatio="none"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
-        >
-          {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
-          <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} transform="translate(0,0)" />
-          <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} transform="translate(1200,0)" />
-          {layer.foam && (
-            // Thin, soft, low-opacity foam — misty spray rather than a bright line.
-            <>
-              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} transform="translate(0,0)" />
-              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} transform="translate(1200,0)" />
-            </>
-          )}
-        </svg>
+        {Array.from({ length: TILES }, (_, i) => (
+          <svg
+            key={i}
+            viewBox="0 0 1200 200"
+            preserveAspectRatio="none"
+            style={{ position: "absolute", left: i * TILE, bottom: 0, width: TILE, height: "100%", display: "block" }}
+          >
+            {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
+            <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} />
+            {layer.foam && (
+              // Thin, soft, low-opacity foam — misty spray rather than a bright line.
+              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} />
+            )}
+          </svg>
+        ))}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ export default function Sailboat() {
         className="sail-drift"
         style={{
           position: "absolute",
-          bottom: 158, // just above the far wave band — out on the horizon
+          bottom: 118, // sitting on the far wave band — out on the horizon
           left: 0,
           width: "100%",
           animation: "sailAcross 150s linear infinite",

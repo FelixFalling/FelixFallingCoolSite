@@ -209,7 +209,14 @@ a {
 
 /* ── Phone layout ──────────────────────────────────────────────────────────
  * Slightly tighter side padding and section rhythm on small screens, so the
- * content gets more of the width without feeling cramped. */
+ * content gets more of the width without feeling cramped. The shore (rocks +
+ * lighthouse) also shrinks so it stays clear of the hero text. */
+@media (max-width: 700px) {
+  :root {
+    --shore-scale: 0.7;
+  }
+}
+
 @media (max-width: 640px) {
   .container {
     padding: 0 20px;
@@ -230,18 +237,20 @@ a {
 
 /* ── Wave animation keyframes (used by the Hero waves) ─────────────────────
  * Two drift directions so adjacent wave layers move against each other, plus
- * two gentle vertical "swell" bobs. Respects reduced-motion preferences. */
+ * two gentle vertical "swell" bobs. Respects reduced-motion preferences.
+ * The drift distance is exactly one 1200px wave tile (see Waves.tsx), so the
+ * loop restart lands on an identical crest — seamless at any screen width. */
 @keyframes waveDrift {
   from {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-1200px);
   }
 }
 @keyframes waveDrift2 {
   from {
-    transform: translateX(-50%);
+    transform: translateX(-1200px);
   }
   to {
     transform: translateX(0);
@@ -286,20 +295,6 @@ a {
     transform: translate(110%, -6%);
   }
 }
-@keyframes mistDrift {
-  0% {
-    transform: translateX(-6%);
-    opacity: 0.75;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(6%);
-    opacity: 0.75;
-  }
-}
-
 /* ── Scene-magic keyframes (lighthouse, sailboat, rain, ducks) ───────────── */
 /* The lighthouse beam: one slow full rotation, like the real thing. */
 @keyframes beamSweep {
@@ -361,7 +356,6 @@ a {
   .wave-swell,
   .cloud-drift,
   .gull-drift,
-  .mist-drift,
   .beam-sweep,
   .sail-drift,
   .rain-fall {

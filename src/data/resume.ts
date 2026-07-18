@@ -85,7 +85,7 @@ export const resume: Resume = {
     "I build software with a tester's mindset — automation, validation, and " +
     "documentation-driven development, from embedded firmware up to web " +
     "interfaces. This site is one of my projects: everything on it, from the " +
-    "fog to the CI pipeline, is hand-built and open source.",
+    "waves to the CI pipeline, is hand-built and open source.",
   showPhoto: false, // no photo for now — this site stays pseudonymous
 
   links: {
