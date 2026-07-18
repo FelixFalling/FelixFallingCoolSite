@@ -210,8 +210,9 @@ a {
 /* ── Phone layout ──────────────────────────────────────────────────────────
  * Slightly tighter side padding and section rhythm on small screens, so the
  * content gets more of the width without feeling cramped. The shore (rocks +
- * lighthouse) also shrinks so it stays clear of the hero text. */
-@media (max-width: 700px) {
+ * lighthouse) also shrinks below 1100px — on narrow screens the hero text
+ * column reaches the left edge, and this keeps the lighthouse under it. */
+@media (max-width: 1100px) {
   :root {
     --shore-scale: 0.7;
   }
@@ -296,49 +297,36 @@ a {
   }
 }
 /* ── Scene-magic keyframes (lighthouse, rain, ducks) ─────────────────────── */
-/* The lighthouse light rotates in the horizontal plane, so from the shore its
- * double cone foreshortens (scaleX → 0) as it turns toward or away from you,
- * then stretches out the other way — one full turn every 9s. */
+/* The lighthouse's single beam: stretched over the sea, it swings in and
+ * shrinks as the lamp turns toward you, vanishes at the moment it points your
+ * way, then sweeps back out. One cycle every 8s. */
 @keyframes beamTurn {
-  0% {
+  0%,
+  100% {
     transform: scaleX(1);
-    opacity: 0.9;
+    opacity: 0.85;
   }
-  22% {
+  42% {
     transform: scaleX(0.1);
-    opacity: 0.3;
-  }
-  28% {
-    transform: scaleX(-0.1);
     opacity: 0.3;
   }
   50% {
-    transform: scaleX(-1);
-    opacity: 0.9;
+    transform: scaleX(0.02);
+    opacity: 0;
   }
-  72% {
-    transform: scaleX(-0.1);
-    opacity: 0.3;
-  }
-  78% {
+  58% {
     transform: scaleX(0.1);
     opacity: 0.3;
   }
-  100% {
-    transform: scaleX(1);
-    opacity: 0.9;
-  }
 }
 /* The lantern flashes brightest exactly when the beam points at the viewer —
- * the 25% / 75% marks of beamTurn, where the cone is edge-on. */
+ * the 50% mark of beamTurn, where the cone has vanished. */
 @keyframes lampFlash {
   0%,
-  50%,
   100% {
-    opacity: 0.45;
+    opacity: 0.4;
   }
-  25%,
-  75% {
+  50% {
     opacity: 1;
   }
 }

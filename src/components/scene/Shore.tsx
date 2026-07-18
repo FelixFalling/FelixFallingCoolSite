@@ -65,30 +65,31 @@ export default function Shore() {
           Kept left of the hero text column and scaled down so the tower's tip
           stays below the text at any screen width. */}
       <Cluster left="9%" bottom={50} scale={0.75}>
-        {/* The rotating light, dark mode only (the wrapper's opacity is the
+        {/* The turning light, dark mode only (the wrapper's opacity is the
             theme gate, so the animations inside are free to fade the parts).
 
-            A real lighthouse lamp spins in the HORIZONTAL plane, so from the
-            shore you see its two opposed cones sweep sideways, foreshorten to
-            nothing as they turn toward you — and at that exact moment the
-            lantern flashes in your eyes. beamTurn squashes the double cone's
-            scaleX like a turning beam; lampFlash brightens the lantern in
-            sync (both 9s, matched in globals.css). */}
+            ONE beam, like a single-panel lamp turning in the horizontal
+            plane: it stretches out over the sea, swings in and shrinks as the
+            lamp turns toward you — and at the moment it points your way the
+            beam vanishes and the lantern FLASHES — then it swings back out.
+            beamTurn drives the beam's scaleX, lampFlash brightens the lantern
+            at the same instant (both 8s, matched in globals.css). */}
         <div style={{ opacity: "var(--star-opacity)", transition: "opacity 0.25s ease" }}>
-          {/* Double light cone, centered on the lantern (x=214, y=216 from bottom). */}
+          {/* The light cone, anchored at the lantern (x=214, y=216 from
+              bottom), reaching out over the open sea to the right. */}
           <div
             className="beam-sweep"
             style={{
               position: "absolute",
-              left: 214 - 430,
-              bottom: 216 - 20,
-              width: 860,
-              height: 40,
-              transformOrigin: "50% 50%",
+              left: 214,
+              bottom: 216 - 21,
+              width: 470,
+              height: 42,
+              transformOrigin: "0 50%",
               background:
-                "linear-gradient(90deg, rgba(233, 242, 242, 0) 0%, rgba(233, 242, 242, 0.30) 44%, rgba(233, 242, 242, 0.45) 50%, rgba(233, 242, 242, 0.30) 56%, rgba(233, 242, 242, 0) 100%)",
-              clipPath: "polygon(0 0, 50% 44%, 100% 0, 100% 100%, 50% 56%, 0 100%)",
-              animation: "beamTurn 9s linear infinite",
+                "linear-gradient(90deg, rgba(233, 242, 242, 0.42), rgba(233, 242, 242, 0) 88%)",
+              clipPath: "polygon(0 45%, 100% 0, 100% 100%, 0 55%)",
+              animation: "beamTurn 8s ease-in-out infinite",
               willChange: "transform, opacity",
             }}
           />
@@ -103,7 +104,7 @@ export default function Shore() {
               height: 28,
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(233, 242, 242, 0.9), rgba(233, 242, 242, 0) 70%)",
-              animation: "lampFlash 9s linear infinite",
+              animation: "lampFlash 8s ease-in-out infinite",
             }}
           />
         </div>
