@@ -2,12 +2,14 @@ import { resume } from "@/data/resume";
 import ThemeToggle from "./ThemeToggle";
 import styles from "./Nav.module.css";
 
-/** Sticky top navigation. Links jump to each section by its `id`. */
+/**
+ * Sticky top navigation. Links jump to each section by its `id`.
+ * Experience/Education links are omitted while those sections are hidden —
+ * see the PRIVACY note in app/page.tsx.
+ */
 const links = [
   { href: "#about", label: "About" },
-  { href: "#experience", label: "Experience" },
   { href: "#projects", label: "Projects" },
-  { href: "#education", label: "Education" },
   { href: "#skills", label: "Skills" },
   { href: "#contact", label: "Contact" },
 ];

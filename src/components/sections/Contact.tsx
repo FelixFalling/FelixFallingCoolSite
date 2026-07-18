@@ -28,9 +28,11 @@ export default function Contact() {
           <a className={styles.link} href={resume.links.github} target="_blank" rel="noopener">
             {prettyUrl(resume.links.github)}
           </a>
-          <a className={styles.link} href={resume.links.linkedin} target="_blank" rel="noopener">
-            {prettyUrl(resume.links.linkedin)}
-          </a>
+          {resume.links.linkedin && (
+            <a className={styles.link} href={resume.links.linkedin} target="_blank" rel="noopener">
+              {prettyUrl(resume.links.linkedin)}
+            </a>
+          )}
         </div>
         <div className={styles.copyright}>
           © {year} {resume.name}

@@ -26,7 +26,7 @@ test.describe("phone layout", () => {
   test("all nav links are visible and tappable", async ({ page }) => {
     await page.goto("./");
     const nav = page.getByRole("navigation");
-    for (const label of ["About", "Experience", "Projects", "Education", "Skills", "Contact"]) {
+    for (const label of ["About", "Projects", "Skills", "Contact"]) {
       await expect(nav.getByRole("link", { name: label })).toBeVisible();
     }
   });

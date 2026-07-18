@@ -1,5 +1,6 @@
 import { resume } from "@/data/resume";
 import Reveal from "@/components/ui/Reveal";
+import Slides from "@/components/ui/Slides";
 import styles from "./Projects.module.css";
 
 export default function Projects() {
@@ -9,6 +10,9 @@ export default function Projects() {
       <div className={styles.grid}>
         {resume.projects.map((project, i) => (
           <article key={i} className={`card ${styles.card}`}>
+            {project.images && project.images.length > 0 && (
+              <Slides images={project.images} title={project.title} />
+            )}
             <div className={styles.eyebrow}>{project.eyebrow}</div>
             <h3 className={styles.title}>{project.title}</h3>
             <p className={styles.description}>{project.description}</p>

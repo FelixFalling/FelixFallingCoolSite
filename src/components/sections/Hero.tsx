@@ -20,9 +20,11 @@ export default function Hero() {
             <a className={styles.btnPrimary} href={links.github} target="_blank" rel="noopener">
               GitHub
             </a>
-            <a className={styles.btnPrimary} href={links.linkedin} target="_blank" rel="noopener">
-              LinkedIn
-            </a>
+            {links.linkedin && (
+              <a className={styles.btnPrimary} href={links.linkedin} target="_blank" rel="noopener">
+                LinkedIn
+              </a>
+            )}
             {links.resumePdf && (
               <a className={styles.btnGhost} href={`${BASE_PATH}/${links.resumePdf}`} download>
                 Download resume ↓

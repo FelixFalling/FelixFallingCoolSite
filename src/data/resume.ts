@@ -1,10 +1,15 @@
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  YOUR RESUME CONTENT — edit everything here.
+ *  YOUR SITE CONTENT — edit everything here.
  * ─────────────────────────────────────────────────────────────────────────
  *  This is the ONE file you change to update the site's text. The components
  *  just render whatever you put here, so you never have to touch layout/HTML
- *  to change your name, jobs, projects, etc.
+ *  to change your name, projects, skills, etc.
+ *
+ *  PRIVACY NOTE: this site is public and scrapable. It deliberately uses the
+ *  "Flying Felix" handle and contains no real name, employers, school, photo,
+ *  location, or contact details. Keep it that way unless you decide otherwise.
+ *  (The Experience/Education sections are currently hidden — see page.tsx.)
  *
  *  TypeScript tip: the `: SomeType` annotations below describe the shape of
  *  each piece of data. If you mistype a field (e.g. forget a project's title),
@@ -20,11 +25,18 @@ export interface Job {
   bullets: string[];
 }
 
+/** One slide in a project card's little slideshow. */
+export interface ProjectImage {
+  src: string; // path under /public, e.g. "projects/clock-1.png"
+  alt: string; // describes the image for screen readers
+}
+
 export interface Project {
   eyebrow: string; // small label above the title, e.g. "2024 · Personal"
   title: string;
   description: string;
   link?: { label: string; href: string }; // optional "View repo →" style link
+  images?: ProjectImage[]; // screenshots shown as a swipeable slideshow
   tags: string[];
 }
 
@@ -49,7 +61,7 @@ export interface Resume {
   showPhoto: boolean;
   links: {
     github: string;
-    linkedin: string;
+    linkedin?: string; // hidden for now — ties the handle to a real identity
     resumePdf?: string; // file placed in /public, e.g. "resume.pdf"
   };
   experience: Job[];
@@ -59,97 +71,83 @@ export interface Resume {
   skills: SkillGroup[];
 }
 
+// The base path GitHub Pages serves from — used to build links to the
+// standalone pages in /public.
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const resume: Resume = {
   name: "Flying Felix",
   jobTitle: "Software Developer",
-  location: "City, ST · Detail",
-  specialties: "Testing Software· UI · Backend · DevOps",
+  location: "Somewhere along a foggy coast",
+  specialties: "Test automation · Embedded systems · DevOps",
   about:
-    "Welcome To My Cool Little website I'm going to be build my portfolio " +
-    "Something Something.",
-  showPhoto: true,
+    "I build software with a tester's mindset — automation, validation, and " +
+    "documentation-driven development, from embedded firmware up to web " +
+    "interfaces. This site is one of my projects: everything on it, from the " +
+    "fog to the CI pipeline, is hand-built and open source.",
+  showPhoto: false, // no photo for now — this site stays pseudonymous
 
   links: {
     github: "https://github.com/FelixFalling",
-    linkedin: "https://www.linkedin.com/in/username",
-    resumePdf: undefined, // set to "resume.pdf" once you add the file to /public
+    // linkedin: intentionally omitted for now (see PRIVACY NOTE above)
+    resumePdf: undefined, // intentionally none — the PDF has personal details
   },
 
-  experience: [
-    {
-      company: "Company Name",
-      title: "Job Title",
-      location: "City, ST",
-      period: "Start – Present",
-      bullets: [
-        "Achievement or responsibility — what you did and the impact it had.",
-        "Achievement or responsibility — what you did and the impact it had.",
-        "Achievement or responsibility — what you did and the impact it had.",
-      ],
-    },
-    {
-      company: "Company Name",
-      title: "Job Title",
-      location: "City, ST",
-      period: "Start – End",
-      bullets: [
-        "Achievement or responsibility — what you did and the impact it had.",
-        "Achievement or responsibility — what you did and the impact it had.",
-      ],
-    },
-  ],
+  // Hidden for now (see page.tsx) — fill these in when you're ready to share.
+  experience: [],
 
   projects: [
     {
-      eyebrow: "Year · Context",
-      title: "Project Title",
+      eyebrow: "2026 · This website",
+      title: "This Portfolio Site",
       description:
-        "Two or three sentences describing the project: what you built, the " +
-        "technologies involved, and the measurable outcome.",
-      tags: ["Tag", "Tag", "Tag"],
+        "A hand-built Next.js + TypeScript site with an animated Oregon-coast " +
+        "scene: layered waves, drifting fog, sea stacks, and a light/dark " +
+        "theme. Tested with Playwright on desktop and mobile, and deployed to " +
+        "GitHub Pages by CI on every push.",
+      link: { label: "View the code →", href: "https://github.com/FelixFalling/FelixFallingCoolSite" },
+      images: [
+        { src: "projects/site-light.png", alt: "The portfolio homepage in light mode — fog and sea stacks under the hero" },
+        { src: "projects/site-dark.png", alt: "The portfolio homepage in dark mode — moonlit waves and stars" },
+      ],
+      tags: ["Next.js", "TypeScript", "Playwright", "GitHub Actions"],
     },
     {
-      eyebrow: "Year · Context",
-      title: "Project Title",
+      eyebrow: "Tool · Single file",
+      title: "Curse of Ra",
       description:
-        "Two or three sentences describing the project: what you built, the " +
-        "technologies involved, and the measurable outcome.",
-      link: { label: "View repository →", href: "#" },
-      tags: ["Tag", "Tag", "Tag"],
+        "A work-hours punch clock disguised as an animated Egyptian tomb — " +
+        "tap the cartouche to clock in and out, and it tracks your day and " +
+        "your weekly 40 while the scene glitters around you. One " +
+        "self-contained HTML file, no frameworks, no dependencies.",
+      link: { label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` },
+      images: [{ src: "projects/clock-1.png", alt: "The Curse of Ra clock — an animated Egyptian tomb scene" }],
+      tags: ["HTML", "CSS animation", "Vanilla JS"],
     },
     {
-      eyebrow: "Year · Context",
-      title: "Project Title",
+      eyebrow: "Game · Single file",
+      title: "The Wizard's Tower",
       description:
-        "Two or three sentences describing the project: what you built, the " +
-        "technologies involved, and the measurable outcome.",
-      link: { label: "Live site →", href: "#" },
-      tags: ["Tag", "Tag", "Tag"],
+        "An endless-climb browser game: a very normal cat, a laser dot, and " +
+        "a tower that never ends. Climb for points, bat everything off the " +
+        "shelves, dodge ghost librarians, unlock new cats — all in one " +
+        "dependency-free HTML file.",
+      link: { label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` },
+      images: [{ src: "projects/wizard-1.png", alt: "The Wizard's Tower browser game title screen" }],
+      tags: ["JavaScript", "Game", "CSS"],
     },
   ],
 
-  education: [
-    {
-      degree: "Degree Name",
-      year: "Year",
-      detail: "Institution · Detail · GPA",
-      note: "Relevant coursework or other details",
-    },
-    {
-      degree: "Degree Name",
-      year: "Year",
-      detail: "Institution · Detail · GPA",
-      note: "Relevant coursework or other details",
-    },
-  ],
-  honors: "Honors: Award · Award",
+  // Hidden for now (see page.tsx) — fill in when you're ready to share.
+  education: [],
+  honors: undefined,
 
   skills: [
-    { heading: "Languages", skills: ["Skill one", "Skill two", "Skill three"] },
-    { heading: "Frameworks & Libraries", skills: ["Skill one", "Skill two", "Skill three"] },
-    { heading: "DevOps & Cloud", skills: ["Skill one", "Skill two", "Skill three"] },
-    { heading: "Testing", skills: ["Skill one", "Skill two", "Skill three"] },
-    { heading: "Systems & Hardware", skills: ["Skill one", "Skill two", "Skill three"] },
-    { heading: "Practices", skills: ["Skill one", "Skill two", "Skill three"] },
+    { heading: "Languages", skills: ["Python", "C/C++", "TypeScript / JavaScript", "Bash"] },
+    { heading: "Testing & Validation", skills: ["Test automation", "Black-box & system validation", "Playwright", "Technical documentation"] },
+    { heading: "Embedded & Hardware", skills: ["Arduino", "Raspberry Pi", "Serial protocols", "Firmware debugging", "OpenCV"] },
+    { heading: "DevOps & Infrastructure", skills: ["Docker", "Terraform", "Ansible", "Proxmox", "CI/CD", "GitHub Actions"] },
+    { heading: "Security", skills: ["Malware analysis", "YARA", "Suricata", "Packet analysis"] },
+    { heading: "Web & UI", skills: ["Next.js", "React", "Node.js", "Qt / QML (PySide6)"] },
   ],
 };

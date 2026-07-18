@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The site's favicon: a sea stack in the fog over two wave lines.
+       Kept to a few bold shapes so it stays readable at 16x16. -->
+  <rect width="64" height="64" rx="14" fill="#152c33"/>
+  <!-- sea stack -->
+  <path d="M22 44 L24 24 C24 18 30 12 33 16 C36 20 39 30 41 36 L43 44 Z" fill="#7f9a9c"/>
+  <!-- fog band across the rock -->
+  <rect x="8" y="30" width="48" height="7" rx="3.5" fill="#152c33" opacity="0.55"/>
+  <!-- waves -->
+  <path d="M8 47 Q16 42 24 47 T40 47 T56 47" fill="none" stroke="#5fb4ae" stroke-width="4" stroke-linecap="round"/>
+  <path d="M8 55 Q16 50 24 55 T40 55 T56 55" fill="none" stroke="#3a6f6b" stroke-width="4" stroke-linecap="round"/>
+</svg>

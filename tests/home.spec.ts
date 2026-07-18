@@ -26,17 +26,21 @@ test.describe("home page", () => {
     await expect(page.getByText(resume.jobTitle).first()).toBeVisible();
   });
 
-  test("hero links point at my GitHub and LinkedIn", async ({ page }) => {
+  test("hero links match the data file", async ({ page }) => {
     await page.goto("./");
     const hero = page.locator("header");
     await expect(hero.getByRole("link", { name: "GitHub" })).toHaveAttribute(
       "href",
       resume.links.github,
     );
-    await expect(hero.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
-      "href",
-      resume.links.linkedin,
-    );
+    // LinkedIn is optional (and currently hidden for privacy) — the button
+    // must only exist when the data file provides a URL.
+    const linkedin = hero.getByRole("link", { name: "LinkedIn" });
+    if (resume.links.linkedin) {
+      await expect(linkedin).toHaveAttribute("href", resume.links.linkedin);
+    } else {
+      await expect(linkedin).toHaveCount(0);
+    }
   });
 
   test("nav link scrolls to the section", async ({ page }) => {
@@ -48,10 +52,29 @@ test.describe("home page", () => {
 
   test("every section renders once scrolled to", async ({ page }) => {
     await page.goto("./");
-    for (const id of ["about", "experience", "projects", "education", "skills", "contact"]) {
+    // Experience/Education are intentionally hidden for now (see page.tsx).
+    for (const id of ["about", "projects", "skills", "contact"]) {
       const section = page.locator(`#${id}`);
       await section.scrollIntoViewIfNeeded();
       await expect(section).toBeVisible();
+    }
+  });
+
+  test("each project card shows its screenshots and link", async ({ page }) => {
+    await page.goto("./");
+    await page.locator("#projects").scrollIntoViewIfNeeded();
+    for (const project of resume.projects) {
+      const card = page.locator("article", { hasText: project.title });
+      if (project.images?.length) {
+        // The first slide of the slideshow should be a real, loaded image.
+        const img = card.getByRole("img", { name: project.images[0].alt });
+        await expect(img).toBeVisible();
+        const loaded = await img.evaluate((el: HTMLImageElement) => el.naturalWidth > 0);
+        expect(loaded, `${project.title} screenshot should load`).toBe(true);
+      }
+      if (project.link) {
+        await expect(card.getByRole("link", { name: project.link.label })).toBeVisible();
+      }
     }
   });
 
