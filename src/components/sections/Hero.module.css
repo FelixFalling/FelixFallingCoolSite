@@ -70,8 +70,11 @@
 }
 
 .photo {
-  width: 168px;
-  height: 168px;
+  /* Scales with the viewport like the rest of the hero (name, buttons): 168px
+     on a laptop, growing to 280px on a big monitor so it stays in proportion
+     with the large scaled-up name. */
+  width: clamp(168px, 14vw, 280px);
+  height: clamp(168px, 14vw, 280px);
   border-radius: 50%;
   background: linear-gradient(160deg, var(--photo-from), var(--photo-to));
   border: 4px solid rgba(255, 255, 255, 0.85);
@@ -80,7 +83,7 @@
   align-items: center;
   justify-content: center;
   color: var(--photo-text);
-  font-size: 13px;
+  font-size: clamp(13px, 1vw, 17px);
   font-weight: 600;
   text-align: center;
 }
