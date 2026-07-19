@@ -4,9 +4,9 @@ My personal portfolio / resume site — built with **Next.js + TypeScript**, dep
 as a static site to **GitHub Pages** at
 <https://felixfalling.github.io/FelixFallingCoolSite/>.
 
-The design is a moody Oregon-coast scene: fog rolling over sea stacks, waves
-breaking under the hero, gulls overhead — with a light theme ("overcast day")
-and a dark theme ("moonlit night").
+The design is a moody Oregon-coast scene: sea stacks and a sweeping lighthouse
+over waves breaking under the hero — with a light theme ("overcast day") and a
+dark theme ("moonlit night").
 
 ## Quick start
 
@@ -45,7 +45,7 @@ src/
                         they flow on any screen size  ← numbers to tweak
       Shore.tsx         the rocks + lighthouse (drawn together so the
                         lighthouse always stands on its rock)
-      Clouds.tsx  Gulls.tsx  Stars.tsx (stars = dark mode only)
+      Stars.tsx         faint stars (dark mode only)
       weather.ts  Rain.tsx  DuckRain.tsx (live weather + the easter egg)
     ui/                 shared building blocks used across pages
       Button.tsx        THE button (primary/ghost) — hero + 404 use it
@@ -85,8 +85,8 @@ Tip while designing: force a theme from the URL with `?theme=dark` or
 
 ## How the coast scene works
 
-`HeroScene.tsx` stacks the layers back-to-front: stars → clouds → gulls →
-shore (rocks + lighthouse) → waves → rain. Each layer is a small
+`HeroScene.tsx` stacks the layers back-to-front: stars → shore (rocks +
+lighthouse) → waves → rain. Each layer is a small
 file where the interesting parts are **plain data arrays** — positions, sizes,
 speeds, opacities — with comments explaining each number. Want a fifth wave?
 Add a line to `LAYERS` in `Waves.tsx`.

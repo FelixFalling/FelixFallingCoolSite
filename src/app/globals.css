@@ -360,26 +360,6 @@ a {
   }
 }
 
-/* ── Hero atmosphere keyframes (clouds, gulls, fog) ────────────────────────
- * All three just slide their layer sideways across the sky/sea and loop. Each
- * layer sits in an over-wide strip so a second copy scrolls in seamlessly (same
- * trick as the waves). Fog also breathes its opacity a little as it drifts. */
-@keyframes cloudDrift {
-  from {
-    transform: translateX(-8%);
-  }
-  to {
-    transform: translateX(8%);
-  }
-}
-@keyframes gullDrift {
-  from {
-    transform: translate(-10%, 0);
-  }
-  to {
-    transform: translate(110%, -6%);
-  }
-}
 /* ── Scene-magic keyframes (lighthouse, rain, ducks) ─────────────────────── */
 /* The lighthouse's single beam: stretched over the sea, it swings in and
  * shrinks as the lamp turns toward you, vanishes at the moment it points your
@@ -466,12 +446,10 @@ a {
   }
   /* The slow horizontal wave drift is the site's identity and is gentle
      enough to keep. Everything springier or attention-grabbing stops:
-     the vertical swell bob, clouds, gulls, the lighthouse beam and flash,
-     rain, and the scroll cue (the duck easter egg and cursor parallax are
-     skipped in JavaScript). */
+     the vertical swell bob, the lighthouse beam and flash, rain, and the
+     scroll cue (the duck easter egg and cursor parallax are skipped in
+     JavaScript). */
   .wave-swell,
-  .cloud-drift,
-  .gull-drift,
   .beam-sweep,
   .lamp-flash,
   .rain-fall,

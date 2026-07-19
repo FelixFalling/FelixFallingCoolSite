@@ -120,7 +120,7 @@ test.describe("reduced motion", () => {
   // Simulate a visitor whose OS is set to "reduce motion". Policy (see the
   // media query in globals.css): the gentle horizontal drift KEEPS moving —
   // it's the site's identity and calm enough — while the springier vertical
-  // swell (and beam, gulls, parallax, ducks) stops.
+  // swell (and beam, parallax, ducks) stops.
   // emulateMedia must run BEFORE goto so the page loads with the setting on.
   test("swell stops but the gentle drift keeps flowing", async ({ homePage, page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

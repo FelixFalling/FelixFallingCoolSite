@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import Stars from "./Stars";
-import Clouds from "./Clouds";
-import Gulls from "./Gulls";
 import Shore from "./Shore";
 import Waves from "./Waves";
 import Rain from "./Rain";
@@ -14,15 +12,15 @@ import { useCoastalWeather } from "./weather";
  * HeroScene — assembles the coastal diorama behind the hero text and, on desktop,
  * makes it react to the mouse.
  *
- * Layering, back → front: stars (sky) → clouds → gulls → sea stacks → waves
- * → fog. Each layer positions itself; this component just stacks them in order
- * (later = painted on top) and tracks the cursor.
+ * Layering, back → front: stars (sky) → sea stacks → waves. Each layer positions
+ * itself; this component just stacks them in order (later = painted on top) and
+ * tracks the cursor.
  *
  * The cursor tracking writes the pointer's position onto this element's style as
  * two CSS variables, --mx and --my (each ~ -1..1 from the hero's center). The
- * parallax layers (clouds, sea stacks, fog) read those vars in their own CSS and
- * shift a few pixels toward the cursor — nearer layers shift more, which reads as
- * depth. The `"use client"` line is required because we use browser APIs
+ * parallax layers (sea stacks) read those vars in their own CSS and shift a few
+ * pixels toward the cursor, which reads as depth. The `"use client"` line is
+ * required because we use browser APIs
  * (matchMedia, pointer events); the rest of the scene is plain CSS/SVG.
  *
  * Touch devices and anyone who prefers reduced motion never get the listener —
@@ -100,8 +98,6 @@ export default function HeroScene() {
       }
     >
       <Stars />
-      <Clouds />
-      <Gulls />
       <Shore />
       {/* The waves live in a fixed-height strip at the bottom so they keep
           their proportions instead of stretching to the full hero height.
