@@ -207,10 +207,10 @@ export const resume: Resume = {
       title: "The Wizard's Tower",
       description:
         "An endless-climb browser game: a very normal cat, a laser dot, and " +
-        "a tower that never ends. Climb for points, bat everything off the " +
-        "shelves, dodge ghost librarians, unlock new cats. Another " +
-        "vibe-coding session — AI-paired, human-directed, one " +
-        "dependency-free HTML file.",
+        "a tower that never ends. Bat things off shelves, dodge ghost " +
+        "librarians, cursed grimoires, and darting wisps — and past 50 " +
+        "meters, fight the wizard himself for boons and unlockable cats. " +
+        "Vibe-coded: AI-paired, human-directed, one dependency-free HTML file.",
       links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
       images: [
         { src: "projects/wizard-2.png", alt: "The Wizard's Tower gameplay — a cat chasing a laser dot up shelves, dodging ghost librarians" },

@@ -109,6 +109,14 @@
   .heart{ color:#ff6b81; font-size:12px; }
   .heart.off{ color:rgba(242,232,213,.22); }
 
+  .boon{
+    width:132px; padding:12px 10px; border-radius:12px; box-shadow:none;
+    background:rgba(255,255,255,.07); border:2px solid rgba(142,240,221,.25);
+    font-size:11.5px; line-height:1.35; font-weight:600;
+  }
+  .boon b{ color:var(--ghost); display:block; margin-bottom:4px; font-size:13px; }
+  .boon:hover{ background:rgba(142,240,221,.15); transform:translateY(-2px); }
+
   @media (max-width:640px){
     .hud .hint{ display:none; }
     .panel{ top:auto; bottom:16px; right:16px; }
@@ -150,6 +158,15 @@
       <button id="menuSoundBtn" type="button">Sound: On</button>
     </div>
     <p class="tiny">Climb higher to unlock new cats. Librarian ghosts reshelve your chaos, the warden owl bites, and the shush hurts. Pounce them all.</p>
+  </div>
+</div>
+
+<div class="overlay" id="upg" hidden>
+  <div class="card">
+    <div class="eyebrow">The tower yields</div>
+    <h2>Choose a boon</h2>
+    <p class="sub">One gift for the rest of this climb.</p>
+    <div class="menu-row" id="upgRow"></div>
   </div>
 </div>
 
@@ -223,9 +240,23 @@ const SKINS = [
   { name:'Tuxedo',       unlock:30,  fur:'#3a3450', furHi:'#4a4462', furD:'#2b2640', stripe:'#3a3450', belly:'#f2e8d5', dot:'linear-gradient(135deg,#3a3450 55%,#f2e8d5 55%)' },
   { name:'Siamese',      unlock:60,  fur:'#ecdcc0', furHi:'#f4e7d0', furD:'#d9c5a4', stripe:'#ecdcc0', belly:'#f7ecd9', points:'#6b4a33', dot:'linear-gradient(135deg,#ecdcc0 55%,#6b4a33 55%)' },
   { name:'Calico',       unlock:100, fur:'#f2e8d5', furHi:'#fbf3e3', furD:'#d8c9ae', stripe:'#f2e8d5', belly:'#ffffff', patches:['#eda05b','#4a4258'], dot:'linear-gradient(135deg,#f2e8d5 34%,#eda05b 34% 67%,#4a4258 67%)' },
-  { name:'Golden',       unlock:150, fur:'#f2c94c', furHi:'#ffe08a', furD:'#d9a92e', stripe:'#c98f1e', belly:'#fdf3d0', sparkle:true, dot:'#f2c94c' }
+  { name:'Golden',       unlock:150, fur:'#f2c94c', furHi:'#ffe08a', furD:'#d9a92e', stripe:'#c98f1e', belly:'#fdf3d0', sparkle:true, dot:'#f2c94c' },
+  // boss-gated cats: unlockB = wizards defeated (career total), not meters
+  { name:'Familiar', unlockB:1, fur:'#241d3d', furHi:'#37305a', furD:'#171130', stripe:'#241d3d', belly:'#4a4258', sparkle:true, dot:'#241d3d' },
+  { name:'Arcane',   unlockB:3, fur:'#7e68b8', furHi:'#9a86d4', furD:'#5d4a92', stripe:'#5d4a92', belly:'#cdb9f2', sparkle:true, dot:'#7e68b8' }
 ];
 let gameState = 'menu', lives = 9, careerBest = 0, skinIdx = 0;
+
+/* Difficulty & progression: `tier` rises with height and brings new enemies;
+   the wizard himself appears at nextBossAt meters. `mods` holds the run's
+   chosen boons (reset each new tower). bossesBeaten is career-persistent. */
+let tier = 0, boss = null, bossNum = 0, nextBossAt = 50, bossesBeaten = 0;
+let bolts = [];
+const mods = { batReach:1, thumpReach:1, invulnBonus:0, shushMul:1, swoopCdMul:1 };
+function resetMods(){
+  mods.batReach = 1; mods.thumpReach = 1; mods.invulnBonus = 0;
+  mods.shushMul = 1; mods.swoopCdMul = 1;
+}
 
 const cat = {
   x:0, y:0, vx:0, vy:0, face:1, blink:0, blinkT:2,
@@ -422,6 +453,32 @@ function spawnLib(x, y){
       shushCd:rnd(3,6), shushT:0, fleeT:0, face:1, phase:rnd(0,9) });
   }
 }
+/* Tier ≥ 1: a cursed book that flaps around and charges the cat. */
+function spawnGrimoire(x, y){
+  const gs = enemies.filter(e=>e.kind==='grim');
+  if (gs.length >= 3){
+    let low = gs[0];
+    for (const g of gs) if (g.y > low.y) low = g;
+    Object.assign(low, { x, y, ax:x, ay:y, state:'patrol', cd:rnd(2,4), vx:0, vy:0, stunT:0 });
+  } else {
+    enemies.push({ kind:'grim', x, y, ax:x, ay:y, state:'patrol', cd:rnd(2,4),
+      chargeT:0, stunT:0, vx:0, vy:0, face:1, phase:rnd(0,9),
+      color: BOOKCOLORS[(Math.random()*BOOKCOLORS.length)|0] });
+  }
+}
+/* Tier ≥ 2: a fast little spark that darts at the cat; one pounce pops it. */
+function spawnWisp(x, y){
+  const ws = enemies.filter(e=>e.kind==='wisp');
+  if (ws.length >= 3){
+    let low = ws[0];
+    for (const w of ws) if (w.y > low.y) low = w;
+    Object.assign(low, { x, y, ax:x, ay:y, state:'orbit', cd:rnd(1.5,3), dartT:0, dead:false });
+  } else {
+    enemies.push({ kind:'wisp', x, y, ax:x, ay:y, state:'orbit', cd:rnd(1.5,3),
+      dartT:0, dead:false, vx:0, vy:0, face:1, phase:rnd(0,9) });
+  }
+}
+
 function spawnOwl(){
   const p = perches[perches.length-1];
   if (!p) return;
@@ -500,6 +557,9 @@ function extendTower(){
   stepsGen++;
   if (stepsGen % 2 === 0) spawnLib((created.x0+created.x1)/2, ny - 80*S);
   if (stepsGen % 3 === 0) spawnOwl();
+  // higher tiers bring new company
+  if (tier >= 1 && stepsGen % 3 === 1) spawnGrimoire((created.x0+created.x1)/2, ny - 130*S);
+  if (tier >= 2 && stepsGen % 2 === 1) spawnWisp(rnd(LX+60*S, RX-60*S), ny - 100*S);
 
   lastLedge = { x0: created.x0, x1: created.x1, y: created.y };
   topGenY = Math.min(topGenY, created.y);
@@ -509,6 +569,8 @@ function buildScene(){
   items = []; particles = []; enemies = [];
   surfaces = []; casesArr = []; arches = []; perches = [];
   knocked = 0; best = 0; nextMile = 10;
+  tier = 0; boss = null; bossNum = 0; nextBossAt = 50; bolts.length = 0;
+  resetMods();
   lives = 9; renderLives();
   countEl.textContent = 0; htEl.textContent = 0;
   banner.classList.remove('show');
@@ -676,15 +738,17 @@ function updateItems(dt){
           if (impact > 120) sThud();
         }
       }
+      // flying items can shove neighbours — but ONLY on the same shelf level
+      // (the old 160*S band let one swat cascade across half the tower)
       const sp = Math.hypot(it.vx, it.vy);
-      if (sp > 150){
+      if (sp > 200){
         for (const o of items){
           if (o === it || o.state !== 'rest' || o.broken) continue;
-          if (Math.abs(o.y - it.y) > 160*S) continue;
+          if (Math.abs(o.y - it.y) > 26*S) continue;
           const d = Math.hypot(o.x-it.x, o.y-it.y);
           if (d < (radius(it)+radius(o))*.72){
             const dir = o.x >= it.x ? 1 : -1;
-            knockItem(o, dir*(Math.abs(it.vx)*.6+90), -rnd(90,200));
+            knockItem(o, dir*(Math.abs(it.vx)*.5+60), -rnd(70,160));
             it.vx *= .7;
           }
         }
@@ -748,13 +812,18 @@ function nextHop(from,to){
   }
   return -1;
 }
-function bumpNear(x, ledgeY, range, push){
+/* Knocks items near a point on a ledge. Deliberately SHORT-ranGED: the cat
+   only bats what's right beside her paws (plus the Long Paws boon).
+   frontDir: 0 = both sides; ±1 = only items on that side (her swat arm).
+   fMin/fMax: how hard the push is when `push` is 0. */
+function bumpNear(x, ledgeY, range, push, frontDir, fMin, fMax){
   for (const it of items){
     if (it.state !== 'rest' || it.broken || it.cool > 0) continue;
     if (Math.abs(it.y + hEff(it) - ledgeY) > 22*S) continue;
+    if (frontDir && (it.x - x)*frontDir < -radius(it)*.4) continue; // behind her
     if (Math.abs(it.x - x) < range + radius(it)*.75){
       const dir = push !== 0 ? Math.sign(push) : (it.x >= x ? 1 : -1);
-      knockItem(it, dir*(Math.abs(push) || rnd(260,470)), -rnd(180,380));
+      knockItem(it, dir*(Math.abs(push) || rnd(fMin||260, fMax||470)), -rnd(180,380));
     }
   }
 }
@@ -766,7 +835,7 @@ function stunCat(t){
 function hitCat(e){
   if (cat.invuln > 0) return;
   stunCat(1.0);
-  cat.invuln = 2.2;
+  cat.invuln = 2.2 + mods.invulnBonus;
   cat.state = 'jump';
   cat.vy = -540;
   cat.vx = (cat.x < e.x ? -1 : 1) * 560;
@@ -820,7 +889,8 @@ function updateCat(dt){
       cat.x += clamp(dx, -sp*dt, sp*dt);
       cat.vx = dir*sp; cat.face = dir;
       cat.walkPhase += dt*11;
-      bumpNear(cat.x, cat.y, 46*S, dir*rnd(300,520)); // the long bat
+      // the walking bat: SHORT reach, and only in front of her swat arm
+      bumpNear(cat.x, cat.y, 22*S*mods.batReach, dir*rnd(200,340), dir);
     } else {
       cat.vx = 0; cat.walkPhase *= .8;
       if (wantJump){
@@ -855,13 +925,13 @@ function updateCat(dt){
     if (cat.x > RX-6){ cat.x = RX-6; cat.vx = -Math.abs(cat.vx); }
 
     if (cat.stun <= 0){
-      // the flying tackle: items (long reach)
+      // the flying tackle: only items she actually collides with
       for (const it of items){
         if (it.state !== 'rest' || it.broken || it.cool > 0) continue;
         const d = Math.hypot(it.x-cat.x, it.y-(cat.y-30*S));
-        if (d < 48*S + radius(it)*.8){
+        if (d < 28*S*mods.batReach + radius(it)*.6){
           const dir = it.x >= cat.x ? 1 : -1;
-          knockItem(it, dir*clamp(Math.abs(cat.vx)*.9+200, 220, 720), -rnd(200,430));
+          knockItem(it, dir*clamp(Math.abs(cat.vx)*.7+160, 200, 480), -rnd(180,380));
         }
       }
       // the pounce: enemies
@@ -884,6 +954,32 @@ function updateCat(dt){
             e.vx=cat.vx*.4; e.vy=Math.max(cat.vy,0)*.3;
             cat.smug = 1; sBap();
             for(let i=0;i<4;i++)particles.push({kind:'star',x:e.x,y:e.y,vx:rnd(-80,80),vy:rnd(-120,-20),life:.6,t:0,size:4*S});
+          } else if (e.kind==='grim' && e.state!=='down'){
+            e.state='down'; e.stunT=3;
+            e.vx=cat.vx*.4; e.vy=Math.max(cat.vy,0)*.3+100;
+            cat.smug = 1; sBap();
+            for(let i=0;i<4;i++)particles.push({kind:'star',x:e.x,y:e.y,vx:rnd(-80,80),vy:rnd(-120,-20),life:.6,t:0,size:4*S});
+          } else if (e.kind==='wisp' && !e.dead){
+            e.dead = true; // one pounce pops it
+            cat.smug = 1; sBap();
+            tone(1200,300,.18,'sine',.2);
+            for(let i=0;i<8;i++)particles.push({kind:'star',x:e.x,y:e.y,vx:rnd(-140,140),vy:rnd(-160,-20),life:.5,t:0,size:4*S});
+          }
+        }
+      }
+      // …and the wizard himself, if he's out and vulnerable
+      if (boss && boss.inv <= 0){
+        const d = Math.hypot(boss.x-cat.x, (boss.y-20*S)-(cat.y-30*S));
+        if (d < 74*S){
+          boss.hp--; boss.inv = .8;
+          cat.smug = 1; sBap();
+          for(let i=0;i<8;i++)particles.push({kind:'star',x:boss.x,y:boss.y,vx:rnd(-120,120),vy:rnd(-160,-20),life:.7,t:0,size:5*S});
+          if (boss.hp <= 0){
+            defeatBoss();
+          } else {
+            puff(boss.x, boss.y-20*S, 8);
+            boss.x = rnd(LX+90*S, RX-90*S); boss.y = cat.y - rnd(.3,.5)*H;
+            puff(boss.x, boss.y-20*S, 8);
           }
         }
       }
@@ -902,7 +998,8 @@ function updateCat(dt){
         cat.landT = .18; cat.hop = null;
         dust(cat.x, landed.y, 4);
         tone(90,45,.12,'sine',.16);
-        if (cat.stun <= 0) bumpNear(cat.x, landed.y, 70*S, 0); // the landing thump
+        // the landing thump: only what's under and right beside her
+        if (cat.stun <= 0) bumpNear(cat.x, landed.y, 30*S*mods.thumpReach, 0, 0, 160, 280);
       }
     }
     if (cat.y > FLOOR.y + 300){
@@ -945,9 +1042,9 @@ function updateEnemies(dt){
         if (was > .35 && e.shushT <= .35){
           particles.push({kind:'ring', x:e.x, y:e.y, vx:0, vy:0, life:.5, t:0, size:175*S});
           particles.push({kind:'text', x:e.x, y:e.y-72*S, str:'shhh!', vx:0, vy:-26, life:.9, t:0, size:18*S});
-          if (dCat < 185*S && cat.invuln <= 0){
+          if (dCat < 185*S*mods.shushMul && cat.invuln <= 0){
             stunCat(1.4);
-            cat.invuln = 1.6;
+            cat.invuln = 1.6 + mods.invulnBonus;
             // the shush blows her clean off the shelf
             cat.state = 'jump'; cat.hop = null;
             cat.vy = -320;
@@ -957,8 +1054,8 @@ function updateEnemies(dt){
         }
         continue;
       }
-      if (dCat < 135*S && e.shushCd <= 0 && cat.invuln <= 0){
-        e.shushT = .8; e.shushCd = 5.5;
+      if (dCat < 135*S*mods.shushMul && e.shushCd <= 0 && cat.invuln <= 0){
+        e.shushT = .8; e.shushCd = Math.max(3.5, 5.5 - tier*.6);
         e.face = cat.x < e.x ? -1 : 1;
         sShush();
         continue;
@@ -978,7 +1075,7 @@ function updateEnemies(dt){
           if (best2){ e.target = best2; best2.claimed = true; }
         }
         if (e.target){
-          const d = moveToward(e, e.target.x, e.target.y - 26*S, 125*S, dt);
+          const d = moveToward(e, e.target.x, e.target.y - 26*S, 125*S*(1+tier*.15), dt);
           if (d < 22*S){
             e.target.state = 'held'; e.target.claimed = false;
             e.carry.push(e.target); e.target = null;
@@ -989,7 +1086,7 @@ function updateEnemies(dt){
       }
       if (e.carry.length > 0){
         const h = e.carry[0].home;
-        const d = moveToward(e, h.x, h.y - 34*S, 125*S, dt);
+        const d = moveToward(e, h.x, h.y - 34*S, 125*S*(1+tier*.15), dt);
         if (d < 20*S){
           restoreItem(e.carry.shift());
           particles.push({kind:'star', x:h.x, y:h.y, vx:0, vy:-40, life:.5, t:0, size:4*S});
@@ -1005,7 +1102,7 @@ function updateEnemies(dt){
       }
       moveToward(e, e.tx, e.ty, 60*S, dt);
     }
-    else { // owl
+    else if (e.kind === 'owl'){
       if (e.state === 'stunned'){
         e.stunT -= dt;
         if (e.y < FLOOR.y - 14*S){ e.vy += CATG*dt; e.y += e.vy*dt; e.x += e.vx*dt; }
@@ -1020,7 +1117,8 @@ function updateEnemies(dt){
             && cat.invuln <= 0 && cat.stun <= 0){
           const tx = cat.x + cat.vx*.22, ty = cat.y - 30*S;
           const d = Math.hypot(tx-e.x, ty-e.y) || 1;
-          e.vx = (tx-e.x)/d*640*S; e.vy = (ty-e.y)/d*640*S;
+          const swoopSp = 640*S*(1+tier*.08);
+          e.vx = (tx-e.x)/d*swoopSp; e.vy = (ty-e.y)/d*swoopSp;
           e.state = 'swoop'; e.swoopT = 1.05;
           sHoot();
         }
@@ -1032,10 +1130,10 @@ function updateEnemies(dt){
         const d = Math.hypot(cat.x-e.x, (cat.y-30*S)-e.y);
         if (d < 52*S && cat.invuln <= 0){
           hitCat(e);
-          e.state = 'return'; e.cd = rnd(3.5,5);
+          e.state = 'return'; e.cd = rnd(3.5,5)*(1-tier*.12)*mods.swoopCdMul;
         }
         if (e.swoopT <= 0 || e.y > FLOOR.y-24*S || e.x < LX+10 || e.x > RX-10){
-          e.state = 'return'; e.cd = rnd(3.5,5);
+          e.state = 'return'; e.cd = rnd(3.5,5)*(1-tier*.12)*mods.swoopCdMul;
         }
       }
       else { // return to the perch nearest the cat
@@ -1051,7 +1149,158 @@ function updateEnemies(dt){
         } else e.state = 'perch';
       }
     }
+    else if (e.kind === 'grim'){ // the cursed book
+      if (e.state === 'down'){ // swatted out of the air
+        e.stunT -= dt;
+        if (e.y < FLOOR.y - 12*S){ e.vy += CATG*dt; e.y += e.vy*dt; e.x += e.vx*dt; }
+        else { e.y = FLOOR.y - 12*S; e.vx = 0; }
+        if (e.stunT <= 0){ e.state = 'patrol'; e.ax = e.x; e.ay = cat.y - rnd(140,220)*S; }
+        continue;
+      }
+      if (e.state === 'charge'){
+        e.chargeT -= dt;
+        e.x += e.vx*dt; e.y += e.vy*dt;
+        if (Math.abs(e.vx) > 10) e.face = Math.sign(e.vx);
+        const d = Math.hypot(cat.x-e.x, (cat.y-30*S)-e.y);
+        if (d < 38*S && cat.invuln <= 0){ hitCat(e); e.state='patrol'; e.cd = rnd(2.5,4); }
+        if (e.chargeT <= 0 || e.x < LX+16 || e.x > RX-16){ e.state='patrol'; e.cd = rnd(2.5,4); }
+        continue;
+      }
+      // patrol: weave near its anchor, drifting up to stay level with the climb
+      e.ay = lerp(e.ay, cat.y - 170*S, Math.min(1, dt*.35));
+      e.x = clamp(e.ax + Math.sin(time*1.3+e.phase)*150*S, LX+30*S, RX-30*S);
+      e.y = e.ay + Math.sin(time*2.6+e.phase)*40*S;
+      e.face = cat.x < e.x ? -1 : 1;
+      e.cd -= dt;
+      if (e.cd <= 0 && cat.invuln <= 0 && cat.stun <= 0 &&
+          Math.hypot(cat.x-e.x, cat.y-e.y) < Math.max(W,H)*.55){
+        const tx = cat.x + cat.vx*.15, ty = cat.y - 26*S;
+        const d = Math.hypot(tx-e.x, ty-e.y) || 1;
+        const spd = 520*S*(1+tier*.08);
+        e.vx = (tx-e.x)/d*spd; e.vy = (ty-e.y)/d*spd;
+        e.state = 'charge'; e.chargeT = .9;
+        noiseBurst(.12,.12,700,'highpass'); // angry page-flutter
+      }
+    }
+    else if (e.kind === 'wisp'){ // the darting spark
+      if (e.state === 'dart'){
+        e.dartT -= dt;
+        e.x += e.vx*dt; e.y += e.vy*dt;
+        const d = Math.hypot(cat.x-e.x, (cat.y-28*S)-e.y);
+        if (d < 26*S && cat.invuln <= 0){ hitCat(e); e.state='orbit'; e.cd = rnd(2,3.5); }
+        if (e.dartT <= 0 || e.x < LX+12 || e.x > RX-12){ e.state='orbit'; e.cd = rnd(2,3.5); }
+        continue;
+      }
+      // orbit: swirl loosely around the cat's neighbourhood
+      e.ay = lerp(e.ay, cat.y - 130*S, Math.min(1, dt*.5));
+      e.ax = lerp(e.ax, cat.x, Math.min(1, dt*.3));
+      e.x = clamp(e.ax + Math.cos(time*3.2+e.phase)*95*S, LX+20*S, RX-20*S);
+      e.y = e.ay + Math.sin(time*4.1+e.phase)*55*S;
+      e.cd -= dt;
+      if (e.cd <= 0 && cat.invuln <= 0 && cat.stun <= 0){
+        const d = Math.hypot(cat.x-e.x, (cat.y-28*S)-e.y) || 1;
+        const spd = 700*S;
+        e.vx = (cat.x-e.x)/d*spd; e.vy = ((cat.y-28*S)-e.y)/d*spd;
+        e.state = 'dart'; e.dartT = .55;
+        tone(880,1400,.12,'sine',.12);
+      }
+    }
   }
+  // popped wisps vanish for good
+  for (let i=enemies.length-1;i>=0;i--) if (enemies[i].dead) enemies.splice(i,1);
+}
+
+/* ---------- the wizard (boss fights) ----------
+   Past nextBossAt meters the tower's owner shows up: he hovers near the cat,
+   lobs magic bolts, and teleports. Pounce him (the same pounce as always) to
+   drain his health orbs; each defeat grants lives, a boon, and progress
+   toward the boss-unlocked cats. */
+function spawnBoss(){
+  bossNum++;
+  boss = {
+    hp: 2 + bossNum, maxHp: 2 + bossNum,
+    x: clamp(cat.x, LX+90*S, RX-90*S), y: cat.y - H*.45,
+    castT: 2.4, casts: 0, inv: 1.2, phase: rnd(0,9), face: 1
+  };
+  toast('The wizard has noticed.', 'Pounce him before his spells land.');
+  tone(180,60,.6,'sawtooth',.22); sHoot();
+}
+
+function updateBoss(dt){
+  if (!boss) return;
+  boss.inv = Math.max(0, boss.inv - dt);
+  // hover: drift to a spot above the cat, weaving side to side
+  const targX = clamp(cat.x + Math.sin(time*.7+boss.phase)*W*.22, LX+80*S, RX-80*S);
+  const targY = cat.y - H*.38;
+  boss.x += (targX - boss.x)*Math.min(1, dt*1.6);
+  boss.y += (targY - boss.y)*Math.min(1, dt*1.6);
+  boss.face = cat.x < boss.x ? -1 : 1;
+
+  boss.castT -= dt;
+  if (boss.castT <= 0){
+    boss.casts++;
+    const n = 1 + Math.min(2, bossNum-1); // later wizards throw more bolts
+    for (let i=0;i<n;i++){
+      const dx = cat.x - boss.x, dy = (cat.y-30*S) - boss.y;
+      const d = Math.hypot(dx,dy) || 1, spd = 330*S*(1+bossNum*.08);
+      bolts.push({
+        x: boss.x + boss.face*30*S, y: boss.y - 50*S,
+        vx: dx/d*spd + (i-(n-1)/2)*130*S, vy: dy/d*spd - 50*S,
+        t: 0, life: 3
+      });
+    }
+    tone(760,240,.25,'sawtooth',.18);
+    boss.castT = Math.max(1.4, 2.6 - bossNum*.15);
+    if (boss.casts % 3 === 0){ // and then he's somewhere else
+      puff(boss.x, boss.y-20*S, 10);
+      boss.x = rnd(LX+90*S, RX-90*S);
+      boss.y = cat.y - rnd(.3,.5)*H;
+      boss.inv = .5;
+      puff(boss.x, boss.y-20*S, 10);
+    }
+  }
+}
+
+function updateBolts(dt){
+  for (let i=bolts.length-1;i>=0;i--){
+    const b = bolts[i];
+    b.t += dt;
+    b.x += b.vx*dt; b.y += b.vy*dt;
+    if (Math.random() < .4) particles.push({
+      kind:'star', x:b.x, y:b.y, vx:rnd(-20,20), vy:rnd(-20,20), life:.25, t:0, size:2.5*S
+    });
+    const d = Math.hypot(cat.x-b.x, (cat.y-30*S)-b.y);
+    if (d < 30*S && cat.invuln <= 0){
+      hitCat(b);
+      bolts.splice(i,1);
+      continue;
+    }
+    if (b.t > b.life || b.x < LX || b.x > RX || b.y > FLOOR.y){
+      puff(b.x, Math.min(b.y, FLOOR.y), 3);
+      bolts.splice(i,1);
+    }
+  }
+}
+
+function defeatBoss(){
+  for (let i=0;i<26;i++) particles.push({
+    kind:'star', x:boss.x+rnd(-40,40)*S, y:boss.y+rnd(-60,20)*S,
+    vx:rnd(-200,200), vy:rnd(-260,-40), life:rnd(.6,1.2), t:0, size:rnd(3,7)*S
+  });
+  puff(boss.x, boss.y-20*S, 14);
+  boss = null; bolts.length = 0;
+  bossesBeaten++;
+  nextBossAt += 75;
+  lives = Math.min(9, lives + 2); renderLives();
+  sMrrp(); tone(520,1040,.4,'sine',.25);
+  for (const sk of SKINS){
+    if (sk.unlockB && bossesBeaten >= sk.unlockB && !sk.announced){
+      sk.announced = true;
+      toast('New cat unlocked: '+sk.name, 'Open the menu to equip it.');
+    }
+  }
+  saveGame();
+  showUpgrades();
 }
 
 /* ---------- particles ---------- */
@@ -1830,10 +2079,138 @@ function drawOwl(e){
   ctx.restore();
 }
 
+function drawGrim(e){
+  const flap = e.state==='charge' ? Math.sin(time*26+e.phase)*.7 : Math.sin(time*8+e.phase)*.45;
+  ctx.save();
+  ctx.translate(e.x, e.y);
+  ctx.scale(e.face, 1);
+  if (e.state==='down') ctx.rotate(.7);
+  // page-wings
+  ctx.fillStyle = C.cream;
+  for (const sd of [-1,1]){
+    ctx.save();
+    ctx.translate(sd*10*S, -4*S);
+    ctx.rotate(sd*flap);
+    ctx.beginPath(); ctx.ellipse(sd*12*S, 0, 13*S, 7*S, sd*.35, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  // cover
+  ctx.fillStyle = e.color;
+  rr(-12*S, -12*S, 24*S, 20*S, 3*S); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.22)';
+  ctx.fillRect(-12*S, -12*S, 4*S, 20*S);
+  // eyes on the cover
+  if (e.state==='down'){
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.8*S;
+    for (const sd of [-1,1]){
+      ctx.beginPath();
+      ctx.moveTo(sd*5*S-2.4*S, -6*S); ctx.lineTo(sd*5*S+2.4*S, -1*S);
+      ctx.moveTo(sd*5*S+2.4*S, -6*S); ctx.lineTo(sd*5*S-2.4*S, -1*S);
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-4*S, -4*S, 3.6*S, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 5*S, -4*S, 3.6*S, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = C.ink;
+    ctx.beginPath(); ctx.arc(-3*S, -3.4*S, 1.7*S, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 6*S, -3.4*S, 1.7*S, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6*S;
+    ctx.beginPath(); ctx.moveTo(-7*S,-9*S); ctx.lineTo(-1.5*S,-7*S); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( 8*S,-9*S); ctx.lineTo( 2.5*S,-7*S); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawWisp(e){
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const pu = 1 + Math.sin(time*10+e.phase)*.25;
+  const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, 15*S*pu);
+  g.addColorStop(0, 'rgba(210,255,246,.95)');
+  g.addColorStop(.5, 'rgba(142,240,221,.5)');
+  g.addColorStop(1, 'rgba(142,240,221,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(e.x, e.y, 15*S*pu, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = C.ink;
+  ctx.fillRect(e.x-4*S, e.y-2.4*S, 2.2*S, 4.5*S);
+  ctx.fillRect(e.x+2*S, e.y-2.4*S, 2.2*S, 4.5*S);
+}
+
+function drawBoss(){
+  if (!boss) return;
+  const bob = Math.sin(time*2+boss.phase)*6*S;
+  ctx.save();
+  ctx.translate(boss.x, boss.y + bob);
+  ctx.scale(boss.face, 1);
+  if (boss.inv > 0) ctx.globalAlpha = .5 + .3*Math.sin(time*24);
+  // robe
+  ctx.shadowColor = C.lavD; ctx.shadowBlur = 26*S;
+  ctx.fillStyle = C.plum;
+  ctx.beginPath();
+  ctx.moveTo(-24*S,-30*S);
+  ctx.quadraticCurveTo(-34*S,20*S,-26*S,44*S);
+  ctx.quadraticCurveTo(0,52*S,26*S,44*S);
+  ctx.quadraticCurveTo(34*S,20*S,24*S,-30*S);
+  ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0;
+  // face + beard
+  ctx.fillStyle = '#e8cfae';
+  ctx.beginPath(); ctx.arc(0,-38*S,15*S,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = C.cream;
+  ctx.beginPath();
+  ctx.moveTo(-13*S,-34*S); ctx.quadraticCurveTo(0,8*S,13*S,-34*S);
+  ctx.closePath(); ctx.fill();
+  // hat
+  ctx.fillStyle = C.lavD;
+  ctx.beginPath();
+  ctx.moveTo(-20*S,-46*S); ctx.lineTo(20*S,-46*S); ctx.lineTo(4*S,-84*S);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = C.mustard; star4(6*S,-64*S,4*S); ctx.fill();
+  // angry eyes
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2*S;
+  ctx.beginPath(); ctx.moveTo(-9*S,-45*S); ctx.lineTo(-3*S,-42*S); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( 9*S,-45*S); ctx.lineTo( 3*S,-42*S); ctx.stroke();
+  ctx.fillStyle = C.ink;
+  ctx.beginPath(); ctx.arc(-5.5*S,-39*S,1.8*S,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 5.5*S,-39*S,1.8*S,0,Math.PI*2); ctx.fill();
+  // staff with glowing orb
+  ctx.strokeStyle = C.woodDark; ctx.lineWidth = 4*S;
+  ctx.beginPath(); ctx.moveTo(24*S,44*S); ctx.lineTo(30*S,-52*S); ctx.stroke();
+  ctx.fillStyle = `rgba(142,240,221,${.7+.3*Math.sin(time*6)})`;
+  ctx.beginPath(); ctx.arc(30*S,-56*S,7*S,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // health orbs above his hat
+  for (let i=0;i<boss.maxHp;i++){
+    ctx.fillStyle = i < boss.hp ? 'rgba(142,240,221,.95)' : 'rgba(242,232,213,.2)';
+    ctx.beginPath();
+    ctx.arc(boss.x - (boss.maxHp-1)*7*S + i*14*S, boss.y - 104*S + bob, 5*S, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawBolts(){
+  for (const b of bolts){
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 13*S);
+    g.addColorStop(0, 'rgba(235,205,255,.95)');
+    g.addColorStop(.5, 'rgba(150,110,230,.5)');
+    g.addColorStop(1, 'rgba(150,110,230,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 13*S, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
 function drawEnemies(){
   for (const e of enemies){
     if (e.y < camY-180 || e.y > camY+H+180) continue;
-    e.kind==='lib' ? drawLib(e) : drawOwl(e);
+    if (e.kind==='lib') drawLib(e);
+    else if (e.kind==='owl') drawOwl(e);
+    else if (e.kind==='grim') drawGrim(e);
+    else drawWisp(e);
   }
 }
 
@@ -1862,18 +2239,18 @@ function frame(t){
 
     updateCat(dt);
     updateEnemies(dt);
+    updateBoss(dt);
+    updateBolts(dt);
     updateItems(dt);
 
     // height score
     const meters = (FLOOR.y - cat.y)/(90*S);
+    tier = Math.min(3, Math.floor(meters/40));
+    if (!boss && meters >= nextBossAt) spawnBoss();
     if (meters > best){
       best = meters;
       htEl.textContent = Math.floor(best);
-      if (best >= nextMile){
-        toast(Math.floor(nextMile)+' meters up', QUIPS[(Math.random()*QUIPS.length)|0]);
-        sMrrp();
-        nextMile = nextMile < 25 ? 25 : nextMile < 50 ? 50 : nextMile + 50;
-      }
+      // career first, so milestone saves below always store the latest value
       if (best > careerBest){
         careerBest = best;
         for (const sk of SKINS){
@@ -1884,6 +2261,12 @@ function frame(t){
             renderSkins();
           }
         }
+      }
+      if (best >= nextMile){
+        toast(Math.floor(nextMile)+' meters up', QUIPS[(Math.random()*QUIPS.length)|0]);
+        sMrrp();
+        nextMile = nextMile < 25 ? 25 : nextMile < 50 ? 50 : nextMile + 50;
+        saveGame();
       }
     }
   } else {
@@ -1914,6 +2297,8 @@ function frame(t){
   }
   drawParticles();
   drawEnemies();
+  drawBoss();
+  drawBolts();
   drawCat();
   drawLaser();
   ctx.restore();
@@ -1981,10 +2366,13 @@ function renderLives(){
   for (let i=0;i<9;i++) s2 += '<span class="heart'+(i<lives?'':' off')+'">&#10084;</span>';
   livesChip.innerHTML = s2;
 }
+function skinLocked(sk){
+  return sk.unlockB ? bossesBeaten < sk.unlockB : careerBest < sk.unlock;
+}
 function renderSkins(){
   skinRow.innerHTML = '';
   SKINS.forEach((sk,i)=>{
-    const locked = careerBest < sk.unlock;
+    const locked = skinLocked(sk);
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'skin' + (i===skinIdx?' sel':'') + (locked?' lock':'');
@@ -1993,13 +2381,69 @@ function renderSkins(){
     dot.style.background = sk.dot;
     b.appendChild(dot);
     const lab = document.createElement('div');
-    lab.textContent = locked ? '\uD83D\uDD12 '+sk.unlock+' m' : sk.name;
+    lab.textContent = locked
+      ? (sk.unlockB ? '\uD83D\uDD12 boss \u00D7'+sk.unlockB : '\uD83D\uDD12 '+sk.unlock+' m')
+      : sk.name;
     b.appendChild(lab);
     b.addEventListener('click', ()=>{
-      if (careerBest >= sk.unlock){ skinIdx = i; renderSkins(); }
+      if (!skinLocked(sk)){ skinIdx = i; renderSkins(); saveGame(); }
     });
     skinRow.appendChild(b);
   });
+}
+
+/* ---------- the boons (post-boss upgrade picks, this run only) ---------- */
+const UPGRADES = [
+  { name:'Long Paws',      desc:'+40% batting reach',            apply:()=>{ mods.batReach *= 1.4; } },
+  { name:'Ninth Wind',     desc:'+2 extra lives',                apply:()=>{ lives = Math.min(9, lives+2); renderLives(); } },
+  { name:'Lucky Whiskers', desc:'+1s of safety after every hit', apply:()=>{ mods.invulnBonus += 1; } },
+  { name:'Quiet Ears',     desc:'Shushes reach 35% less',        apply:()=>{ mods.shushMul *= .65; } },
+  { name:"Owl's Bane",     desc:'Owls swoop half as often',      apply:()=>{ mods.swoopCdMul *= 1.5; } },
+  { name:'Heavy Landing',  desc:'+60% landing-thump reach',      apply:()=>{ mods.thumpReach *= 1.6; } }
+];
+function showUpgrades(){
+  gameState = 'upgrade'; // pauses the sim: frame() only updates while 'playing'
+  const row = document.getElementById('upgRow');
+  row.innerHTML = '';
+  const pool = [...UPGRADES].sort(()=>Math.random()-.5).slice(0,3);
+  for (const u of pool){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'boon';
+    const t = document.createElement('b'); t.textContent = u.name;
+    b.appendChild(t);
+    b.appendChild(document.createTextNode(u.desc));
+    b.addEventListener('click', ()=>{
+      u.apply();
+      document.getElementById('upg').hidden = true;
+      gameState = 'playing';
+      toast(u.name, u.desc);
+      sMrrp();
+    });
+    row.appendChild(b);
+  }
+  document.getElementById('upg').hidden = false;
+}
+
+/* ---------- save file (career progress survives reloads) ---------- */
+function saveGame(){
+  try{
+    localStorage.setItem('wizardsTowerSave', JSON.stringify({
+      careerBest: Math.floor(careerBest), bossesBeaten, skinIdx
+    }));
+  }catch(e){ /* storage blocked \u2014 progress just won't persist */ }
+}
+function loadGame(){
+  try{
+    const d = JSON.parse(localStorage.getItem('wizardsTowerSave') || 'null');
+    if (!d) return;
+    careerBest = d.careerBest || 0;
+    bossesBeaten = d.bossesBeaten || 0;
+    skinIdx = Math.min(d.skinIdx || 0, SKINS.length-1);
+    if (skinLocked(SKINS[skinIdx])) skinIdx = 0;
+    // don't re-announce unlocks you already have
+    for (const sk of SKINS) if (!skinLocked(sk)) sk.announced = true;
+  }catch(e){ /* corrupted save \u2014 start fresh */ }
 }
 function loseLife(){
   if (gameState !== 'playing') return;
@@ -2018,6 +2462,7 @@ function gameOver(){
   statK.textContent = knocked;
   banner.classList.remove('show');
   overEl.hidden = false;
+  saveGame();
 }
 startBtn.addEventListener('click', ()=>{
   gameState = 'playing';
@@ -2045,6 +2490,43 @@ document.getElementById('overMenuBtn').addEventListener('click', ()=>{
   menuEl.hidden = false;
 });
 
+/* ---------- debug/test hook ----------
+   The whole game lives in this closure, so tests (and curious devs) get one
+   tiny window in: read state, or teleport the cat up the tower. */
+window.__tower = {
+  get state(){
+    return {
+      gameState, tier, lives,
+      best: Math.floor(best),
+      careerBest: Math.floor(careerBest),
+      bossesBeaten,
+      boss: !!boss,
+      bossHp: boss ? boss.hp : 0,
+      enemies: enemies.map(e=>e.kind)
+    };
+  },
+  jumpTo(m){
+    const y = FLOOR.y - m*90*S;
+    while (topGenY > y - H*2) extendTower();
+    buildAdj();
+    let s = FLOOR;
+    for (const sf of surfaces){
+      if (sf.sconce) continue;
+      if (Math.abs(sf.y - y) < Math.abs(s.y - y)) s = sf;
+    }
+    cat.x = clamp((s.x0+s.x1)/2, s.x0+20*S, s.x1-20*S);
+    cat.y = s.y; cat.surf = s;
+    cat.state = 'ground'; cat.vx = cat.vy = 0; cat.hop = null;
+    camY = cat.y - H*.62;
+  },
+  hitBoss(){ // lands one pounce on the wizard, as if the cat connected
+    if (!boss) return;
+    boss.hp--;
+    if (boss.hp <= 0) defeatBoss();
+  }
+};
+
+loadGame();
 renderLives();
 renderSkins();
 resize();
