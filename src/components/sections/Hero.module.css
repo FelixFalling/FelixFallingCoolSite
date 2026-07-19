@@ -20,7 +20,9 @@
 }
 
 .text {
-  flex: 1 1 480px;
+  /* No grow: the text keeps its natural width so the photo hugs it as one
+     unit instead of being flung to the far edge on wide monitors. */
+  flex: 0 1 560px;
 }
 
 .eyebrow {
