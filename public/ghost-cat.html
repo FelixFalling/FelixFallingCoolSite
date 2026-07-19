@@ -899,6 +899,26 @@ function stunCat(t){
   cat.stun = Math.max(cat.stun, t);
   if (cat.state === 'crouch') cat.state = 'ground';
 }
+/* One landed hit on the wizard — from a flying pounce OR a standing swat
+   when he swoops within paw range. */
+function tryBossPounce(range){
+  if (!boss || boss.inv > 0) return;
+  const d = Math.hypot(boss.x-cat.x, (boss.y-20*S)-(cat.y-30*S));
+  if (d >= range) return;
+  boss.hp--; boss.inv = .8;
+  cat.smug = 1; cat.pawT = .26; sBap();
+  for(let i=0;i<8;i++)particles.push({kind:'star',x:boss.x,y:boss.y,vx:rnd(-120,120),vy:rnd(-160,-20),life:.7,t:0,size:5*S});
+  if (boss.hp <= 0){
+    defeatBoss();
+  } else {
+    puff(boss.x, boss.y-20*S, 8);
+    boss.ax = rnd(LX+90*S, RX-90*S);
+    boss.ay = cat.y - rnd(.24,.38)*H;
+    boss.x = boss.ax; boss.y = boss.ay;
+    boss.dipT = 0; boss.dipCd = rnd(2,3); // retreat, then swoop again
+    puff(boss.x, boss.y-20*S, 8);
+  }
+}
 function hitCat(e){
   if (cat.invuln > 0) return;
   stunCat(1.0);
@@ -932,6 +952,8 @@ function updateCat(dt){
   if (cat.state === 'ground'){
     cat.y = cat.surf.y;
     if (cat.stun > 0){ cat.vx = 0; cat.walkPhase *= .8; return; }
+    // if the swooping wizard glides within paw range, she swats him
+    tryBossPounce(58*S);
 
     const curIdx = surfaces.indexOf(cat.surf);
     const tIdx = surfaceAt(px, py);
@@ -1035,21 +1057,7 @@ function updateCat(dt){
         }
       }
       // …and the wizard himself, if he's out and vulnerable
-      if (boss && boss.inv <= 0){
-        const d = Math.hypot(boss.x-cat.x, (boss.y-20*S)-(cat.y-30*S));
-        if (d < 74*S){
-          boss.hp--; boss.inv = .8;
-          cat.smug = 1; sBap();
-          for(let i=0;i<8;i++)particles.push({kind:'star',x:boss.x,y:boss.y,vx:rnd(-120,120),vy:rnd(-160,-20),life:.7,t:0,size:5*S});
-          if (boss.hp <= 0){
-            defeatBoss();
-          } else {
-            puff(boss.x, boss.y-20*S, 8);
-            boss.x = rnd(LX+90*S, RX-90*S); boss.y = cat.y - rnd(.3,.5)*H;
-            puff(boss.x, boss.y-20*S, 8);
-          }
-        }
-      }
+      tryBossPounce(74*S);
     }
     if (cat.vy > 0){
       let landed = null;
@@ -1293,32 +1301,61 @@ function bossPal(){ return BOSS_PALS[Math.min(bossNum-1, BOSS_PALS.length-1)]; }
 
 function spawnBoss(){
   bossNum++;
+  const ax = clamp(cat.x, LX+90*S, RX-90*S), ay = cat.y - H*.32;
   boss = {
     hp: 2 + bossNum, maxHp: 2 + bossNum,
-    x: clamp(cat.x, LX+90*S, RX-90*S), y: cat.y - H*.45,
-    castT: 2.4, casts: 0, inv: 1.2, phase: rnd(0,9), face: 1
+    x: ax, y: ay, ax, ay,          // ax/ay: his hover ANCHOR (fixed between teleports)
+    castT: 2.4, casts: 0, inv: 1.2,
+    dipT: 0, dipCd: 2.2,           // the swoop-down attack window (see updateBoss)
+    phase: rnd(0,9), face: 1
   };
-  toast(bossPal().title + ' has noticed.', 'Pounce him before his spells land.');
+  toast(bossPal().title + ' has noticed.', 'Pounce him when he swoops low.');
   tone(180,60,.6,'sawtooth',.22); sHoot();
 }
 
 function updateBoss(dt){
   if (!boss) return;
   boss.inv = Math.max(0, boss.inv - dt);
-  // hover: drift to a spot above the cat, weaving side to side
-  const targX = clamp(cat.x + Math.sin(time*.7+boss.phase)*W*.22, LX+80*S, RX-80*S);
-  const targY = cat.y - H*.38;
-  boss.x += (targX - boss.x)*Math.min(1, dt*1.6);
-  boss.y += (targY - boss.y)*Math.min(1, dt*1.6);
+
+  // if the cat leaves him far behind (up OR down), he blinks back to her —
+  // he must never be simply outrun, and never left unreachable
+  if (Math.abs(cat.y - boss.ay) > H*.9){
+    puff(boss.x, boss.y-20*S, 8);
+    boss.ax = clamp(cat.x + rnd(-.2,.2)*W, LX+90*S, RX-90*S);
+    boss.ay = cat.y - H*.32;
+    boss.x = boss.ax; boss.y = boss.ay;
+    boss.inv = Math.max(boss.inv, .4);
+    puff(boss.x, boss.y-20*S, 8);
+  }
+
+  // the dip: every few seconds he swoops down to the cat's level and glides
+  // there for a beat — THAT is the window to pounce him. He holds his fire
+  // while low, so diving in is brave, not suicidal.
+  boss.dipCd -= dt;
+  if (boss.dipCd <= 0 && boss.dipT <= 0){ boss.dipT = 2.0; boss.dipCd = rnd(3.6,5); }
+  let dip = 0;
+  if (boss.dipT > 0){
+    boss.dipT -= dt;
+    dip = Math.sin(clamp(1 - boss.dipT/2.0, 0, 1)*Math.PI); // 0 → 1 → 0
+  }
+
+  // hover around the fixed anchor; the dip pulls him down to pounce height
+  // and drifts him toward the cat so the window is a real one
+  const tx = clamp(
+    boss.ax + Math.sin(time*.9+boss.phase)*90*S + (cat.x - boss.ax)*dip*.85,
+    LX+80*S, RX-80*S);
+  const ty = lerp(boss.ay, cat.y - 46*S, dip*.92);
+  boss.x += (tx - boss.x)*Math.min(1, dt*3);
+  boss.y += (ty - boss.y)*Math.min(1, dt*3);
   boss.face = cat.x < boss.x ? -1 : 1;
 
   boss.castT -= dt;
-  if (boss.castT <= 0){
+  if (boss.castT <= 0 && dip < .35){ // no casting mid-swoop: the dip is fair
     boss.casts++;
     const n = 1 + Math.min(2, bossNum-1); // later wizards throw more bolts
     for (let i=0;i<n;i++){
       const dx = cat.x - boss.x, dy = (cat.y-30*S) - boss.y;
-      const d = Math.hypot(dx,dy) || 1, spd = 330*S*(1+bossNum*.08);
+      const d = Math.hypot(dx,dy) || 1, spd = 300*S*(1+bossNum*.08);
       bolts.push({
         x: boss.x + boss.face*30*S, y: boss.y - 50*S,
         vx: dx/d*spd + (i-(n-1)/2)*130*S, vy: dy/d*spd - 50*S,
@@ -1329,8 +1366,9 @@ function updateBoss(dt){
     boss.castT = Math.max(1.4, 2.6 - bossNum*.15);
     if (boss.casts % 3 === 0){ // and then he's somewhere else
       puff(boss.x, boss.y-20*S, 10);
-      boss.x = rnd(LX+90*S, RX-90*S);
-      boss.y = cat.y - rnd(.3,.5)*H;
+      boss.ax = rnd(LX+90*S, RX-90*S);
+      boss.ay = cat.y - rnd(.24,.38)*H;
+      boss.x = boss.ax; boss.y = boss.ay;
       boss.inv = .5;
       puff(boss.x, boss.y-20*S, 10);
     }
@@ -2627,6 +2665,7 @@ window.__tower = {
       bossesBeaten,
       boss: !!boss,
       bossHp: boss ? boss.hp : 0,
+      bossDy: boss ? Math.round(Math.abs(boss.y - cat.y)/S) : -1,
       bingus: bingusUnlocked,
       skin: SKINS[skinIdx].name,
       enemies: enemies.map(e=>e.kind)

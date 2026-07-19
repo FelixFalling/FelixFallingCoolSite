@@ -14,6 +14,7 @@ type TowerState = {
   stage: number;
   boss: boolean;
   bossHp: number;
+  bossDy: number;
   lives: number;
   bingus: boolean;
   skin: string;
@@ -60,6 +61,24 @@ test.describe("the Wizard's Tower game", () => {
     // past 50m the tower has changed into its second stage theme
     expect(state.stage).toBe(1);
     expect(errors).toEqual([]);
+  });
+
+  test("the wizard swoops into pounce range", async ({ page }) => {
+    // Regression guard for "the boss is impossible to hit": within a few
+    // seconds of spawning he must dip close enough to the cat to be pounced
+    // (bossDy is his vertical distance in scene units; a jump covers ~250).
+    await page.goto("./ghost-cat.html");
+    await page.getByRole("button", { name: "Start climbing" }).click();
+    await page.evaluate(() => window.__tower.jumpTo(60));
+    await expect
+      .poll(() => page.evaluate(() => window.__tower.state.boss), { timeout: 5000 })
+      .toBe(true);
+    await expect
+      .poll(() => page.evaluate(() => window.__tower.state.bossDy), {
+        timeout: 10_000,
+        message: "the boss should swoop within pounce reach",
+      })
+      .toBeLessThan(120);
   });
 
   test("he who types the name summons Bingus", async ({ page }) => {
