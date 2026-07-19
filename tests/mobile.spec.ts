@@ -22,7 +22,7 @@ test.describe("phone layout", () => {
 
   test("all nav links are visible and tappable", async ({ homePage }) => {
     await homePage.goto();
-    for (const label of ["About", "Projects", "Skills", "Activity", "Contact"]) {
+    for (const label of ["About", "Projects", "Games", "Skills", "Activity", "Contact"]) {
       await expect(homePage.nav.link(label)).toBeVisible();
     }
   });

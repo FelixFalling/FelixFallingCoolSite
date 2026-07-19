@@ -206,10 +206,10 @@ a {
  * monitor gets a proportionally bigger site, not a small island of content. */
 @media (min-width: 1200px) {
   :root {
-    /* Container: 1240px on small desktops, growing to 1760px on 4K. */
-    --content-width: clamp(1240px, 72vw, 1760px);
-    /* The sea deepens with the screen (240px → 400px on 4K)… */
-    --waves-height: clamp(240px, 16vw, 400px);
+    /* Container: 1240px on small desktops, growing to 1560px on 4K. */
+    --content-width: clamp(1240px, 68vw, 1560px);
+    /* The sea deepens with the screen (240px → 330px on 4K)… */
+    --waves-height: clamp(240px, 14vw, 330px);
     /* …and the shoreline lifts to sit on the higher waterline. */
     --shore-lift: calc(var(--waves-height) - 195px);
     /* Bigger rocks + lighthouse so the scene holds its own. */
@@ -222,8 +222,8 @@ a {
 
   .section-layout {
     display: grid;
-    grid-template-columns: clamp(220px, 15vw, 330px) 1fr;
-    gap: 0 clamp(48px, 4vw, 90px);
+    grid-template-columns: clamp(220px, 14vw, 290px) 1fr;
+    gap: 0 clamp(48px, 3.2vw, 72px);
     align-items: start;
   }
 
@@ -233,7 +233,7 @@ a {
     top: 84px;
     display: block;
     margin: 0;
-    font-size: clamp(24px, 1.7vw, 38px);
+    font-size: clamp(24px, 1.5vw, 32px);
     line-height: 1.25;
   }
 
@@ -253,7 +253,7 @@ a {
  * card text grows so it doesn't read tiny inside the wider grid. */
 @media (min-width: 1600px) {
   :root {
-    --shore-scale: 1.5;
+    --shore-scale: 1.35;
   }
 
   .card {
@@ -268,7 +268,7 @@ a {
 
 @media (min-width: 2100px) {
   :root {
-    --shore-scale: 1.85;
+    --shore-scale: 1.55;
   }
 }
 

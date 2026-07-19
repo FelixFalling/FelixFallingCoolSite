@@ -32,13 +32,13 @@
 
 .title {
   margin: 0 0 10px;
-  font-size: clamp(26px, 2vw, 40px);
+  font-size: clamp(26px, 1.7vw, 34px);
   color: var(--footer-title);
 }
 
 .subtitle {
   margin: 0 0 28px;
-  font-size: clamp(16px, 1.1vw, 22px);
+  font-size: clamp(16px, 1vw, 19px);
   color: var(--footer-subtitle);
 }
 
@@ -55,7 +55,7 @@
   text-decoration: none;
   border: 1px solid var(--footer-link-border);
   padding: 0.67em 1.33em;
-  font-size: clamp(15px, 0.95vw, 20px);
+  font-size: clamp(15px, 0.85vw, 17px);
   border-radius: 6px;
   transition: background 0.15s ease;
 }

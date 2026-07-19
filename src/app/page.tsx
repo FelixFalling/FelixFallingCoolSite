@@ -2,6 +2,7 @@ import Nav from "@/components/ui/Nav";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
 import Projects from "@/components/sections/Projects";
+import Games from "@/components/sections/Games";
 import Skills from "@/components/sections/Skills";
 import Activity from "@/components/sections/Activity";
 import Contact from "@/components/sections/Contact";
@@ -25,6 +26,7 @@ export default function Home() {
       <main className="container">
         <About />
         <Projects />
+        <Games />
         <Skills />
         <Activity />
       </main>

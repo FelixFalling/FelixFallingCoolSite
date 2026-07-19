@@ -19,6 +19,20 @@
   }
 }
 
+/* The Games section's grid: same cards, simple two columns on desktop. */
+.gamesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 22px;
+}
+
+@media (min-width: 1200px) {
+  .gamesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(22px, 1.8vw, 36px);
+  }
+}
+
 /* Very large screens: card text grows with the wider cards. */
 @media (min-width: 1600px) {
   .eyebrow {
@@ -26,11 +40,11 @@
   }
 
   .title {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .description {
-    font-size: 16.5px;
+    font-size: 15.5px;
   }
 
   .link {

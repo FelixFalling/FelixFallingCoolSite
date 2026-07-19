@@ -10,6 +10,7 @@ import styles from "./Nav.module.css";
 const links = [
   { href: "#about", label: "About" },
   { href: "#projects", label: "Projects" },
+  { href: "#games", label: "Games" },
   { href: "#skills", label: "Skills" },
   { href: "#activity", label: "Activity" },
   { href: "#contact", label: "Contact" },

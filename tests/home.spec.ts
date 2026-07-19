@@ -51,7 +51,7 @@ test.describe("home page", () => {
   test("every section renders once scrolled to", async ({ homePage }) => {
     await homePage.goto();
     // Experience/Education are intentionally hidden for now (see page.tsx).
-    for (const id of ["about", "projects", "skills", "activity", "contact"]) {
+    for (const id of ["about", "projects", "games", "skills", "activity", "contact"]) {
       await homePage.scrollToSection(id);
       await expect(homePage.section(id)).toBeVisible();
     }
@@ -60,7 +60,9 @@ test.describe("home page", () => {
   test("each project card shows its screenshots and link", async ({ homePage }) => {
     await homePage.goto();
     await homePage.scrollToSection("projects");
-    for (const project of resume.projects) {
+    // Projects and Games render through the same ProjectCards component, so
+    // one loop covers every card in both sections.
+    for (const project of [...resume.projects, ...resume.games]) {
       const card = homePage.projectCard(project.title);
       if (project.images?.length) {
         // Slides load lazily, so scroll the card into view and poll until the

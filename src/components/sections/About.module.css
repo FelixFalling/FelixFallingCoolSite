@@ -8,8 +8,8 @@
 /* Desktop: larger and editorial, scaling with the monitor. */
 @media (min-width: 1200px) {
   .text {
-    font-size: clamp(19px, 1.25vw, 28px);
+    font-size: clamp(19px, 1.1vw, 24px);
     line-height: 1.7;
-    max-width: clamp(720px, 55vw, 1100px);
+    max-width: clamp(720px, 52vw, 980px);
   }
 }

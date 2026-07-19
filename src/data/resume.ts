@@ -66,6 +66,7 @@ export interface Resume {
   };
   experience: Job[];
   projects: Project[];
+  games: Project[]; // the just-for-fun vibe-coded toys — own section below Projects
   education: School[];
   honors?: string;
   skills: SkillGroup[];
@@ -180,6 +181,11 @@ export const resume: Resume = {
       ],
       tags: ["Next.js", "TypeScript", "Playwright", "GitHub Actions"],
     },
+  ],
+
+  // The just-for-fun corner — vibe-coded toys, shown in their own Games
+  // section right below Projects.
+  games: [
     {
       eyebrow: "Vibe-coded · Just for fun",
       title: "Curse of Ra",

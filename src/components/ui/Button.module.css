@@ -11,7 +11,7 @@
   padding: 0.8em 1.45em;
   border-radius: 6px;
   /* 14px on phones/laptops, growing gently on big monitors. */
-  font-size: clamp(14px, 0.95vw, 21px);
+  font-size: clamp(14px, 0.78vw, 17px);
   font-weight: 600;
   transition: background 0.15s ease;
 }

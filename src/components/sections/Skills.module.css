@@ -9,7 +9,7 @@
 /* Very large screens: keep the skill text readable in the wider grid. */
 @media (min-width: 1600px) {
   .grid {
-    font-size: 16.5px;
+    font-size: 15.5px;
     gap: 22px 40px;
   }
 }
