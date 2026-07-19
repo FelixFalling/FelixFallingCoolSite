@@ -11,10 +11,30 @@
 @media (min-width: 1200px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: clamp(22px, 1.8vw, 36px);
   }
 
   .grid > article:first-child {
     grid-column: span 2;
+  }
+}
+
+/* Very large screens: card text grows with the wider cards. */
+@media (min-width: 1600px) {
+  .eyebrow {
+    font-size: 13.5px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .description {
+    font-size: 16.5px;
+  }
+
+  .link {
+    font-size: 15.5px;
   }
 }
 

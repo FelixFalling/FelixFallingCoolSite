@@ -5,11 +5,13 @@
 .ghost {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.55em;
   text-decoration: none;
-  padding: 11px 20px;
+  /* em padding: the whole button scales with its (fluid) font size. */
+  padding: 0.8em 1.45em;
   border-radius: 6px;
-  font-size: 14px;
+  /* 14px on phones/laptops, growing gently on big monitors. */
+  font-size: clamp(14px, 0.95vw, 21px);
   font-weight: 600;
   transition: background 0.15s ease;
 }
@@ -38,6 +40,6 @@
 @media (max-width: 640px) {
   .primary,
   .ghost {
-    padding: 13px 22px;
+    padding: 0.93em 1.57em;
   }
 }

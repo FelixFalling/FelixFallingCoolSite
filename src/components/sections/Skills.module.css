@@ -6,6 +6,14 @@
   font-size: 14.5px;
 }
 
+/* Very large screens: keep the skill text readable in the wider grid. */
+@media (min-width: 1600px) {
+  .grid {
+    font-size: 16.5px;
+    gap: 22px 40px;
+  }
+}
+
 .heading {
   font-weight: 700;
   color: var(--navy);

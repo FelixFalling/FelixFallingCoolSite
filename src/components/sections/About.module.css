@@ -5,10 +5,11 @@
   color: var(--slate);
 }
 
-/* Desktop: a touch larger, editorial. */
+/* Desktop: larger and editorial, scaling with the monitor. */
 @media (min-width: 1200px) {
   .text {
-    font-size: 19px;
+    font-size: clamp(19px, 1.25vw, 28px);
     line-height: 1.7;
+    max-width: clamp(720px, 55vw, 1100px);
   }
 }

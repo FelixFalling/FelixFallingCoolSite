@@ -189,27 +189,31 @@ a {
 }
 
 /* The hero's sea band: how tall the waves strip is. */
+:root {
+  --waves-height: 190px;
+}
+
 .waves-strip {
-  height: 190px;
+  height: var(--waves-height);
 }
 
 /* ── Desktop layout (≥1200px): the site's own look on big screens ──────────
  * Instead of a stretched phone column, sections switch to an editorial
  * two-column layout: the title lives in a sticky LEFT RAIL that stays in
- * view while its content scrolls beside it. The container also widens
- * (see the media query at the bottom of the tokens). */
+ * view while its content scrolls beside it.
+ *
+ * Everything here scales FLUIDLY with the viewport (clamp + vw), so a 4K
+ * monitor gets a proportionally bigger site, not a small island of content. */
 @media (min-width: 1200px) {
   :root {
-    --content-width: 1240px;
-    /* Bigger rocks + lighthouse so the scene holds its own on big screens,
-       lifted to match the deeper sea's higher waterline. */
+    /* Container: 1240px on small desktops, growing to 1760px on 4K. */
+    --content-width: clamp(1240px, 72vw, 1760px);
+    /* The sea deepens with the screen (240px → 400px on 4K)… */
+    --waves-height: clamp(240px, 16vw, 400px);
+    /* …and the shoreline lifts to sit on the higher waterline. */
+    --shore-lift: calc(var(--waves-height) - 195px);
+    /* Bigger rocks + lighthouse so the scene holds its own. */
     --shore-scale: 1.18;
-    --shore-lift: 45px;
-  }
-
-  /* A deeper sea on desktop — the scene fills more of a tall viewport. */
-  .waves-strip {
-    height: 240px;
   }
 
   .section {
@@ -218,8 +222,8 @@ a {
 
   .section-layout {
     display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 0 48px;
+    grid-template-columns: clamp(220px, 15vw, 330px) 1fr;
+    gap: 0 clamp(48px, 4vw, 90px);
     align-items: start;
   }
 
@@ -229,7 +233,7 @@ a {
     top: 84px;
     display: block;
     margin: 0;
-    font-size: 24px;
+    font-size: clamp(24px, 1.7vw, 38px);
     line-height: 1.25;
   }
 
@@ -242,6 +246,29 @@ a {
     margin-top: 12px;
     border-radius: 2px;
     background: var(--teal);
+  }
+}
+
+/* Very large screens (≥1600px, e.g. QHD/4K): the shore steps up again and
+ * card text grows so it doesn't read tiny inside the wider grid. */
+@media (min-width: 1600px) {
+  :root {
+    --shore-scale: 1.5;
+  }
+
+  .card {
+    padding: 30px 32px;
+  }
+
+  .tag {
+    font-size: 13.5px;
+    padding: 4px 12px;
+  }
+}
+
+@media (min-width: 2100px) {
+  :root {
+    --shore-scale: 1.85;
   }
 }
 
