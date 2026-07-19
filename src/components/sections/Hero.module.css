@@ -101,11 +101,14 @@
  * monitor — the cap itself grows on wider screens. */
 @media (min-width: 1200px) {
   .inner {
-    /* Fill the screen below the nav, capped so tall-but-narrow monitors
-       don't get empty sky — and the cap rises with screen width. */
-    min-height: min(calc(100vh - 57px), max(880px, 44vw));
+    /* Fill the screen below the nav, but capped ~1000px so ultrawide/4K
+       monitors don't balloon into a giant hero with an empty middle band —
+       the content and scene don't scale with viewport WIDTH, so the height
+       shouldn't either. The gentle 26vw term keeps it full on normal
+       laptops (=880px) and only nudges up on very wide screens. */
+    min-height: min(calc(100vh - 57px), max(880px, 26vw));
     padding-top: 40px;
-    padding-bottom: calc(var(--waves-height, 240px) + 60px);
+    padding-bottom: calc(var(--waves-height, 240px) + 40px);
   }
 
   .eyebrow {
