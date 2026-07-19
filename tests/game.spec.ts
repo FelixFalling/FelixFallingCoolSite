@@ -14,6 +14,8 @@ type TowerState = {
   boss: boolean;
   bossHp: number;
   lives: number;
+  bingus: boolean;
+  skin: string;
 };
 
 declare global {
@@ -55,5 +57,21 @@ test.describe("the Wizard's Tower game", () => {
     expect(state.tier).toBeGreaterThanOrEqual(1);
     expect(state.bossHp).toBeGreaterThan(0);
     expect(errors).toEqual([]);
+  });
+
+  test("he who types the name summons Bingus", async ({ page }) => {
+    await page.goto("./ghost-cat.html");
+    await expect
+      .poll(() => page.evaluate(() => window.__tower.state.bingus))
+      .toBe(false);
+    await page.keyboard.type("bingus");
+    await expect
+      .poll(() => page.evaluate(() => window.__tower.state.bingus))
+      .toBe(true);
+    // typing it again equips him
+    await page.keyboard.type("bingus");
+    await expect
+      .poll(() => page.evaluate(() => window.__tower.state.skin))
+      .toBe("Bingus");
   });
 });

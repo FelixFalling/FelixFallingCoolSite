@@ -243,8 +243,11 @@ const SKINS = [
   { name:'Golden',       unlock:150, fur:'#f2c94c', furHi:'#ffe08a', furD:'#d9a92e', stripe:'#c98f1e', belly:'#fdf3d0', sparkle:true, dot:'#f2c94c' },
   // boss-gated cats: unlockB = wizards defeated (career total), not meters
   { name:'Familiar', unlockB:1, fur:'#241d3d', furHi:'#37305a', furD:'#171130', stripe:'#241d3d', belly:'#4a4258', sparkle:true, dot:'#241d3d' },
-  { name:'Arcane',   unlockB:3, fur:'#7e68b8', furHi:'#9a86d4', furD:'#5d4a92', stripe:'#5d4a92', belly:'#cdb9f2', sparkle:true, dot:'#7e68b8' }
+  { name:'Arcane',   unlockB:3, fur:'#7e68b8', furHi:'#9a86d4', furD:'#5d4a92', stripe:'#5d4a92', belly:'#cdb9f2', sparkle:true, dot:'#7e68b8' },
+  // the secret one. he who knows, knows. (see the keydown listener)
+  { name:'Bingus', secret:true, fur:'#d8b3a5', furHi:'#eccabc', furD:'#b98f80', stripe:'#d8b3a5', belly:'#f2ddd1', wrinkles:true, dot:'#d8b3a5' }
 ];
+let bingusUnlocked = false;
 let gameState = 'menu', lives = 9, careerBest = 0, skinIdx = 0;
 
 /* Difficulty & progression: `tier` rises with height and brings new enemies;
@@ -1815,6 +1818,16 @@ function drawCat(){
       ctx.stroke();
     }
   }
+  if (SK.wrinkles){ // the hairless one is all folds
+    ctx.strokeStyle = SK.furD; ctx.lineWidth = 2.2*S; ctx.lineCap = 'round';
+    for (let i=0;i<3;i++){
+      const xx = -R*.52 + i*R*.38;
+      ctx.beginPath();
+      ctx.moveTo(xx, bodyCy - R*.36);
+      ctx.quadraticCurveTo(xx + R*.15, bodyCy - R*.2, xx, bodyCy - R*.04);
+      ctx.stroke();
+    }
+  }
   ctx.restore();
 
   // near legs; while she's swatting, the swat IS the near-front leg
@@ -1871,6 +1884,14 @@ function drawCat(){
         ctx.beginPath();
         ctx.moveTo(headX + hx, headY - hr*.96);
         ctx.lineTo(headX + hx*1.2, headY - hr*.68);
+        ctx.stroke();
+      }
+    }
+    if (SK.wrinkles){ // a thoughtful, folded brow
+      ctx.strokeStyle = SK.furD; ctx.lineWidth = 1.8*S; ctx.lineCap='round';
+      for (let i=0;i<2;i++){
+        ctx.beginPath();
+        ctx.arc(headX, headY - hr*.4 + i*hr*.18, hr*.34, Math.PI*1.2, Math.PI*1.8);
         ctx.stroke();
       }
     }
@@ -2327,6 +2348,31 @@ function setPointer(e){
   pointer.x = e.clientX; pointer.y = e.clientY; pointer.seen = true;
 }
 addEventListener('pointermove', setPointer);
+
+/* the secret one: type his name, anywhere, and he answers */
+let bingusBuf = '';
+addEventListener('keydown', e => {
+  if (e.key.length !== 1) return;
+  bingusBuf = (bingusBuf + e.key.toLowerCase()).slice(-6);
+  if (bingusBuf !== 'bingus') return;
+  bingusBuf = '';
+  if (!bingusUnlocked){
+    bingusUnlocked = true;
+    saveGame();
+    renderSkins();
+    toast('BINGUS.', 'The hairless one has been summoned. Check the menu.');
+    sMrrp(); tone(180,720,.5,'square',.2);
+    for (let i=0;i<14;i++) particles.push({
+      kind:'star', x:cat.x, y:cat.y-40*S,
+      vx:rnd(-160,160), vy:rnd(-220,-40), life:rnd(.5,1), t:0, size:rnd(3,6)*S
+    });
+  } else {
+    skinIdx = SKINS.findIndex(s=>s.secret);
+    renderSkins(); saveGame();
+    toast('Bingus.', 'He was always here.');
+    sMrrp();
+  }
+});
 addEventListener('pointerdown', e => { audioInit(); if (AC && AC.state==='suspended') AC.resume(); setPointer(e); });
 addEventListener('touchmove', e => {
   if (e.touches[0]){ pointer.x = e.touches[0].clientX; pointer.y = e.touches[0].clientY; pointer.seen = true; }
@@ -2367,6 +2413,7 @@ function renderLives(){
   livesChip.innerHTML = s2;
 }
 function skinLocked(sk){
+  if (sk.secret) return !bingusUnlocked;
   return sk.unlockB ? bossesBeaten < sk.unlockB : careerBest < sk.unlock;
 }
 function renderSkins(){
@@ -2382,7 +2429,7 @@ function renderSkins(){
     b.appendChild(dot);
     const lab = document.createElement('div');
     lab.textContent = locked
-      ? (sk.unlockB ? '\uD83D\uDD12 boss \u00D7'+sk.unlockB : '\uD83D\uDD12 '+sk.unlock+' m')
+      ? (sk.secret ? '\uD83D\uDD12 ???' : sk.unlockB ? '\uD83D\uDD12 boss \u00D7'+sk.unlockB : '\uD83D\uDD12 '+sk.unlock+' m')
       : sk.name;
     b.appendChild(lab);
     b.addEventListener('click', ()=>{
@@ -2429,7 +2476,7 @@ function showUpgrades(){
 function saveGame(){
   try{
     localStorage.setItem('wizardsTowerSave', JSON.stringify({
-      careerBest: Math.floor(careerBest), bossesBeaten, skinIdx
+      careerBest: Math.floor(careerBest), bossesBeaten, skinIdx, bingus: bingusUnlocked
     }));
   }catch(e){ /* storage blocked \u2014 progress just won't persist */ }
 }
@@ -2439,6 +2486,7 @@ function loadGame(){
     if (!d) return;
     careerBest = d.careerBest || 0;
     bossesBeaten = d.bossesBeaten || 0;
+    bingusUnlocked = !!d.bingus;
     skinIdx = Math.min(d.skinIdx || 0, SKINS.length-1);
     if (skinLocked(SKINS[skinIdx])) skinIdx = 0;
     // don't re-announce unlocks you already have
@@ -2502,6 +2550,8 @@ window.__tower = {
       bossesBeaten,
       boss: !!boss,
       bossHp: boss ? boss.hp : 0,
+      bingus: bingusUnlocked,
+      skin: SKINS[skinIdx].name,
       enemies: enemies.map(e=>e.kind)
     };
   },
