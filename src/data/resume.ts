@@ -96,7 +96,10 @@ export const resume: Resume = {
     "documentation-driven development, from embedded firmware up to web " +
     "interfaces. This site is one of my projects: everything on it, from the " +
     "waves to the CI pipeline, is hand-built and open source.",
-  showPhoto: false, // no photo for now — this site stays pseudonymous
+  // Shows a placeholder circle in the hero (no real photo — that stays off
+  // the pseudonymous site). Drop a real image in later by replacing the
+  // placeholder markup in sections/Hero.tsx.
+  showPhoto: true,
 
   links: {
     github: "https://github.com/FelixFalling",
