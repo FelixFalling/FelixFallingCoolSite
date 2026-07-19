@@ -109,13 +109,86 @@
   .heart{ color:#ff6b81; font-size:12px; }
   .heart.off{ color:rgba(242,232,213,.22); }
 
-  .boon{
-    width:132px; padding:12px 10px; border-radius:12px; box-shadow:none;
-    background:rgba(255,255,255,.07); border:2px solid rgba(142,240,221,.25);
-    font-size:11.5px; line-height:1.35; font-weight:600;
+  /* the lives chip flinches red when she takes a hit */
+  @keyframes chipHurt{
+    0%{ transform:scale(1); box-shadow:0 4px 18px rgba(10,6,24,.5); }
+    30%{ transform:scale(1.14); box-shadow:0 0 24px 4px rgba(255,80,90,.8); }
+    100%{ transform:scale(1); box-shadow:0 4px 18px rgba(10,6,24,.5); }
   }
-  .boon b{ color:var(--ghost); display:block; margin-bottom:4px; font-size:13px; }
-  .boon:hover{ background:rgba(142,240,221,.15); transform:translateY(-2px); }
+  .chip.hurt{ animation:chipHurt .4s ease; }
+
+  /* ===== the level-up (post-boss) dopamine machine ===== */
+  #upg .card{
+    position:relative; overflow:hidden;
+    background:rgba(24,20,44,.97);
+    border:none;
+    animation:upgPop .5s cubic-bezier(.2,1.5,.4,1) both;
+  }
+  @keyframes upgPop{ from{ transform:scale(.6); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  /* the spinning conic-gradient border */
+  #upg .card::before{
+    content:''; position:absolute; inset:-140%; z-index:0;
+    background:conic-gradient(from 0deg,
+      #8ef0dd, #ffd66b, #ff8ac0, #b39dff, #8ef0dd);
+    animation:upgSpin 6s linear infinite;
+  }
+  #upg .card::after{
+    content:''; position:absolute; inset:3px; z-index:0; border-radius:18px;
+    background:rgba(24,20,44,.97);
+  }
+  @keyframes upgSpin{ to{ transform:rotate(360deg); } }
+  #upg .card > *{ position:relative; z-index:1; }
+  #upg .card .eyebrow{ color:#ffd66b; }
+  #upg .card h2{
+    background:linear-gradient(100deg,#8ef0dd 20%,#fff 50%,#ffd66b 80%);
+    background-size:220% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:upgShimmer 2.4s linear infinite;
+  }
+  @keyframes upgShimmer{ to{ background-position:220% center; } }
+
+  .boon{
+    position:relative; overflow:hidden;
+    width:148px; padding:16px 12px 14px; border-radius:14px; box-shadow:none;
+    background:rgba(255,255,255,.06); border:2px solid rgba(142,240,221,.3);
+    font-size:11.5px; line-height:1.4; font-weight:600;
+    opacity:0; transform:translateY(18px) scale(.9);
+    animation:boonIn .5s cubic-bezier(.2,1.5,.4,1) forwards;
+  }
+  .boon:nth-child(1){ animation-delay:.28s; }
+  .boon:nth-child(2){ animation-delay:.42s; }
+  .boon:nth-child(3){ animation-delay:.56s; }
+  @keyframes boonIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
+  .boon .ic{ font-size:30px; line-height:1; display:block; margin-bottom:8px;
+    filter:drop-shadow(0 0 10px rgba(142,240,221,.55)); }
+  .boon b{ color:var(--ghost); display:block; margin-bottom:4px; font-size:14px; }
+  .boon .bd{ opacity:.8; }
+  .boon:hover{
+    background:rgba(142,240,221,.16); transform:translateY(-4px) scale(1.05);
+    border-color:var(--ghost); box-shadow:0 0 26px rgba(142,240,221,.4);
+  }
+  /* the shine that sweeps across on hover */
+  .boon::after{
+    content:''; position:absolute; top:0; left:-60%; width:45%; height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);
+    transform:skewX(-18deg); transition:left .5s ease;
+  }
+  .boon:hover::after{ left:130%; }
+  .boon.chosen{ animation:boonChosen .45s ease forwards; }
+  @keyframes boonChosen{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.22); box-shadow:0 0 40px 8px rgba(142,240,221,.9); }
+    100%{ transform:scale(1); }
+  }
+
+  /* a full-screen flash when the boss falls / a boon is taken */
+  #flash{
+    position:fixed; inset:0; z-index:20; pointer-events:none;
+    background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.9), rgba(142,240,221,.3) 40%, transparent 72%);
+    opacity:0;
+  }
+  #flash.go{ animation:flashHit .6s ease; }
+  @keyframes flashHit{ 0%{ opacity:0; } 12%{ opacity:.85; } 100%{ opacity:0; } }
 
   @media (max-width:640px){
     .hud .hint{ display:none; }
@@ -125,6 +198,7 @@
 </head>
 <body>
 <canvas id="scene"></canvas>
+<div id="flash"></div>
 
 <div class="hud">
   <div class="eyebrow">An interactive climb</div>
@@ -312,6 +386,7 @@ const SKINS = [
 ];
 let bingusUnlocked = false;
 let gameState = 'menu', lives = 9, careerBest = 0, skinIdx = 0;
+let slowmo = 0; // seconds of dramatic slow-motion remaining (boss defeats)
 
 /* Difficulty & progression: `tier` rises with height and brings new enemies;
    the wizard himself appears at nextBossAt meters. `mods` holds the run's
@@ -1396,17 +1471,39 @@ function updateBolts(dt){
   }
 }
 
+const CONFETTI = ['#8ef0dd','#ffd66b','#ff8ac0','#b39dff','#f2e8d5','#ff6b81'];
 function defeatBoss(){
-  for (let i=0;i<26;i++) particles.push({
-    kind:'star', x:boss.x+rnd(-40,40)*S, y:boss.y+rnd(-60,20)*S,
-    vx:rnd(-200,200), vy:rnd(-260,-40), life:rnd(.6,1.2), t:0, size:rnd(3,7)*S
+  const bx = boss.x, by = boss.y;
+  // the burst: a shower of colored stars + spinning confetti + shockwave rings
+  for (let i=0;i<40;i++) particles.push({
+    kind:'star', x:bx+rnd(-40,40)*S, y:by+rnd(-60,20)*S,
+    vx:rnd(-320,320), vy:rnd(-380,-40), life:rnd(.7,1.5), t:0, size:rnd(3,8)*S
   });
-  puff(boss.x, boss.y-20*S, 14);
+  for (let i=0;i<70;i++) particles.push({
+    kind:'confetti', x:bx+rnd(-30,30)*S, y:by-10*S,
+    color:CONFETTI[(Math.random()*CONFETTI.length)|0],
+    vx:rnd(-460,460), vy:rnd(-620,-120), vr:rnd(-14,14), rot:rnd(0,6),
+    life:rnd(1.4,2.6), t:0, size:rnd(5,10)*S
+  });
+  for (let i=0;i<3;i++) particles.push({
+    kind:'ring', x:bx, y:by-20*S, vx:0, vy:0, life:.7+i*.15, t:-i*.12, size:(220+i*90)*S
+  });
+  particles.push({ kind:'rise', x:bx, y:by-20*S, str:'+2 LIVES', vx:0, vy:-70,
+    life:1.8, t:0, size:26*S, color:'#8ef0dd' });
+  puff(bx, by-20*S, 18);
+
   boss = null; bolts.length = 0;
   bossesBeaten++;
   nextBossAt += 75;
   lives = Math.min(9, lives + 2); renderLives();
-  sMrrp(); tone(520,1040,.4,'sine',.25);
+
+  // the drama: a bright flash, slow-motion, and a rising fanfare
+  slowmo = 1.1;
+  const fl = document.getElementById('flash');
+  fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+  sMrrp();
+  [0,120,240,420].forEach((ms,i)=> setTimeout(()=> tone([523,659,784,1047][i], [659,784,1047,1319][i], .3, 'triangle', .22), ms));
+
   for (const sk of SKINS){
     if (sk.unlockB && bossesBeaten >= sk.unlockB && !sk.announced){
       sk.announced = true;
@@ -1414,7 +1511,8 @@ function defeatBoss(){
     }
   }
   saveGame();
-  showUpgrades();
+  // let the burst breathe before the boon screen slides up
+  setTimeout(showUpgrades, 900);
 }
 
 /* ---------- particles ---------- */
@@ -1424,6 +1522,7 @@ function updateParticles(dt){
     p.t += dt;
     if (p.t >= p.life){ particles.splice(i,1); continue; }
     if (p.kind==='shard'){ p.vy += GRAV*.8*dt; p.rot += p.vr*dt; }
+    if (p.kind==='confetti'){ p.vy += GRAV*.55*dt; p.vx *= Math.pow(.6,dt); p.rot += p.vr*dt; }
     if (p.kind==='dust' || p.kind==='star'){ p.vy += 300*dt; }
     p.x += (p.vx||0)*dt; p.y += (p.vy||0)*dt;
   }
@@ -1446,9 +1545,24 @@ function drawParticles(){
       ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*.7);
       ctx.restore(); ctx.globalAlpha = 1;
     } else if (p.kind==='ring'){
+      if (p.t < 0) continue;
       ctx.strokeStyle = `rgba(205,185,242,${a*.85})`;
       ctx.lineWidth = 3*S;
       ctx.beginPath(); ctx.arc(p.x,p.y,(p.t/p.life)*p.size,0,Math.PI*2); ctx.stroke();
+    } else if (p.kind==='confetti'){
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color; ctx.globalAlpha = Math.min(1, a*2);
+      ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*.6);
+      ctx.restore(); ctx.globalAlpha = 1;
+    } else if (p.kind==='rise'){
+      const rise = p.t/p.life;
+      ctx.fillStyle = p.color || '#8ef0dd';
+      ctx.globalAlpha = Math.min(1, (1-rise)*1.6);
+      ctx.font = `italic 900 ${p.size*(1+rise*.3)}px Fraunces, serif`;
+      ctx.textAlign = 'center';
+      ctx.shadowColor = p.color || '#8ef0dd'; ctx.shadowBlur = 16*S;
+      ctx.fillText(p.str, p.x, p.y);
+      ctx.shadowBlur = 0; ctx.globalAlpha = 1;
     } else if (p.kind==='text'){
       ctx.fillStyle = `rgba(234,255,250,${a})`;
       ctx.font = `italic 900 ${p.size}px Fraunces, serif`;
@@ -2363,8 +2477,13 @@ function drawLaser(){
 
 /* ---------- main loop ---------- */
 function frame(t){
-  const dt = Math.min((t - lastT)/1000 || .016, .033);
-  lastT = t; time += dt;
+  const realDt = Math.min((t - lastT)/1000 || .016, .033);
+  lastT = t; time += realDt;
+
+  // slow-motion: the world crawls during a boss-kill celebration, but the
+  // camera, particles, and effects keep real time so the show reads clearly
+  slowmo = Math.max(0, slowmo - realDt);
+  const dt = slowmo > 0 ? realDt*.32 : realDt;
 
   if (gameState === 'playing'){
     // grow the tower ahead of the climb
@@ -2411,10 +2530,10 @@ function frame(t){
     if (cat.blinkT <= 0){ cat.blink = .14; cat.blinkT = rnd(2.2,5); }
     cat.blink = Math.max(0, cat.blink - dt);
   }
-  updateParticles(dt);
+  updateParticles(realDt); // the confetti keeps real time — the show must pop
 
   const camT = clamp(cat.y - H*.62, -1e12, FLOOR.y + 60*S - H);
-  camY += (camT - camY)*Math.min(1, dt*5);
+  camY += (camT - camY)*Math.min(1, realDt*5);
 
   ctx.setTransform(DPR,0,0,DPR,0,0);
   drawWallBase();
@@ -2556,15 +2675,17 @@ function renderSkins(){
 
 /* ---------- the boons (post-boss upgrade picks, this run only) ---------- */
 const UPGRADES = [
-  { name:'Long Paws',      desc:'+40% batting reach',            apply:()=>{ mods.batReach *= 1.4; } },
-  { name:'Ninth Wind',     desc:'+2 extra lives',                apply:()=>{ lives = Math.min(9, lives+2); renderLives(); } },
-  { name:'Lucky Whiskers', desc:'+1s of safety after every hit', apply:()=>{ mods.invulnBonus += 1; } },
-  { name:'Quiet Ears',     desc:'Shushes reach 35% less',        apply:()=>{ mods.shushMul *= .65; } },
-  { name:"Owl's Bane",     desc:'Owls swoop half as often',      apply:()=>{ mods.swoopCdMul *= 1.5; } },
-  { name:'Heavy Landing',  desc:'+60% landing-thump reach',      apply:()=>{ mods.thumpReach *= 1.6; } }
+  { name:'Long Paws',      ic:'🐾', desc:'+40% batting reach',            apply:()=>{ mods.batReach *= 1.4; } },
+  { name:'Ninth Wind',     ic:'💜', desc:'+2 extra lives',                apply:()=>{ lives = Math.min(9, lives+2); renderLives(); } },
+  { name:'Lucky Whiskers', ic:'✨', desc:'+1s of safety after every hit', apply:()=>{ mods.invulnBonus += 1; } },
+  { name:'Quiet Ears',     ic:'🤫', desc:'Shushes reach 35% less',        apply:()=>{ mods.shushMul *= .65; } },
+  { name:"Owl's Bane",     ic:'🦉', desc:'Owls swoop half as often',      apply:()=>{ mods.swoopCdMul *= 1.5; } },
+  { name:'Heavy Landing',  ic:'💥', desc:'+60% landing-thump reach',      apply:()=>{ mods.thumpReach *= 1.6; } }
 ];
+let upgPicked = false;
 function showUpgrades(){
   gameState = 'upgrade'; // pauses the sim: frame() only updates while 'playing'
+  upgPicked = false;
   const row = document.getElementById('upgRow');
   row.innerHTML = '';
   const pool = [...UPGRADES].sort(()=>Math.random()-.5).slice(0,3);
@@ -2572,15 +2693,22 @@ function showUpgrades(){
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'boon';
-    const t = document.createElement('b'); t.textContent = u.name;
-    b.appendChild(t);
-    b.appendChild(document.createTextNode(u.desc));
+    const ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = u.ic;
+    const t  = document.createElement('b'); t.textContent = u.name;
+    const d  = document.createElement('span'); d.className = 'bd'; d.textContent = u.desc;
+    b.append(ic, t, d);
     b.addEventListener('click', ()=>{
-      u.apply();
-      document.getElementById('upg').hidden = true;
-      gameState = 'playing';
-      toast(u.name, u.desc);
-      sMrrp();
+      if (upgPicked) return; // one gift only
+      upgPicked = true;
+      b.classList.add('chosen');
+      const fl = document.getElementById('flash');
+      fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+      tone(660,1320,.3,'triangle',.22); sMrrp();
+      setTimeout(()=>{
+        u.apply();
+        document.getElementById('upg').hidden = true;
+        gameState = 'playing';
+      }, 480);
     });
     row.appendChild(b);
   }
@@ -2612,12 +2740,11 @@ function loseLife(){
   if (gameState !== 'playing') return;
   lives--;
   renderLives();
-  if (lives > 0){
-    toast(lives + (lives===1?' life left':' lives left'),
-      lives > 4 ? 'A cat can afford a few mistakes.' : 'She is running low on luck.');
-  } else {
-    gameOver();
-  }
+  // the hearts chip already shows the toll — no toast blocking the action.
+  // a quick red flash of the lives chip sells the hit instead.
+  livesChip.classList.remove('hurt'); void livesChip.offsetWidth;
+  livesChip.classList.add('hurt');
+  if (lives <= 0) gameOver();
 }
 function gameOver(){
   gameState = 'over';
