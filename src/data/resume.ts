@@ -104,7 +104,7 @@ export const resume: Resume = {
   // the pseudonymous site). Drop a real image in later by replacing the
   // placeholder markup in sections/Hero.tsx.
   showPhoto: true,
-  // photo: "me.jpg",  ← put your image in /public and uncomment this line
+  photo: "me.jpg",
 
   links: {
     github: "https://github.com/FelixFalling",
