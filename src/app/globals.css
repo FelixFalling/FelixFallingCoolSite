@@ -208,13 +208,12 @@ a {
   :root {
     /* Container: 1240px on small desktops, growing to 1560px on 4K. */
     --content-width: clamp(1240px, 68vw, 1560px);
-    /* A deep sea that rises up to fill the hero rather than sitting as a thin
-       strip at the bottom (was 240–330px). */
-    --waves-height: clamp(360px, 30vw, 560px);
+    /* The sea deepens with the screen (240px → 330px on 4K)… */
+    --waves-height: clamp(240px, 14vw, 330px);
     /* …and the shoreline lifts to sit on the higher waterline. */
-    --shore-lift: calc(var(--waves-height) - 210px);
-    /* Big rocks + lighthouse so the scene fills its share of the hero. */
-    --shore-scale: 1.5;
+    --shore-lift: calc(var(--waves-height) - 195px);
+    /* Bigger rocks + lighthouse so the scene holds its own. */
+    --shore-scale: 1.18;
   }
 
   .section {
@@ -254,7 +253,7 @@ a {
  * card text grows so it doesn't read tiny inside the wider grid. */
 @media (min-width: 1600px) {
   :root {
-    --shore-scale: 1.7;
+    --shore-scale: 1.35;
   }
 
   .card {
@@ -269,7 +268,7 @@ a {
 
 @media (min-width: 2100px) {
   :root {
-    --shore-scale: 1.9;
+    --shore-scale: 1.55;
   }
 }
 
