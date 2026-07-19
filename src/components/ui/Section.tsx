@@ -7,9 +7,12 @@ import Reveal from "./Reveal";
  *
  *   <Section id="about" title="About">…content…</Section>
  *
- * `id` is what the nav links jump to; `title` renders as the section heading
- * with the fading rule (styled by .section-title in globals.css); Reveal fades
- * the whole thing up the first time it's scrolled into view.
+ * `id` is what the nav links jump to; `title` renders as the section heading;
+ * Reveal fades the whole thing up the first time it's scrolled into view.
+ *
+ * The layout is responsive by CSS (globals.css): on phones the title stacks
+ * above the content; on desktop (≥1200px) the title becomes a sticky left
+ * rail beside the content — the site's distinct desktop look.
  */
 export default function Section({
   id,
@@ -22,8 +25,10 @@ export default function Section({
 }) {
   return (
     <Reveal id={id}>
-      <h2 className="section-title">{title}</h2>
-      {children}
+      <div className="section-layout">
+        <h2 className="section-title">{title}</h2>
+        <div className="section-body">{children}</div>
+      </div>
     </Reveal>
   );
 }

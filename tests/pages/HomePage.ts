@@ -13,6 +13,7 @@ export class HomePage extends BasePage {
   // ── Scene ───────────────────────────────────────────────────────────────
   readonly stars: Locator;
   readonly waveDrift: Locator;
+  readonly waveSwell: Locator;
   readonly ducks: Locator;
 
   // ── Extras ──────────────────────────────────────────────────────────────
@@ -30,6 +31,7 @@ export class HomePage extends BasePage {
 
     this.stars = page.getByTestId("stars");
     this.waveDrift = page.locator(".wave-drift").first();
+    this.waveSwell = page.locator(".wave-swell").first();
     this.ducks = page.locator("[data-duck]");
 
     this.curseOfRaLink = page.getByRole("link", { name: "🕑 Curse of Ra", exact: true });

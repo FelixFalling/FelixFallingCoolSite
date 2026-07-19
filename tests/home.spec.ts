@@ -115,12 +115,15 @@ test.describe("404 page", () => {
 });
 
 test.describe("reduced motion", () => {
-  // Simulate a visitor whose OS is set to "reduce motion" — the waves must
-  // freeze for them (that's what the media query in globals.css promises).
+  // Simulate a visitor whose OS is set to "reduce motion". Policy (see the
+  // media query in globals.css): the gentle horizontal drift KEEPS moving —
+  // it's the site's identity and calm enough — while the springier vertical
+  // swell (and beam, gulls, parallax, ducks) stops.
   // emulateMedia must run BEFORE goto so the page loads with the setting on.
-  test("wave animation is disabled", async ({ homePage, page }) => {
+  test("swell stops but the gentle drift keeps flowing", async ({ homePage, page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await homePage.goto();
-    await expect(homePage.waveDrift).toHaveCSS("animation-name", "none");
+    await expect(homePage.waveSwell).toHaveCSS("animation-name", "none");
+    await expect(homePage.waveDrift).toHaveCSS("animation-name", /waveDrift/);
   });
 });

@@ -188,6 +188,49 @@ a {
   background: linear-gradient(90deg, var(--rule), transparent);
 }
 
+/* ── Desktop layout (≥1200px): the site's own look on big screens ──────────
+ * Instead of a stretched phone column, sections switch to an editorial
+ * two-column layout: the title lives in a sticky LEFT RAIL that stays in
+ * view while its content scrolls beside it. The container also widens
+ * (see the media query at the bottom of the tokens). */
+@media (min-width: 1200px) {
+  :root {
+    --content-width: 1240px;
+  }
+
+  .section {
+    padding: 48px 0 72px;
+  }
+
+  .section-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0 48px;
+    align-items: start;
+  }
+
+  /* The sticky rail title: parked below the nav while the section scrolls. */
+  .section-title {
+    position: sticky;
+    top: 84px;
+    display: block;
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+  }
+
+  /* Swap the long fading rule for a short teal accent under the title. */
+  .section-title::after {
+    content: "";
+    display: block;
+    width: 44px;
+    height: 3px;
+    margin-top: 12px;
+    border-radius: 2px;
+    background: var(--teal);
+  }
+}
+
 /* Card used by Experience / Projects / Education. */
 .card {
   background: var(--card-bg);
@@ -319,6 +362,18 @@ a {
     opacity: 0.3;
   }
 }
+/* The desktop scroll cue bobs gently above the waves. */
+@keyframes cueBob {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateX(-50%) translateY(10px);
+    opacity: 1;
+  }
+}
 /* The lantern flashes brightest exactly when the beam points at the viewer —
  * the 50% mark of beamTurn, where the cone has vanished. */
 @keyframes lampFlash {
@@ -368,13 +423,18 @@ a {
   html {
     scroll-behavior: auto;
   }
-  .wave-drift,
+  /* The slow horizontal wave drift is the site's identity and is gentle
+     enough to keep. Everything springier or attention-grabbing stops:
+     the vertical swell bob, clouds, gulls, the lighthouse beam and flash,
+     rain, and the scroll cue (the duck easter egg and cursor parallax are
+     skipped in JavaScript). */
   .wave-swell,
   .cloud-drift,
   .gull-drift,
   .beam-sweep,
   .lamp-flash,
-  .rain-fall {
+  .rain-fall,
+  .scroll-cue {
     animation: none !important;
   }
 }

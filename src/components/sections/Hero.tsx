@@ -45,6 +45,13 @@ export default function Hero() {
         )}
       </div>
 
+      {/* Desktop-only scroll cue bobbing above the waves ("there's more below"). */}
+      <div className={`scroll-cue ${styles.scrollCue}`} aria-hidden="true">
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none">
+          <path d="M2 2 L13 12 L24 2" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+
       <HeroScene />
     </header>
   );

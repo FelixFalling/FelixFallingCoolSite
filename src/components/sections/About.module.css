@@ -4,3 +4,11 @@
   max-width: 720px;
   color: var(--slate);
 }
+
+/* Desktop: a touch larger, editorial. */
+@media (min-width: 1200px) {
+  .text {
+    font-size: 19px;
+    line-height: 1.7;
+  }
+}

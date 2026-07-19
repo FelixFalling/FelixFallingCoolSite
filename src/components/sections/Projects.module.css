@@ -6,6 +6,18 @@
   gap: 22px;
 }
 
+/* Desktop: three columns, with the first (flagship) project as a big
+   featured card spanning two of them. */
+@media (min-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid > article:first-child {
+    grid-column: span 2;
+  }
+}
+
 /* Column layout so the tags can be pushed to the bottom of each card. */
 .card {
   display: flex;
