@@ -91,7 +91,11 @@ function WaveLayer({ layer }: { layer: Layer }) {
             key={i}
             viewBox="0 0 1200 200"
             preserveAspectRatio="none"
-            style={{ position: "absolute", left: i * TILE, bottom: 0, width: TILE, height: "100%", display: "block" }}
+            // bottom: -28 bleeds each drawing past the hero's bottom edge, so
+            // when the swell bobs a layer upward (up to 15px) it can never
+            // lift its bottom edge into view and flash the layer behind it.
+            // The hero clips the overflow, so the bleed is invisible.
+            style={{ position: "absolute", left: i * TILE, bottom: -28, width: TILE, height: "calc(100% + 28px)", display: "block" }}
           >
             {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
             <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} />
