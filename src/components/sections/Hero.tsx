@@ -36,11 +36,19 @@ export default function Hero() {
 
         {resume.showPhoto && (
           <div className={styles.photoWrap}>
-            <div className={styles.photo}>
-              Photo
-              <br />
-              placeholder
-            </div>
+            {resume.photo ? (
+              <img
+                className={styles.photo}
+                src={`${BASE_PATH}/${resume.photo}`}
+                alt={resume.name}
+              />
+            ) : (
+              <div className={styles.photo}>
+                Photo
+                <br />
+                placeholder
+              </div>
+            )}
           </div>
         )}
       </div>

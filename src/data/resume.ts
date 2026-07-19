@@ -59,6 +59,10 @@ export interface Resume {
   specialties: string; // one line, e.g. "Backend · Distributed systems · Go"
   about: string;
   showPhoto: boolean;
+  // Your profile image: put the file in /public (e.g. public/me.jpg) and set
+  // this to its filename ("me.jpg"). Leave undefined to show the grey
+  // placeholder circle instead. Only shows when showPhoto is true.
+  photo?: string;
   links: {
     github: string;
     linkedin?: string; // hidden for now — ties the handle to a real identity
@@ -100,6 +104,7 @@ export const resume: Resume = {
   // the pseudonymous site). Drop a real image in later by replacing the
   // placeholder markup in sections/Hero.tsx.
   showPhoto: true,
+  // photo: "me.jpg",  ← put your image in /public and uncomment this line
 
   links: {
     github: "https://github.com/FelixFalling",
