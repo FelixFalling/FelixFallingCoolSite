@@ -11,6 +11,7 @@ type TowerState = {
   gameState: string;
   best: number;
   tier: number;
+  stage: number;
   boss: boolean;
   bossHp: number;
   lives: number;
@@ -56,6 +57,8 @@ test.describe("the Wizard's Tower game", () => {
     const state = await page.evaluate(() => window.__tower.state);
     expect(state.tier).toBeGreaterThanOrEqual(1);
     expect(state.bossHp).toBeGreaterThan(0);
+    // past 50m the tower has changed into its second stage theme
+    expect(state.stage).toBe(1);
     expect(errors).toEqual([]);
   });
 

@@ -209,6 +209,7 @@ const C = {
   wallTop:'#2c2447', wallBot:'#1e1936', star:'rgba(242,232,213,.10)',
   stoneWall:'#241d3d', stoneLine:'#1a142e', slab:'#3b3358', slabHi:'#59507e',
   wood:'#8a6242', woodDark:'#5d4230', woodEdge:'#a97f58', caseBack:'#241d3d',
+  archIn:'#141026',
   cream:'#f2e8d5', terra:'#d98e73', sage:'#9db787', sageD:'#6f8a5e',
   blue:'#7f95c9', mustard:'#d9b25f', rose:'#cf8fa0', plum:'#4a3d70',
   amber:'#ffcf8a', ink:'#1c1530', ghostGlow:'#8ef0dd',
@@ -216,6 +217,68 @@ const C = {
   fur:'#eda05b', furD:'#cf7c36', furStripe:'#c96f2e', furBelly:'#f7e3c8', laser:'#ff5050'
 };
 const BOOKCOLORS = [C.terra, C.sage, C.blue, C.mustard, C.rose];
+
+/* ---------- the stages of the tower ----------
+   Each wizard rules a zone, and the tower dresses to match: as the cat
+   climbs past each boss height the walls, wood, ghosts, and owls all
+   cross-fade to that stage's palette (updateTheme lerps the colors in C
+   every frame, so everything drawn with them re-themes for free). */
+const THEMES = [
+  { name:'The Library', // the classic plum-and-wood ground floors
+    wallTop:'#2c2447', wallBot:'#1e1936', stoneWall:'#241d3d', stoneLine:'#1a142e',
+    wood:'#8a6242', woodDark:'#5d4230', woodEdge:'#a97f58', caseBack:'#241d3d',
+    slab:'#3b3358', slabHi:'#59507e', archIn:'#141026',
+    lav:'#cdb9f2', lavD:'#7e68b8', owl:'#7a5a3f', owlD:'#5e452f' },
+  { name:'The Alchemy Halls', // the alchemist's emerald floors past 50m
+    wallTop:'#1e3a32', wallBot:'#122720', stoneWall:'#1a322b', stoneLine:'#102219',
+    wood:'#7a6a3a', woodDark:'#524629', woodEdge:'#a3894e', caseBack:'#153029',
+    slab:'#2e4a40', slabHi:'#4a6e60', archIn:'#0b1e17',
+    lav:'#a8e8c0', lavD:'#56a476', owl:'#6a6a45', owlD:'#4e4e30' },
+  { name:'The Frozen Observatory', // the astronomer's icy floors past 125m
+    wallTop:'#243450', wallBot:'#16223a', stoneWall:'#1e2c48', stoneLine:'#141e34',
+    wood:'#7e90aa', woodDark:'#556685', woodEdge:'#aabdd2', caseBack:'#192740',
+    slab:'#33456a', slabHi:'#54688e', archIn:'#0e1830',
+    lav:'#bfe6f8', lavD:'#6494c6', owl:'#7888a0', owlD:'#56637a' },
+  { name:'The Ember Sanctum', // the ember wizard's smouldering top past 200m
+    wallTop:'#3c2030', wallBot:'#26131d', stoneWall:'#331a28', stoneLine:'#22101a',
+    wood:'#6e3a30', woodDark:'#4a241e', woodEdge:'#9a5a42', caseBack:'#2a131d',
+    slab:'#4a2838', slabHi:'#6e4054', archIn:'#1a0a11',
+    lav:'#f8c8a8', lavD:'#d87848', owl:'#6a4030', owlD:'#4c2c20' }
+];
+const THEME_KEYS = ['wallTop','wallBot','stoneWall','stoneLine','wood','woodDark',
+  'woodEdge','caseBack','slab','slabHi','archIn','lav','lavD','owl','owlD'];
+function hex2rgb(h){
+  return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+}
+const THEME_RGB = THEMES.map(t => {
+  const o = {};
+  for (const k of THEME_KEYS) o[k] = hex2rgb(t[k]);
+  return o;
+});
+let stage = 0, lastStage = 0;
+const themeCur = {};
+function snapTheme(n){
+  stage = lastStage = n;
+  for (const k of THEME_KEYS){
+    themeCur[k] = THEME_RGB[n][k].slice();
+    C[k] = THEMES[n][k];
+  }
+}
+snapTheme(0);
+function stageFor(m){ return m < 50 ? 0 : m < 125 ? 1 : m < 200 ? 2 : 3; }
+function updateTheme(dt){
+  stage = stageFor((FLOOR.y - cat.y)/(90*S));
+  if (stage !== lastStage){
+    if (stage > lastStage) toast(THEMES[stage].name, 'The tower changes here.');
+    lastStage = stage;
+  }
+  const tg = THEME_RGB[stage], f = Math.min(1, dt*1.6);
+  for (const k of THEME_KEYS){
+    const c = themeCur[k], g = tg[k];
+    c[0] += (g[0]-c[0])*f; c[1] += (g[1]-c[1])*f; c[2] += (g[2]-c[2])*f;
+    C[k] = 'rgb('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+')';
+  }
+}
 
 /* ---------- state ---------- */
 let surfaces = [], items = [], particles = [], enemies = [];
@@ -574,6 +637,7 @@ function buildScene(){
   knocked = 0; best = 0; nextMile = 10;
   tier = 0; boss = null; bossNum = 0; nextBossAt = 50; bolts.length = 0;
   resetMods();
+  snapTheme(0);
   lives = 9; renderLives();
   countEl.textContent = 0; htEl.textContent = 0;
   banner.classList.remove('show');
@@ -1218,6 +1282,15 @@ function updateEnemies(dt){
    lobs magic bolts, and teleports. Pounce him (the same pounce as always) to
    drain his health orbs; each defeat grants lives, a boon, and progress
    toward the boss-unlocked cats. */
+/* Each wizard dresses for his own floors (see THEMES): robe, hat, and the
+   color of his magic. Index = bossNum-1, capped at the last. */
+const BOSS_PALS = [
+  { title:'The Alchemist',  robe:'#3e7a58', hat:'#2b593f', orb:[168,232,192] },
+  { title:'The Astronomer', robe:'#4a6ea8', hat:'#33507e', orb:[191,230,248] },
+  { title:'The Ember Sage', robe:'#a84a3a', hat:'#7e3328', orb:[248,200,168] }
+];
+function bossPal(){ return BOSS_PALS[Math.min(bossNum-1, BOSS_PALS.length-1)]; }
+
 function spawnBoss(){
   bossNum++;
   boss = {
@@ -1225,7 +1298,7 @@ function spawnBoss(){
     x: clamp(cat.x, LX+90*S, RX-90*S), y: cat.y - H*.45,
     castT: 2.4, casts: 0, inv: 1.2, phase: rnd(0,9), face: 1
   };
-  toast('The wizard has noticed.', 'Pounce him before his spells land.');
+  toast(bossPal().title + ' has noticed.', 'Pounce him before his spells land.');
   tone(180,60,.6,'sawtooth',.22); sHoot();
 }
 
@@ -1249,7 +1322,7 @@ function updateBoss(dt){
       bolts.push({
         x: boss.x + boss.face*30*S, y: boss.y - 50*S,
         vx: dx/d*spd + (i-(n-1)/2)*130*S, vy: dy/d*spd - 50*S,
-        t: 0, life: 3
+        t: 0, life: 3, orb: bossPal().orb
       });
     }
     tone(760,240,.25,'sawtooth',.18);
@@ -1360,7 +1433,7 @@ function drawArch(a){
   ctx.moveTo(x-aw/2, bot); ctx.lineTo(x-aw/2, top+aw/2);
   ctx.arc(x, top+aw/2, aw/2, Math.PI, 0);
   ctx.lineTo(x+aw/2, bot); ctx.closePath();
-  ctx.fillStyle = '#141026'; ctx.fill();
+  ctx.fillStyle = C.archIn; ctx.fill();
   ctx.clip();
   ctx.fillStyle = 'rgba(242,232,213,.7)';
   star4(x-aw*.22, top+aw*.9, 4*S); ctx.fill();
@@ -1368,7 +1441,7 @@ function drawArch(a){
   if (a.hasMoon){
     ctx.fillStyle = 'rgba(242,232,213,.92)';
     ctx.beginPath(); ctx.arc(x+aw*.12, top+aw*.5, aw*.2, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#141026';
+    ctx.fillStyle = C.archIn;
     ctx.beginPath(); ctx.arc(x+aw*.2, top+aw*.44, aw*.17, 0, Math.PI*2); ctx.fill();
   }
   ctx.restore();
@@ -2161,6 +2234,7 @@ function drawWisp(e){
 
 function drawBoss(){
   if (!boss) return;
+  const BP = bossPal();
   const bob = Math.sin(time*2+boss.phase)*6*S;
   ctx.save();
   ctx.translate(boss.x, boss.y + bob);
@@ -2168,7 +2242,7 @@ function drawBoss(){
   if (boss.inv > 0) ctx.globalAlpha = .5 + .3*Math.sin(time*24);
   // robe
   ctx.shadowColor = C.lavD; ctx.shadowBlur = 26*S;
-  ctx.fillStyle = C.plum;
+  ctx.fillStyle = BP.robe;
   ctx.beginPath();
   ctx.moveTo(-24*S,-30*S);
   ctx.quadraticCurveTo(-34*S,20*S,-26*S,44*S);
@@ -2184,7 +2258,7 @@ function drawBoss(){
   ctx.moveTo(-13*S,-34*S); ctx.quadraticCurveTo(0,8*S,13*S,-34*S);
   ctx.closePath(); ctx.fill();
   // hat
-  ctx.fillStyle = C.lavD;
+  ctx.fillStyle = BP.hat;
   ctx.beginPath();
   ctx.moveTo(-20*S,-46*S); ctx.lineTo(20*S,-46*S); ctx.lineTo(4*S,-84*S);
   ctx.closePath(); ctx.fill();
@@ -2196,15 +2270,16 @@ function drawBoss(){
   ctx.fillStyle = C.ink;
   ctx.beginPath(); ctx.arc(-5.5*S,-39*S,1.8*S,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc( 5.5*S,-39*S,1.8*S,0,Math.PI*2); ctx.fill();
-  // staff with glowing orb
+  // staff with glowing orb, in his own magic's color
+  const [or,og,ob] = BP.orb;
   ctx.strokeStyle = C.woodDark; ctx.lineWidth = 4*S;
   ctx.beginPath(); ctx.moveTo(24*S,44*S); ctx.lineTo(30*S,-52*S); ctx.stroke();
-  ctx.fillStyle = `rgba(142,240,221,${.7+.3*Math.sin(time*6)})`;
+  ctx.fillStyle = `rgba(${or},${og},${ob},${.7+.3*Math.sin(time*6)})`;
   ctx.beginPath(); ctx.arc(30*S,-56*S,7*S,0,Math.PI*2); ctx.fill();
   ctx.restore();
   // health orbs above his hat
   for (let i=0;i<boss.maxHp;i++){
-    ctx.fillStyle = i < boss.hp ? 'rgba(142,240,221,.95)' : 'rgba(242,232,213,.2)';
+    ctx.fillStyle = i < boss.hp ? `rgba(${or},${og},${ob},.95)` : 'rgba(242,232,213,.2)';
     ctx.beginPath();
     ctx.arc(boss.x - (boss.maxHp-1)*7*S + i*14*S, boss.y - 104*S + bob, 5*S, 0, Math.PI*2);
     ctx.fill();
@@ -2213,12 +2288,13 @@ function drawBoss(){
 
 function drawBolts(){
   for (const b of bolts){
+    const [r,g2,b2] = b.orb || [150,110,230];
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 13*S);
-    g.addColorStop(0, 'rgba(235,205,255,.95)');
-    g.addColorStop(.5, 'rgba(150,110,230,.5)');
-    g.addColorStop(1, 'rgba(150,110,230,0)');
+    g.addColorStop(0, 'rgba(245,235,255,.95)');
+    g.addColorStop(.5, `rgba(${r},${g2},${b2},.55)`);
+    g.addColorStop(1, `rgba(${r},${g2},${b2},0)`);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(b.x, b.y, 13*S, 0, Math.PI*2); ctx.fill();
     ctx.restore();
@@ -2263,6 +2339,7 @@ function frame(t){
     updateBoss(dt);
     updateBolts(dt);
     updateItems(dt);
+    updateTheme(dt);
 
     // height score
     const meters = (FLOOR.y - cat.y)/(90*S);
@@ -2544,7 +2621,7 @@ document.getElementById('overMenuBtn').addEventListener('click', ()=>{
 window.__tower = {
   get state(){
     return {
-      gameState, tier, lives,
+      gameState, tier, stage, lives,
       best: Math.floor(best),
       careerBest: Math.floor(careerBest),
       bossesBeaten,
