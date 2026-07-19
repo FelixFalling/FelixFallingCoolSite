@@ -188,6 +188,11 @@ a {
   background: linear-gradient(90deg, var(--rule), transparent);
 }
 
+/* The hero's sea band: how tall the waves strip is. */
+.waves-strip {
+  height: 190px;
+}
+
 /* ── Desktop layout (≥1200px): the site's own look on big screens ──────────
  * Instead of a stretched phone column, sections switch to an editorial
  * two-column layout: the title lives in a sticky LEFT RAIL that stays in
@@ -196,6 +201,15 @@ a {
 @media (min-width: 1200px) {
   :root {
     --content-width: 1240px;
+    /* Bigger rocks + lighthouse so the scene holds its own on big screens,
+       lifted to match the deeper sea's higher waterline. */
+    --shore-scale: 1.18;
+    --shore-lift: 45px;
+  }
+
+  /* A deeper sea on desktop — the scene fills more of a tall viewport. */
+  .waves-strip {
+    height: 240px;
   }
 
   .section {

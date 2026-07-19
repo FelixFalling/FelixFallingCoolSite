@@ -94,11 +94,13 @@
 /* ── Desktop layout (≥1200px): a full-viewport cinematic hero ────────────── */
 @media (min-width: 1200px) {
   .inner {
-    /* Fill the screen below the nav; the flex centering (already set above)
-       parks the name mid-sky with the whole coast scene beneath it. */
-    min-height: calc(100vh - 57px);
+    /* Fill the screen below the nav — but capped at 880px so very tall
+       monitors don't get an ocean of empty sky between the name and the
+       water. The flex centering (already set above) parks the name mid-sky
+       with the whole coast scene beneath it. */
+    min-height: min(calc(100vh - 57px), 880px);
     padding-top: 40px;
-    padding-bottom: 240px;
+    padding-bottom: 280px;
   }
 
   .title {
@@ -114,7 +116,7 @@
     display: block;
     position: absolute;
     left: 50%;
-    bottom: 214px;
+    bottom: 270px;
     transform: translateX(-50%);
     z-index: 2;
     color: var(--teal-deep);

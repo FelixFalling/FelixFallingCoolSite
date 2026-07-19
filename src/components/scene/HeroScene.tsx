@@ -103,9 +103,11 @@ export default function HeroScene() {
       <Clouds />
       <Gulls />
       <Shore />
-      {/* The waves live in a fixed-height strip at the bottom so they keep their
-          proportions instead of stretching to the full hero height. */}
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}>
+      {/* The waves live in a fixed-height strip at the bottom so they keep
+          their proportions instead of stretching to the full hero height.
+          The height comes from the .waves-strip class (globals.css): 190px,
+          deepened to 240px on desktop so the sea fills a tall viewport. */}
+      <div className="waves-strip" style={{ position: "absolute", left: 0, right: 0, bottom: 0 }}>
         <Waves />
       </div>
       {weather.raining && <Rain />}

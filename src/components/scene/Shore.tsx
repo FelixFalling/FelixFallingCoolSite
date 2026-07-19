@@ -43,7 +43,9 @@ function Cluster({
       style={{
         position: "absolute",
         left,
-        bottom,
+        // --shore-lift (globals.css) raises the whole shoreline on desktop,
+        // where the sea band is deeper and the waterline sits higher.
+        bottom: `calc(${bottom}px + var(--shore-lift, 0px))`,
         transform:
           "translateX(-50%) translate(calc(var(--mx, 0) * 12px), calc(var(--my, 0) * 7px))" +
           ` scale(calc(${scale} * var(--shore-scale, 1)))`,
