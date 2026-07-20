@@ -56,6 +56,9 @@
   button:hover{ background:rgba(160,116,80,.95); transform:translateY(-1px); }
   button:active{ transform:translateY(0) scale(.97); }
   button:focus-visible{ outline:2px solid var(--ghost); outline-offset:2px; }
+  /* the sound toggle: a round icon button (🔊 / 🔇) */
+  .iconBtn{ padding:6px; width:36px; height:36px; font-size:17px; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center; }
 
   .banner{
     position:fixed; left:50%; bottom:38px; transform:translate(-50%,24px);
@@ -211,9 +214,7 @@
   <div class="chip">&#9650; <b id="ht">0</b> m climbed</div>
   <div class="chip"><b id="count">0</b> knocked</div>
   <button id="menuBtn" type="button">Menu</button>
-  <button id="tidyBtn" type="button">Tidy up</button>
-  <button id="newBtn" type="button">New tower</button>
-  <button id="soundBtn" type="button">Mute</button>
+  <button id="soundBtn" class="iconBtn" type="button" aria-label="Mute">&#128266;</button>
 </div>
 
 <div class="banner" id="banner">
@@ -229,6 +230,7 @@
     <div class="skins" id="skinRow"></div>
     <div class="menu-row">
       <button id="startBtn" class="primary" type="button">Start climbing</button>
+      <button id="restartBtn" type="button">Restart</button>
       <button id="menuSoundBtn" type="button">Sound: On</button>
     </div>
     <p class="tiny">Climb higher to unlock new cats. Librarian ghosts reshelve your chaos, the warden owl bites, and the shush hurts. Pounce them all.</p>
@@ -753,18 +755,6 @@ function buildScene(){
     g.fill();
   });
   wallPattern = ctx.createPattern(p,'repeat');
-}
-
-function restoreAll(){
-  for (let i=items.length-1;i>=0;i--){
-    if (items[i].spawned){ items.splice(i,1); continue; }
-    restoreItem(items[i]);
-  }
-  for (const e of enemies){
-    if (e.kind==='lib'){ e.carry.length=0; e.target=null; e.fleeT=0; e.shushT=0; }
-  }
-  particles.length = 0;
-  knocked = 0; countEl.textContent = 0;
 }
 
 /* ---------- knocking things over (still the point) ---------- */
@@ -2612,21 +2602,13 @@ addEventListener('touchmove', e => {
   if (e.touches[0]){ pointer.x = e.touches[0].clientX; pointer.y = e.touches[0].clientY; pointer.seen = true; }
 }, {passive:true});
 
-document.getElementById('tidyBtn').addEventListener('click', () => {
-  restoreAll();
-  cat.grump = 1.6;
-  particles.push({kind:'text', x:cat.x, y:cat.y-90*S, str:'hmph.', vx:0, vy:-20, life:1, t:0, size:16*S});
-});
-document.getElementById('newBtn').addEventListener('click', () => {
-  buildScene();
-  cat.grump = 1;
-});
-
 const soundBtn = document.getElementById('soundBtn');
 const menuSoundBtn = document.getElementById('menuSoundBtn');
 function toggleSound(){
   soundOn = !soundOn;
-  soundBtn.textContent = soundOn ? 'Mute' : 'Unmute';
+  // 🔊 speaker (sound on) / 🔇 muted speaker
+  soundBtn.textContent = soundOn ? '🔊' : '🔇';
+  soundBtn.setAttribute('aria-label', soundOn ? 'Mute' : 'Unmute');
   menuSoundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
   audioInit(); if (AC && AC.state==='suspended') AC.resume();
 }
@@ -2765,6 +2747,16 @@ document.getElementById('menuBtn').addEventListener('click', ()=>{
   gameState = 'menu';
   renderSkins();
   menuEl.hidden = false;
+});
+// Restart: build a fresh tower and drop straight back into the climb.
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  buildScene();
+  document.getElementById('upg').hidden = true;
+  overEl.hidden = true;
+  menuEl.hidden = true;
+  startBtn.textContent = 'Resume';
+  gameState = 'playing';
+  audioInit(); if (AC && AC.state==='suspended') AC.resume();
 });
 document.getElementById('againBtn').addEventListener('click', ()=>{
   buildScene();
