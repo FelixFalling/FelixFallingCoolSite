@@ -2,7 +2,7 @@ import Reveal from "./Reveal";
 
 /**
  * The shared page-section scaffold. Every section of the page is the same
- * shape — a scroll-reveal wrapper plus a titled heading — so that shape lives
+ * shape - a scroll-reveal wrapper plus a titled heading - so that shape lives
  * here once:
  *
  *   <Section id="about" title="About">…content…</Section>
@@ -12,7 +12,7 @@ import Reveal from "./Reveal";
  *
  * The layout is responsive by CSS (globals.css): on phones the title stacks
  * above the content; on desktop (≥1200px) the title becomes a sticky left
- * rail beside the content — the site's distinct desktop look.
+ * rail beside the content - the site's distinct desktop look.
  */
 export default function Section({
   id,

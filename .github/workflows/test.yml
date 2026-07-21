@@ -30,13 +30,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # The Playwright config uses channel "chrome" — GitHub's runners already
+      # The Playwright config uses channel "chrome" - GitHub's runners already
       # have Chrome installed, so there's no browser download step.
       - name: Run Playwright tests
         run: npm test
 
       # When a test fails, the HTML report (screenshots, traces, every step) is
-      # saved as a downloadable artifact on the run page — open it locally with
+      # saved as a downloadable artifact on the run page - open it locally with
       # `npx playwright show-report <unzipped folder>`.
       - name: Upload test report on failure
         if: failure()

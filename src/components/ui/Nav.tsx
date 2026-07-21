@@ -4,7 +4,7 @@ import styles from "./Nav.module.css";
 
 /**
  * Sticky top navigation. Links jump to each section by its `id`.
- * Experience/Education links are omitted while those sections are hidden —
+ * Experience/Education links are omitted while those sections are hidden -
  * see the PRIVACY note in app/page.tsx.
  */
 const links = [

@@ -7,19 +7,19 @@ import "./globals.css";
  * <html> and <body> tags and is the place for site-wide <head> metadata.
  */
 
-// The public URL the site is served from — used to build absolute URLs for
+// The public URL the site is served from - used to build absolute URLs for
 // the social-preview tags below (crawlers require absolute URLs).
 const SITE_URL = "https://felixfalling.github.io/FelixFallingCoolSite/";
 
-const TITLE = `${resume.name} — ${resume.jobTitle}`;
+const TITLE = `${resume.name} - ${resume.jobTitle}`;
 const DESCRIPTION =
-  "Portfolio of Flying Felix — software developer focused on test automation, " +
+  "Portfolio of Flying Felix - software developer focused on test automation, " +
   "embedded systems, and DevOps. Featuring an animated Oregon-coast scene.";
 
 /**
  * The `openGraph` and `twitter` blocks are what make a pasted link unfurl
  * into a rich card (image + title + description) on LinkedIn, Discord, Slack,
- * iMessage, etc. The card image is public/og.png — a screenshot of the hero.
+ * iMessage, etc. The card image is public/og.png - a screenshot of the hero.
  */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: resume.name,
     type: "website",
-    images: [{ url: "og.png", width: 1200, height: 630, alt: "Flying Felix — an animated foggy coast with sea stacks and waves" }],
+    images: [{ url: "og.png", width: 1200, height: 630, alt: "Flying Felix - an animated foggy coast with sea stacks and waves" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -63,7 +63,7 @@ const themeInitScript = `
 `;
 
 /**
- * Privacy-friendly visit counts via GoatCounter — no cookies, no personal
+ * Privacy-friendly visit counts via GoatCounter - no cookies, no personal
  * data, GDPR-safe. The dashboard lives at https://felixfalling.goatcounter.com
  * (create the free account with that exact code to claim it; until then the
  * script quietly no-ops). To remove analytics entirely, delete the <script>

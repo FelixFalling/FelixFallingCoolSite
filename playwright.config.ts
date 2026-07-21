@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright configuration — how the automated browser tests run.
+ * Playwright configuration - how the automated browser tests run.
  *
  * The flow when you run `npm test`:
  *   1. Playwright starts the dev server for you (the `webServer` block below)
@@ -12,7 +12,7 @@ import { defineConfig, devices } from "@playwright/test";
  *
  * Handy commands:
  *   npm test                 run everything headless (no visible browser)
- *   npm run test:ui          interactive mode — watch tests run, time-travel
+ *   npm run test:ui          interactive mode - watch tests run, time-travel
  *   npx playwright codegen   record clicks into test code (great for learning)
  */
 export default defineConfig({
@@ -29,7 +29,7 @@ export default defineConfig({
 
   use: {
     // The site lives under the GitHub Pages base path, so tests navigate with
-    // page.goto("./") — meaning "the baseURL directory" — rather than "/".
+    // page.goto("./") - meaning "the baseURL directory" - rather than "/".
     baseURL: "http://localhost:3000/FelixFallingCoolSite/",
 
     // Record a trace (screenshots + actions + console) when a test fails.
@@ -52,7 +52,7 @@ export default defineConfig({
 
   // Playwright manages the dev server: starts it before tests, stops it after.
   // `reuseExistingServer` means: if you already have `npm run dev` running
-  // locally, tests just use it (faster) — CI always starts a fresh one.
+  // locally, tests just use it (faster) - CI always starts a fresh one.
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000/FelixFallingCoolSite/",

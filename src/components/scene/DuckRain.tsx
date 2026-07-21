@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
  *
  * Type "duck" anywhere on the page and a flock of rubber ducks rains down,
  * splashes, bobs on the water, and drifts away. A nod to the Rubber Duckie
- * Terminator project — this site detects ducks too, just less accurately.
+ * Terminator project - this site detects ducks too, just less accurately.
  *
  * How it works: a window key listener keeps the last four letters typed;
  * when they spell "duck", it generates a batch of ducks with randomized
@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
  * clears itself once the last duck has faded.
  *
  * Visitors who prefer reduced motion get no surprise animation (the egg
- * simply doesn't fire) — and the console hint below is the only clue.
+ * simply doesn't fire) - and the console hint below is the only clue.
  */
 
 interface Duck {
@@ -26,7 +26,7 @@ interface Duck {
   size: number; // px
   duration: number; // s
   delay: number; // s
-  splash: number; // vh — where this duck lands and bobs
+  splash: number; // vh - where this duck lands and bobs
 }
 
 const FLOCK_SIZE = 16;
@@ -35,7 +35,7 @@ export default function DuckRain() {
   const [ducks, setDucks] = useState<Duck[]>([]);
 
   useEffect(() => {
-    console.log("🦆 psst — try typing “duck” anywhere on this page.");
+    console.log("🦆 psst - try typing “duck” anywhere on this page.");
 
     let typed = "";
     let clearTimer: ReturnType<typeof setTimeout> | undefined;

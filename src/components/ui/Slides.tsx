@@ -10,16 +10,16 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
  * A small swipeable screenshot slideshow, used on project cards.
  *
  * How it works: the track is a horizontal strip with CSS `scroll-snap`, so on
- * phones you just swipe it like a photo gallery — no JavaScript involved. The
+ * phones you just swipe it like a photo gallery - no JavaScript involved. The
  * arrows and dots are for mouse users: they scroll the track one card-width,
  * and the dots light up based on which slide is in view (tracked by the
  * onScroll handler below).
  *
- * With a single image it renders as a plain picture — no arrows, no dots.
+ * With a single image it renders as a plain picture - no arrows, no dots.
  *
  * Pass `href` to make the pictures clickable: each slide becomes a link to
  * the project (its code, usually), with a "View the project ↗" highlight on
- * hover. The arrows and dots stay their own buttons — they never navigate.
+ * hover. The arrows and dots stay their own buttons - they never navigate.
  */
 export default function Slides({
   images,

@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
  * The `"use client"` line at the top is important: this component uses browser
  * APIs (IntersectionObserver), so it must run in the browser. Most components
  * in this project are "server components" that render to static HTML at build
- * time — you only add `"use client"` when a component needs interactivity.
+ * time - you only add `"use client"` when a component needs interactivity.
  */
 export default function Reveal({
   id,
@@ -23,7 +23,7 @@ export default function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    // Respect users who prefer no motion — show it immediately, no animation.
+    // Respect users who prefer no motion - show it immediately, no animation.
     // Same if the browser lacks IntersectionObserver: never hide content we
     // can't reveal again.
     if (
@@ -49,7 +49,7 @@ export default function Reveal({
         }
       },
       // rootMargin extends the "viewport" 120px downward, so a section starts
-      // fading in just before it scrolls into view — on phones this means the
+      // fading in just before it scrolls into view - on phones this means the
       // content is already appearing as you reach it, not lagging behind.
       { threshold: 0.01, rootMargin: "0px 0px 120px 0px" },
     );

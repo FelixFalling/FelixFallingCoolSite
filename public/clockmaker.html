@@ -192,7 +192,7 @@
   @media (min-width:900px){
     /* Cap the height so the centered panel always clears the fixed top-row
        controls (title / greeting pill / theme button ≈ top 64px) on short
-       windows — content scrolls inside instead of colliding. */
+       windows - content scrolls inside instead of colliding. */
     #panel{left:auto;right:36px;bottom:auto;top:50%;transform:translateY(-50%);
       width:400px;border-radius:14px;padding:14px 20px;
       max-height:min(88vh, calc(100vh - 128px))}
@@ -325,17 +325,17 @@
   });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
-  onerror="__showErr('Three.js failed to load from CDN — check your network/allowlist.')"></script>
+  onerror="__showErr('Three.js failed to load from CDN - check your network/allowlist.')"></script>
 <script>
 if(typeof THREE === 'undefined'){
-  __showErr('THREE is undefined — the 3D library did not load, so the scene cannot start.');
+  __showErr('THREE is undefined - the 3D library did not load, so the scene cannot start.');
   throw new Error('THREE not loaded');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
  *  ✎  SETTINGS YOU CAN EDIT
  *  ---------------------------------------------------------------------------
- *  These are the safe knobs. Change the values here and reload — you never need
+ *  These are the safe knobs. Change the values here and reload - you never need
  *  to dig into the 3D machinery below to customize the basics.
  *
  *  Want to change the COLORS too? They live a little further down:
@@ -343,11 +343,11 @@ if(typeof THREE === 'undefined'){
  *    • search for "const ENV"  → the lighting + background of the temple
  * ═══════════════════════════════════════════════════════════════════════════ */
 const SETTINGS = {
-  workDayHours:  8,    // length of a full work day — used to predict clock-out
+  workDayHours:  8,    // length of a full work day - used to predict clock-out
   workWeekHours: 40,   // target for the "weekly hours" checker
   greeting: '𓂀 The tomb stirs as you enter',  // message that fades in on load
 };
-// Derived values (leave these) — the clock counts in minutes, not hours.
+// Derived values (leave these) - the clock counts in minutes, not hours.
 const WORK_DAY_MINUTES  = Math.round(SETTINGS.workDayHours  * 60);
 const WORK_WEEK_MINUTES = Math.round(SETTINGS.workWeekHours * 60);
 
@@ -391,7 +391,7 @@ let contextLost = false;
 renderer.domElement.addEventListener('webglcontextlost', function(e){
   e.preventDefault();
   contextLost = true;
-  showNoWebGL('The GPU context was lost — waiting for the browser to restore it…');
+  showNoWebGL('The GPU context was lost - waiting for the browser to restore it…');
 }, false);
 renderer.domElement.addEventListener('webglcontextrestored', function(){
   contextLost = false;
@@ -402,7 +402,7 @@ renderer.domElement.addEventListener('webglcontextrestored', function(){
 const scene = new THREE.Scene();
 /* Start in the dark granite tomb look (values must mirror ENV.inside below so
    the first frame doesn't visibly lerp). Torch-lit burial chamber: visible,
-   heavy, enclosed — the sunny reveal at the finale is the payoff. */
+   heavy, enclosed - the sunny reveal at the finale is the payoff. */
 scene.background = new THREE.Color(0x1a1d24);
 scene.fog = new THREE.Fog(0x1a1d24, 26, 80);
 const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 120);
@@ -434,7 +434,7 @@ sandFloor.rotation.x = -Math.PI/2; sandFloor.position.y = floorY;
 sandFloor.receiveShadow = true; scene.add(sandFloor);
 /* --- crumbling temple interior --- */
 const ceilY = 14;
-/* enclosing pyramid-shaft walls — they lean inward, and fade away at the collapse */
+/* enclosing pyramid-shaft walls - they lean inward, and fade away at the collapse */
 const wallMat = sandstone.clone(); wallMat.transparent = true; wallMat.opacity = 1;
 const backWall = new THREE.Mesh(new THREE.PlaneGeometry(90,50), wallMat);
 backWall.position.set(0, floorY+20, -15); backWall.receiveShadow = true;
@@ -464,19 +464,19 @@ const flameMat = new THREE.MeshBasicMaterial({color:0xffa63c, transparent:true, 
   tl.position.set(x, floorY+5.4, z); scene.add(tl);
   torchLights.push(tl);
 });
-/* the sun, waiting outside — revealed when the tomb falls */
+/* the sun, waiting outside - revealed when the tomb falls */
 const sunMat = new THREE.MeshBasicMaterial({color:0xfff3c8, transparent:true, opacity:0,
   blending:THREE.AdditiveBlending, depthWrite:false});
 const sunMesh = new THREE.Mesh(new THREE.CircleGeometry(9,40), sunMat);
 sunMesh.position.set(16, 22, -60);
 scene.add(sunMesh);
-/* soft warm halo behind the disc — fades in with the sun for a real "sunny" sky */
+/* soft warm halo behind the disc - fades in with the sun for a real "sunny" sky */
 const haloMat = new THREE.MeshBasicMaterial({color:0xffdf9e, transparent:true, opacity:0,
   blending:THREE.AdditiveBlending, depthWrite:false});
 const sunHalo = new THREE.Mesh(new THREE.CircleGeometry(16,40), haloMat);
 sunHalo.position.set(16, 22, -60.5);
 scene.add(sunHalo);
-/* columns with capitals — grouped at the base so they can topple */
+/* columns with capitals - grouped at the base so they can topple */
 const cols = [];
 [[-12,-5],[12,-5],[-17,2],[17,2]].forEach(([x,z],idx)=>{
   const g = new THREE.Group();
@@ -492,7 +492,7 @@ const cols = [];
   scene.add(g);
   cols.push({g, dir: (idx%2 ? 1 : -1)*(0.9 + Math.random()*0.5), delay: Math.random()*0.35});
 });
-/* ceiling slabs — some tilted, gaps where the roof has failed */
+/* ceiling slabs - some tilted, gaps where the roof has failed */
 const slabs = [];
 [[-14,0,0],[-4.5,-2,0.10],[5,1,-0.14],[15,-1,0],[0,-8,0.06]].forEach(([x,z,tilt])=>{
   const slab = new THREE.Mesh(new THREE.BoxGeometry(9.2,0.9,10), sandstone);
@@ -562,7 +562,7 @@ for(let i=0;i<8;i++){
   clockGroup.add(ray);
 }
 
-/* tick marks — lapis */
+/* tick marks - lapis */
 for(let i=0;i<60;i++){
   const major = i%5===0;
   const tick = new THREE.Mesh(
@@ -710,7 +710,7 @@ const LID_REST = {x:3.1, y:0.35, rz:-1.15}; /* where the lid lands after tipping
    so it bleaches with the rest of the stone when daylight floods in. */
 function makeSarcophagus(){
   const g = new THREE.Group();
-  /* stone bier under everything — layout() stretches it down to the floor so
+  /* stone bier under everything - layout() stretches it down to the floor so
      the sarcophagus can sit raised (essential on phones, where the floor line
      is hidden behind the panel) */
   const bier = new THREE.Mesh(new THREE.BoxGeometry(3.9, 1, 1.75), sandstone);
@@ -730,7 +730,7 @@ function makeSarcophagus(){
     const w = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.15, 1.16), sandstone);
     w.position.set(x, 0.825, z); w.castShadow = true; g.add(w);
   });
-  /* the lid — its own Group so slab + cartouche move as one */
+  /* the lid - its own Group so slab + cartouche move as one */
   const lid = new THREE.Group();
   lid.position.set(0, LID0_Y, 0);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(4.75, 0.28, 1.75), sandstone);
@@ -843,7 +843,7 @@ const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
   blending:THREE.AdditiveBlending, depthWrite:false}));
 scene.add(dust);
 
-/* falling debris chunks — a reusable pool of rocks that drop as the tomb fails */
+/* falling debris chunks - a reusable pool of rocks that drop as the tomb fails */
 const debris = [];
 for(let i=0;i<24;i++){
   const r = 0.25 + Math.random()*0.55;
@@ -865,12 +865,12 @@ function dropDebris(prob){
 
 /* ---- Environment phases: tomb interior -> crumbling -> open desert ---- */
 const ENV = {
-  /* dark granite burial chamber — must mirror the initial scene values above */
+  /* dark granite burial chamber - must mirror the initial scene values above */
   inside:  {bg:new THREE.Color(0x1a1d24), fogN:26, fogF:80,
             amb:[new THREE.Color(0x5c6270),0.55], key:[new THREE.Color(0xffbe82),0.7],
             fill:[new THREE.Color(0x424a58),0.35], floor:new THREE.Color(0x4c4f58),
             stone:new THREE.Color(0x62666f), wallOp:1, torch:1},
-  /* vivid blue sunny desert — freedom */
+  /* vivid blue sunny desert - freedom */
   outside: {bg:new THREE.Color(0x58a6ea), fogN:55, fogF:150,
             amb:[new THREE.Color(0xc4dcf8),1.05], key:[new THREE.Color(0xfff1c9),1.7],
             fill:[new THREE.Color(0x93b7e8),0.6], floor:new THREE.Color(0xd4b06a),
@@ -907,14 +907,14 @@ const easeInQ = p => p*p*p;
    Replaces the old "everything at once" ending. Timeline (seconds):
      0–1.0   lid slides aside          1.0–1.6  lid tips off and thuds
      1.4–4.2 pharaoh rises, torch-lit (chime as he stirs)
-     4.2     showcase spin + collapse — only now does daylight flood in
+     4.2     showcase spin + collapse - only now does daylight flood in
      after   he stands free in the sun (idle handled in the render loop)   */
 let finaleAnim = null, finaleStarted = false, pharaohUp = false, finaleDust = 0;
 function beginFinale(){
   if(finaleStarted) return;
   finaleStarted = true;
   finaleAnim = {t0: performance.now(), thud:false, rose:false};
-  /* on phones the bottom sheet covers the stage — tuck it away so the show is
+  /* on phones the bottom sheet covers the stage - tuck it away so the show is
      visible (the grabber brings it back anytime) */
   if(innerWidth < 900 && panelEl && !panelEl.classList.contains('collapsed')){
     panelEl.classList.add('collapsed');
@@ -1082,7 +1082,7 @@ $('actionBtn').addEventListener('click', ()=>{
   $(id).value = nowHHMM();
   /* Same-minute taps would record a zero-length step (e.g. back-from-lunch at
      the exact minute of lunch-out). Manual edits are already clamped by the
-     change handlers — apply the identical rule to button punches. */
+     change handlers - apply the identical rule to button punches. */
   if(id==='lo') clampChip('lo','ci','clock-in');
   if(id==='li') clampChip('li','lo','lunch out');
   refreshUI();
@@ -1125,15 +1125,15 @@ $('reset').addEventListener('click', ()=>{
 });
 /* ============ Session state (in-memory only) ================================
    Persistence was removed on purpose. It used cookies for visitor tracking and
-   restored the previous visit's punches from localStorage — and that
+   restored the previous visit's punches from localStorage - and that
    restore-on-revisit path is exactly what made the clock break on the second
    visit. Nothing here touches cookies or storage now, so every visit starts
    clean and the page can never be broken by leftover saved state.
 
    saveState()/loadState() are kept as harmless no-ops so the existing call
    sites (refreshUI, the week inputs, the reset button) don't need to change. */
-function saveState(){ /* intentionally does nothing — no persistence */ }
-function loadState(){ /* intentionally does nothing — no persistence */ }
+function saveState(){ /* intentionally does nothing - no persistence */ }
+function loadState(){ /* intentionally does nothing - no persistence */ }
 
 /* A brief welcome, shown once per page load (no storage, so always the same). */
 (function greet(){
@@ -1167,12 +1167,12 @@ function calc(){
   } else if(lo!==null){
     clockOutMin = null; marker.visible = false;
     $('out').textContent = '–:–';
-    $('sub').textContent = `On lunch since ${fmt12(lo)} — tap the button when you're back.`;
+    $('sub').textContent = `On lunch since ${fmt12(lo)} - tap the button when you're back.`;
     $('count').textContent = ''; return;
   } else {
     clockOutMin = ci + TARGET;
     $('out').textContent = fmt12(clockOutMin);
-    $('sub').textContent = 'No lunch yet — add it when you take it.';
+    $('sub').textContent = 'No lunch yet - add it when you take it.';
   }
   const a = ((clockOutMin%720)/720)*Math.PI*2;
   marker.position.set(Math.sin(a)*5.55, Math.cos(a)*5.55, 0);
@@ -1187,7 +1187,7 @@ function tickCountdown(){
   const now = new Date();
   const nowMin = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
   /* Minutes until the curse lifts. clockOutMin can pass midnight (e.g. clock in
-     at 8 PM → out at "28:00"), while nowMin wraps back to 0 at 12 AM — so wrap
+     at 8 PM → out at "28:00"), while nowMin wraps back to 0 at 12 AM - so wrap
      the difference into a day and read anything beyond 12 h as overtime. A real
      shift countdown never legitimately exceeds 12 h, so this is unambiguous. */
   let diff = clockOutMin - nowMin;
@@ -1204,11 +1204,11 @@ function tickCountdown(){
   if(diff <= 0){
     const over = -diff;
     const om = Math.floor(over), os = Math.floor((over*60)%60);
-    cnt.innerHTML = `☀ Daylight — flee the tomb ✓ <span class="overtime">(+${om}m ${String(os).padStart(2,'0')}s over)</span>`;
+    cnt.innerHTML = `☀ Daylight - flee the tomb ✓ <span class="overtime">(+${om}m ${String(os).padStart(2,'0')}s over)</span>`;
     if(!tickCountdown._done){ tickCountdown._done = true; beginFinale(); }
     return;
   }
-  if(tickCountdown._done && (templeDown || finaleStarted)) restoreTemple(); /* time was edited back — rebuild */
+  if(tickCountdown._done && (templeDown || finaleStarted)) restoreTemple(); /* time was edited back - rebuild */
   tickCountdown._done = false;
   crumbleF = diff <= 3 ? 1 - diff/3 : 0;   /* the final three minutes */
   if(crumbleF > 0 && !tickCountdown._warned){ tickCountdown._warned = true; rumble(); }
@@ -1260,7 +1260,7 @@ function calcWeek(){
   const have = (+m[1])*60 + (+m[2]);
   const need = WORK_WEEK_MINUTES - have; // weekly target, from SETTINGS at the top
   const weekLabel = `${Math.floor(WORK_WEEK_MINUTES/60)}:${String(WORK_WEEK_MINUTES%60).padStart(2,'0')}`;
-  if(need<=0){ $('wkOut').textContent='Done!'; $('wkSub').textContent = `Already at ${fmtDur(have)} — past ${weekLabel}.`; return; }
+  if(need<=0){ $('wkOut').textContent='Done!'; $('wkSub').textContent = `Already at ${fmtDur(have)} - past ${weekLabel}.`; return; }
   $('wkOut').textContent = fmt12(at+need);
   $('wkSub').textContent = `${weekLabel} − ${m[1]}:${m[2]} = ${fmtDur(need)} more`;
 }
@@ -1318,7 +1318,7 @@ function loop(now){
   }
 }
 function loopBody(now){
-  if(contextLost) return; // GPU context gone — skip until 'webglcontextrestored'
+  if(contextLost) return; // GPU context gone - skip until 'webglcontextrestored'
   let tH, tM, tS;
   if(previewMin !== null){
     const h = Math.floor(previewMin/60)%12, m = previewMin%60;
@@ -1393,12 +1393,12 @@ function loopBody(now){
   fill.color.lerp(envTarget.fill[0], ek); fill.intensity += (envTarget.fill[1]-fill.intensity)*ek;
   floorMat.color.lerp(envTarget.floor, ek);
   sandstone.color.lerp(envTarget.stone, ek); /* granite → sun-bleached stone */
-  wallMat.color.copy(sandstone.color);       /* wallMat is a clone — keep in lock-step */
+  wallMat.color.copy(sandstone.color);       /* wallMat is a clone - keep in lock-step */
   wallMat.opacity += (envTarget.wallOp - wallMat.opacity)*ek;
   walls.forEach(w=>{ w.visible = wallMat.opacity > 0.02; });
   sunMat.opacity += ((1-envTarget.wallOp) - sunMat.opacity)*ek;
   haloMat.opacity += ((1-envTarget.wallOp)*0.35 - haloMat.opacity)*ek;
-  /* torches gutter — harder as the tomb fails, dead once outside */
+  /* torches gutter - harder as the tomb fails, dead once outside */
   const flick = 0.75 + Math.sin(t*11)*0.15 + Math.sin(t*23+1.7)*0.1*(1+crumbleF*2);
   torchLights.forEach((tl,i)=>{ tl.intensity = envTarget.torch===0
       ? Math.max(0, tl.intensity - 0.03)
@@ -1468,7 +1468,7 @@ function loopBody(now){
   /* the awakening (lid, rise, collapse trigger) */
   updateFinale(now);
   if(pharaohUp){
-    /* free at last: turn toward the sun's side (¾ profile — a literal
+    /* free at last: turn toward the sun's side (¾ profile - a literal
        face-the-sun would put his back to the camera), gaze lifted, gentle bob */
     const yawT = Math.sign(sunMesh.position.x - sarc.group.position.x)*0.85;
     if(reduceMotion){

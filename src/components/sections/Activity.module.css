@@ -1,4 +1,4 @@
-/* The contribution chart is ~720px wide — on phones it scrolls sideways inside
+/* The contribution chart is ~720px wide - on phones it scrolls sideways inside
    its own box instead of stretching the page. */
 .chartScroll {
   overflow-x: auto;

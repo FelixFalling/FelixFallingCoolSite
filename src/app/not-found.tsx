@@ -7,7 +7,7 @@ import styles from "./not-found.module.css";
 
 /**
  * The 404 page. Next.js turns this file into out/404.html at build time, and
- * GitHub Pages automatically serves 404.html for any URL that doesn't exist —
+ * GitHub Pages automatically serves 404.html for any URL that doesn't exist -
  * so wrong links wash up here instead of on a browser error page.
  *
  * It reuses the coastal scene components (waves, rocks, fog) so even being
@@ -15,7 +15,7 @@ import styles from "./not-found.module.css";
  */
 
 export const metadata: Metadata = {
-  title: "Lost at sea — Flying Felix",
+  title: "Lost at sea - Flying Felix",
 };
 
 export default function NotFound() {
@@ -34,7 +34,7 @@ export default function NotFound() {
           <div className={styles.code}>404</div>
           <h1 className={styles.title}>Lost at sea</h1>
           <p className={styles.text}>
-            This page drifted out with the tide — or it never existed at all.
+            This page drifted out with the tide - or it never existed at all.
             The fog makes it hard to tell.
           </p>
           <Button href="/">← Back to shore</Button>

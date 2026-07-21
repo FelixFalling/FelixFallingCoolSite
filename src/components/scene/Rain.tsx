@@ -1,5 +1,5 @@
 /**
- * A soft rain layer over the sea — rendered only when it's actually raining
+ * A soft rain layer over the sea - rendered only when it's actually raining
  * on the Oregon coast right now (see weather.ts). Purely decorative.
  *
  * The rain is one element: a repeating diagonal stripe pattern twice the

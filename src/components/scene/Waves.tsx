@@ -2,11 +2,11 @@
  * The animated ocean waves under the hero. Purely decorative.
  *
  * How it works: each layer is a row of identical SVG "tiles", every tile
- * exactly TILE (1200) pixels wide — one full wave period. Because the tiles
+ * exactly TILE (1200) pixels wide - one full wave period. Because the tiles
  * have a FIXED pixel width, the crests keep their shape on any screen: an
  * ultrawide monitor just sees more tiles, not a stretched-flat wave (the bug
  * the previous version had). The drift animation slides the whole row left or
- * right by exactly one tile, then loops — since the pattern repeats every
+ * right by exactly one tile, then loops - since the pattern repeats every
  * tile, the jump back is invisible.
  *
  * A second, inner element gently bobs each layer up and down ("swell").
@@ -14,10 +14,10 @@
  * makes it read as water rather than a sliding image. Live wind data speeds
  * everything up via --wave-speed (see weather.ts).
  *
- * All the animation timing is data below — tweak the numbers to taste.
+ * All the animation timing is data below - tweak the numbers to taste.
  */
 
-const TILE = 1200; // px — one wave period; fixed so crests never flatten
+const TILE = 1200; // px - one wave period; fixed so crests never flatten
 const TILES = 6; // covers screens up to ~6000px wide plus one tile of travel
 
 /** Build one irregular wave crest as an SVG path string (one 1200px period). */
@@ -47,9 +47,9 @@ interface Layer {
 
 // Back-to-front: faint far swell → deeper teal → breaking wave with foam → sand.
 // Fills are theme tokens (defined in globals.css) so the waves recolor in dark
-// mode. The top "sand" layer uses --sand — the page background — so the waves
+// mode. The top "sand" layer uses --sand - the page background - so the waves
 // always look like they wash onto the page itself, in either theme.
-// Drift durations are one full 1200px loop — short enough that the motion is
+// Drift durations are one full 1200px loop - short enough that the motion is
 // unmistakable at a glance (the break layer travels ~110px every second).
 const LAYERS: Layer[] = [
   { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 0.5, foam: false },
@@ -100,7 +100,7 @@ function WaveLayer({ layer }: { layer: Layer }) {
             {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
             <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} />
             {layer.foam && (
-              // Thin, soft, low-opacity foam — misty spray rather than a bright line.
+              // Thin, soft, low-opacity foam - misty spray rather than a bright line.
               <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} />
             )}
           </svg>

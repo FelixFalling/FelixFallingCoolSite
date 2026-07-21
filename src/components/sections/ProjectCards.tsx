@@ -6,7 +6,7 @@ import Slides from "@/components/ui/Slides";
 import styles from "./Projects.module.css";
 
 /**
- * The shared card renderer used by BOTH the Projects and Games sections —
+ * The shared card renderer used by BOTH the Projects and Games sections -
  * one definition of what a project card looks like, two sections that use it.
  * `grid` is the CSS class that decides the column layout (Projects uses the
  * featured 3-column grid, Games a simple 2-column one).
@@ -18,7 +18,7 @@ export default function ProjectCards({ projects, grid }: { projects: Project[]; 
         <Card key={i} className={styles.card}>
           {project.images && project.images.length > 0 && (
             // Clicking a screenshot opens the project (its code when it has
-            // a repo link — see primaryProjectLink in resume.ts).
+            // a repo link - see primaryProjectLink in resume.ts).
             <Slides
               images={project.images}
               title={project.title}

@@ -3,16 +3,16 @@
  * width. Purely decorative.
  *
  * The old version positioned each rock and the lighthouse separately with
- * absolute pixels — on very wide screens they drifted apart and the
+ * absolute pixels - on very wide screens they drifted apart and the
  * lighthouse floated in mid-air. The fix: each cluster is ONE SVG, and the
  * lighthouse is DRAWN ON its rock inside the same drawing, so they can never
  * separate. Clusters anchor to the waterline (a fixed height above the hero
- * bottom) at a percentage across the scene — sizes stay constant, positions
+ * bottom) at a percentage across the scene - sizes stay constant, positions
  * scale, nothing stretches.
  *
  *   • Headland (left ~16%): a broad crag with the lighthouse on its summit.
  *     In dark mode the lantern glows and a beam sweeps a slow full circle
- *     (gated by --star-opacity — the same no-JS switch the stars use).
+ *     (gated by --star-opacity - the same no-JS switch the stars use).
  *   • Monolith (right ~63%): the big Haystack-style dome with a stout
  *     companion stack.
  *   • A small distant stack (~42%) for depth.
@@ -72,8 +72,8 @@ export default function Shore() {
 
             ONE beam, like a single-panel lamp turning in the horizontal
             plane: it stretches out over the sea, swings in and shrinks as the
-            lamp turns toward you — and at the moment it points your way the
-            beam vanishes and the lantern FLASHES — then it swings back out.
+            lamp turns toward you - and at the moment it points your way the
+            beam vanishes and the lantern FLASHES - then it swings back out.
             beamTurn drives the beam's scaleX, lampFlash brightens the lantern
             at the same instant (both 8s, matched in globals.css). */}
         <div style={{ opacity: "var(--star-opacity)", transition: "opacity 0.25s ease" }}>
@@ -95,7 +95,7 @@ export default function Shore() {
               willChange: "transform, opacity",
             }}
           />
-          {/* The lantern glow — flashes brightest as the beam points your way. */}
+          {/* The lantern glow - flashes brightest as the beam points your way. */}
           <div
             className="lamp-flash"
             style={{
@@ -126,7 +126,7 @@ export default function Shore() {
             <rect x="206" y="18" width="16" height="20" /> {/* lantern room */}
             <path d="M203 18 L214 6 L225 18 Z" /> {/* roof */}
           </g>
-          {/* Lamp window — glows via --star in dark mode. */}
+          {/* Lamp window - glows via --star in dark mode. */}
           <rect x="209" y="21" width="10" height="13" style={{ fill: "var(--star)" }} opacity="var(--star-opacity)" />
         </svg>
       </Cluster>

@@ -4,13 +4,13 @@ import ExternalLink from "@/components/ui/ExternalLink";
 import styles from "./Activity.module.css";
 
 /**
- * The GitHub contribution graph — the "green squares" calendar from a GitHub
+ * The GitHub contribution graph - the "green squares" calendar from a GitHub
  * profile, recolored to the site's teal.
  *
  * The image comes from ghchart.rshah.org, a small free service that renders
  * any user's public contribution graph as an SVG (GitHub itself doesn't offer
  * an embeddable version). The hex in the URL sets the color ramp. If the
- * service ever disappears, the alt text + profile link below still work —
+ * service ever disappears, the alt text + profile link below still work -
  * or just delete this section's line in page.tsx.
  */
 
@@ -36,7 +36,7 @@ export default function Activity() {
         />
       </div>
       <p className={styles.caption}>
-        A year of commits, green-squares style —{" "}
+        A year of commits, green-squares style -{" "}
         <ExternalLink href={resume.links.github}>more experiments on GitHub →</ExternalLink>
       </p>
     </Section>

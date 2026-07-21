@@ -4,7 +4,7 @@ import type { Page, Locator } from "@playwright/test";
  * Component object for the sticky top navigation.
  *
  * A "component object" is a page object for a piece of UI that appears on
- * more than one page — the nav exists on the home page AND the 404 page, so
+ * more than one page - the nav exists on the home page AND the 404 page, so
  * its locators live here once and every page object exposes a NavBar.
  */
 export class NavBar {

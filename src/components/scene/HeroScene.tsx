@@ -9,7 +9,7 @@ import DuckRain from "./DuckRain";
 import { useCoastalWeather } from "./weather";
 
 /**
- * HeroScene — assembles the coastal diorama behind the hero text and, on desktop,
+ * HeroScene - assembles the coastal diorama behind the hero text and, on desktop,
  * makes it react to the mouse.
  *
  * Layering, back → front: stars (sky) → sea stacks → waves. Each layer positions
@@ -23,12 +23,12 @@ import { useCoastalWeather } from "./weather";
  * required because we use browser APIs
  * (matchMedia, pointer events); the rest of the scene is plain CSS/SVG.
  *
- * Touch devices and anyone who prefers reduced motion never get the listener —
+ * Touch devices and anyone who prefers reduced motion never get the listener -
  * they see the calm, ambient version, which needs no JavaScript at all.
  */
 export default function HeroScene() {
   const rootRef = useRef<HTMLDivElement>(null);
-  // Live conditions at Newport, OR — wind speeds up the waves, and rain
+  // Live conditions at Newport, OR - wind speeds up the waves, and rain
   // switches the drizzle layer on. Defaults until loaded.
   const weather = useCoastalWeather();
 

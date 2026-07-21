@@ -1,11 +1,11 @@
 /**
- * Faint stars in the hero sky — visible ONLY in dark mode. Purely decorative.
+ * Faint stars in the hero sky - visible ONLY in dark mode. Purely decorative.
  *
  * How the theme switch works with no JavaScript: the whole group's opacity is
  * the --star-opacity token, which globals.css sets to 0 in light and 1 in dark.
  * Flipping the theme just changes the token and the stars fade in or out.
  *
- * Each star is a tiny dot positioned by the STARS data below — add or move
+ * Each star is a tiny dot positioned by the STARS data below - add or move
  * entries to redraw the night sky.
  */
 

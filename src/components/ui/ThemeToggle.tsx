@@ -8,7 +8,7 @@ import styles from "./ThemeToggle.module.css";
  *
  * The actual theme is applied super-early by the script in layout.tsx (before
  * the page paints). This button just reads the current value on mount and flips
- * it on click — updating the <html data-theme> attribute and saving the choice
+ * it on click - updating the <html data-theme> attribute and saving the choice
  * to localStorage so it sticks and the no-flash script can pick it up next time.
  */
 export default function ThemeToggle() {
@@ -26,7 +26,7 @@ export default function ThemeToggle() {
     try {
       localStorage.setItem("theme", next);
     } catch {
-      /* storage blocked — the choice just won't persist */
+      /* storage blocked - the choice just won't persist */
     }
     setTheme(next);
   }

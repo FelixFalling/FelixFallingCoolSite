@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  YOUR SITE CONTENT — edit everything here.
+ *  YOUR SITE CONTENT - edit everything here.
  * ─────────────────────────────────────────────────────────────────────────
  *  This is the ONE file you change to update the site's text. The components
  *  just render whatever you put here, so you never have to touch layout/HTML
@@ -9,12 +9,12 @@
  *  PRIVACY NOTE: this site is public and scrapable. It deliberately uses the
  *  "Flying Felix" handle and contains no real name, employers, school, photo,
  *  location, or contact details. Keep it that way unless you decide otherwise.
- *  (The Experience/Education sections are currently hidden — see page.tsx.)
+ *  (The Experience/Education sections are currently hidden - see page.tsx.)
  *
  *  TypeScript tip: the `: SomeType` annotations below describe the shape of
  *  each piece of data. If you mistype a field (e.g. forget a project's title),
  *  your editor will underline it in red before you ever deploy. That's the
- *  whole point of TypeScript — catching mistakes early.
+ *  whole point of TypeScript - catching mistakes early.
  */
 
 export interface Job {
@@ -65,18 +65,18 @@ export interface Resume {
   photo?: string;
   links: {
     github: string;
-    linkedin?: string; // hidden for now — ties the handle to a real identity
+    linkedin?: string; // hidden for now - ties the handle to a real identity
     resumePdf?: string; // file placed in /public, e.g. "resume.pdf"
   };
   experience: Job[];
   projects: Project[];
-  games: Project[]; // the just-for-fun vibe-coded toys — own section below Projects
+  games: Project[]; // the just-for-fun vibe-coded toys - own section below Projects
   education: School[];
   honors?: string;
   skills: SkillGroup[];
 }
 
-// The base path GitHub Pages serves from — used to build links to the
+// The base path GitHub Pages serves from - used to build links to the
 // standalone pages in /public. Imported from the repo root so the app and the
 // tests agree on it (see basePath.mjs).
 import { BASE_PATH } from "../../basePath.mjs";
@@ -96,11 +96,11 @@ export const resume: Resume = {
   location: "Somewhere along a foggy coast",
   specialties: "Test automation · Embedded systems · DevOps",
   about:
-    "I build software with a tester's mindset — automation, validation, and " +
+    "I build software with a tester's mindset - automation, validation, and " +
     "documentation-driven development, from embedded firmware up to web " +
     "interfaces. This site is one of my projects: everything on it, from the " +
     "waves to the CI pipeline, is hand-built and open source.",
-  // Shows a placeholder circle in the hero (no real photo — that stays off
+  // Shows a placeholder circle in the hero (no real photo - that stays off
   // the pseudonymous site). Drop a real image in later by replacing the
   // placeholder markup in sections/Hero.tsx.
   showPhoto: true,
@@ -110,11 +110,11 @@ export const resume: Resume = {
     github: "https://github.com/FelixFalling",
     // linkedin: intentionally omitted for now (see PRIVACY NOTE above)
     // The PDF is the PSEUDONYMOUS one-pager (source: scripts/resume-pdf.html)
-    // — never upload the real resume here.
+    // - never upload the real resume here.
     resumePdf: "resume.pdf",
   },
 
-  // Hidden for now (see page.tsx) — fill these in when you're ready to share.
+  // Hidden for now (see page.tsx) - fill these in when you're ready to share.
   experience: [],
 
   projects: [
@@ -124,7 +124,7 @@ export const resume: Resume = {
       description:
         "A real-time perception-to-actuation pipeline: a YOLOv8 detector " +
         "trained entirely on synthetic Blender renders (1,000+ auto-labeled " +
-        "images — zero real photos) spots a rubber duck, an Intel RealSense " +
+        "images - zero real photos) spots a rubber duck, an Intel RealSense " +
         "depth camera localizes it in metric 3D, and an Arduino-driven " +
         "two-servo laser turret tracks it live at 85–91% real-world " +
         "detection. Live RGB + depth monitoring UI in OpenCV.",
@@ -133,7 +133,7 @@ export const resume: Resume = {
         { label: "View the code →", href: "https://github.com/FelixFalling/Rubber-Duckie-Terminator" },
       ],
       images: [
-        { src: "projects/ducky-1.jpg", alt: "Live detection feed — RGB view with a duck bounding box beside the depth view" },
+        { src: "projects/ducky-1.jpg", alt: "Live detection feed - RGB view with a duck bounding box beside the depth view" },
       ],
       tags: ["Python", "YOLOv8", "OpenCV", "Arduino", "Synthetic data"],
     },
@@ -149,7 +149,7 @@ export const resume: Resume = {
         "server behind the live site.",
       links: [{ label: "Visit the live site →", href: "https://wdt.cecs.pdx.edu/" }],
       images: [
-        { src: "projects/wildfire-1.png", alt: "The wildfire forecast dashboard — a WRF-SFIRE fire-spread simulation over a map" },
+        { src: "projects/wildfire-1.png", alt: "The wildfire forecast dashboard - a WRF-SFIRE fire-spread simulation over a map" },
       ],
       tags: ["Python", "Deep learning", "HPC / SLURM", "Docker", "Geospatial"],
     },
@@ -158,7 +158,7 @@ export const resume: Resume = {
       title: "Tic-Tac-Toe Q-Learning Agent",
       description:
         "A tabular Q-learning agent that learns tic-tac-toe from scratch " +
-        "through self-play — no hardcoded strategy. Board states are encoded " +
+        "through self-play - no hardcoded strategy. Board states are encoded " +
         "as a base-3 integer to index the Q-table, moves are chosen with a " +
         "decaying epsilon-greedy policy, and rewards (+1 win, +0.5 draw, -1 " +
         "loss) propagate back through the game via the Q-learning update " +
@@ -177,7 +177,7 @@ export const resume: Resume = {
       description:
         "AI and ML fundamentals implemented by hand: heuristic search, a " +
         "genetic algorithm for the eight-queens problem with population-size " +
-        "experiments, and hand-rolled gradient descent — plus a " +
+        "experiments, and hand-rolled gradient descent - plus a " +
         "transfer-learning CNN in TensorFlow that reached 97.35% accuracy.",
       links: [
         { label: "♛ Genetic 8-queens →", href: "https://github.com/FelixFalling/eight_queens_problem" },
@@ -200,29 +200,29 @@ export const resume: Resume = {
         "GitHub Pages by CI on every push.",
       links: [{ label: "View the code →", href: "https://github.com/FelixFalling/FelixFallingCoolSite" }],
       images: [
-        { src: "projects/site-light.png", alt: "The portfolio homepage in light mode — fog and sea stacks under the hero" },
-        { src: "projects/site-dark.png", alt: "The portfolio homepage in dark mode — moonlit waves and stars" },
+        { src: "projects/site-light.png", alt: "The portfolio homepage in light mode - fog and sea stacks under the hero" },
+        { src: "projects/site-dark.png", alt: "The portfolio homepage in dark mode - moonlit waves and stars" },
       ],
       tags: ["Next.js", "TypeScript", "Playwright", "GitHub Actions"],
     },
   ],
 
-  // The just-for-fun corner — vibe-coded toys, shown in their own Games
+  // The just-for-fun corner - vibe-coded toys, shown in their own Games
   // section right below Projects.
   games: [
     {
       eyebrow: "Vibe-coded · Just for fun",
       title: "Curse of Ra",
       description:
-        "A work-hours punch clock disguised as an animated Egyptian tomb — " +
+        "A work-hours punch clock disguised as an animated Egyptian tomb - " +
         "tap the cartouche to clock in and out, and it tracks your day and " +
         "your weekly 40 while the scene glitters around you. Vibe-coded " +
         "with an AI pair as a side experiment: I directed, reviewed, and " +
         "shipped it as one self-contained HTML file.",
       links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
       images: [
-        { src: "projects/clock-1.png", alt: "The Curse of Ra clock at night — a moonlit Egyptian tomb with a golden clock" },
-        { src: "projects/clock-2.png", alt: "The Curse of Ra clock by day — sunbeams lighting the tomb in gold" },
+        { src: "projects/clock-1.png", alt: "The Curse of Ra clock at night - a moonlit Egyptian tomb with a golden clock" },
+        { src: "projects/clock-2.png", alt: "The Curse of Ra clock by day - sunbeams lighting the tomb in gold" },
       ],
       tags: ["HTML", "CSS animation", "Vanilla JS", "AI-assisted"],
     },
@@ -232,19 +232,19 @@ export const resume: Resume = {
       description:
         "An endless-climb browser game: a very normal cat, a laser dot, and " +
         "a tower that never ends. Bat things off shelves, dodge ghost " +
-        "librarians, cursed grimoires, and darting wisps — and past 50 " +
+        "librarians, cursed grimoires, and darting wisps - and past 50 " +
         "meters, fight the wizard himself for boons and unlockable cats. " +
         "Vibe-coded: AI-paired, human-directed, one dependency-free HTML file.",
       links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
       images: [
-        { src: "projects/wizard-2.png", alt: "The Wizard's Tower gameplay — a cat chasing a laser dot up shelves, dodging ghost librarians" },
+        { src: "projects/wizard-2.png", alt: "The Wizard's Tower gameplay - a cat chasing a laser dot up shelves, dodging ghost librarians" },
         { src: "projects/wizard-1.png", alt: "The Wizard's Tower title screen with unlockable cat skins" },
       ],
       tags: ["JavaScript", "Game", "CSS", "AI-assisted"],
     },
   ],
 
-  // Hidden for now (see page.tsx) — fill in when you're ready to share.
+  // Hidden for now (see page.tsx) - fill in when you're ready to share.
   education: [],
   honors: undefined,
 

@@ -24,10 +24,27 @@ export class BasePage {
 
   /**
    * Navigate relative to the configured baseURL (which already includes the
-   * GitHub Pages base path — see playwright.config.ts). An optional theme
+   * GitHub Pages base path - see playwright.config.ts). An optional theme
    * query forces light or dark mode for the visit.
    */
   async goto(path = "./", theme?: "light" | "dark"): Promise<void> {
     await this.page.goto(theme ? `${path}?theme=${theme}` : path);
+    await this.dismissConstructionPopup();
+  }
+
+  /**
+   * The under-construction popup (ConstructionPopup.tsx) covers the page and
+   * blocks clicks until it's closed. It only shows once per browser (via
+   * localStorage) and only on the home page, so most navigations won't find
+   * it - this is a no-op when it doesn't appear.
+   */
+  private async dismissConstructionPopup(): Promise<void> {
+    const dismiss = this.page.getByRole("button", { name: "Dismiss this notice" });
+    try {
+      await dismiss.waitFor({ state: "visible", timeout: 2000 });
+      await dismiss.click();
+    } catch {
+      // didn't show - already dismissed this session, or this page has none
+    }
   }
 }

@@ -8,7 +8,7 @@ import styles from "./ConstructionPopup.module.css";
 const STORAGE_KEY = "construction-notice-dismissed";
 
 /**
- * A one-time "still building this" popup. It checks localStorage on mount —
+ * A one-time "still building this" popup. It checks localStorage on mount -
  * if this visitor hasn't dismissed it before, it shows the dialog; closing it
  * (via the button, the backdrop, or Escape) saves that choice so it won't
  * show again on this device.
@@ -25,7 +25,7 @@ export default function ConstructionPopup() {
         setOpen(true);
       }
     } catch {
-      // storage blocked — just show it every visit rather than crash
+      // storage blocked - just show it every visit rather than crash
       setOpen(true);
     }
   }, []);
@@ -35,7 +35,7 @@ export default function ConstructionPopup() {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
-      /* storage blocked — the choice just won't persist */
+      /* storage blocked - the choice just won't persist */
     }
   }
 
@@ -72,7 +72,7 @@ export default function ConstructionPopup() {
           Under construction
         </h2>
         <p className={styles.text}>
-          This site is still being built — some things may be unfinished or change.
+          This site is still being built - some things may be unfinished or change.
         </p>
         <button type="button" onClick={dismiss} className={styles.action}>
           Got it

@@ -3,7 +3,7 @@ import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
 /**
- * Playwright fixtures — the wiring of the Page Object Model framework.
+ * Playwright fixtures - the wiring of the Page Object Model framework.
  *
  * `test.extend` teaches Playwright to build our page objects on demand: any
  * test that lists `homePage` (or `notFoundPage`) in its arguments receives a
@@ -17,7 +17,7 @@ import { NotFoundPage } from "./pages/NotFoundPage";
  *   });
  *
  * Specs import `test` and `expect` from THIS file instead of
- * "@playwright/test" — that's the only change needed to opt in.
+ * "@playwright/test" - that's the only change needed to opt in.
  */
 type Fixtures = {
   homePage: HomePage;

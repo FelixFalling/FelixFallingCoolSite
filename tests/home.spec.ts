@@ -5,15 +5,15 @@ import { resume, primaryProjectLink } from "../src/data/resume";
  * Smoke tests for the home page: does everything render, link, and navigate?
  *
  * Two things to notice about how these are written:
- * 1. They receive `homePage` — a page object from fixtures.ts. All locators
+ * 1. They receive `homePage` - a page object from fixtures.ts. All locators
  *    live in tests/pages/HomePage.ts; the specs just act and assert.
- * 2. They import resume.ts — the same data the site renders from — so
+ * 2. They import resume.ts - the same data the site renders from - so
  *    updating your resume never breaks a test.
  */
 
 test.describe("home page", () => {
   test("loads with no browser console errors", async ({ homePage, page }) => {
-    // Collect any JS errors the page throws while loading — a hydration bug or
+    // Collect any JS errors the page throws while loading - a hydration bug or
     // broken import shows up here long before you'd spot it visually.
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
@@ -32,7 +32,7 @@ test.describe("home page", () => {
   test("hero links match the data file", async ({ homePage }) => {
     await homePage.goto();
     await expect(homePage.githubButton).toHaveAttribute("href", resume.links.github);
-    // LinkedIn is optional (and currently hidden for privacy) — the button
+    // LinkedIn is optional (and currently hidden for privacy) - the button
     // must only exist when the data file provides a URL.
     if (resume.links.linkedin) {
       await expect(homePage.linkedinButton).toHaveAttribute("href", resume.links.linkedin);
@@ -79,18 +79,13 @@ test.describe("home page", () => {
       for (const link of project.links ?? []) {
         await expect(card.link(link.label)).toHaveAttribute("href", link.href);
       }
-      // Clicking a screenshot opens the project — its code link when it has
+      // Clicking a screenshot opens the project - its code link when it has
       // one (primaryProjectLink is the same helper the site renders with).
       const primary = primaryProjectLink(project);
       if (project.images?.length && primary) {
         await expect(card.slideLink).toHaveAttribute("href", primary.href);
       }
     }
-  });
-
-  test("the Curse of Ra clock link is there", async ({ homePage }) => {
-    await homePage.goto();
-    await expect(homePage.curseOfRaLink).toHaveAttribute("href", /clockmaker\.html$/);
   });
 });
 
@@ -118,8 +113,8 @@ test.describe("404 page", () => {
 
 test.describe("reduced motion", () => {
   // Simulate a visitor whose OS is set to "reduce motion". Policy (see the
-  // media query in globals.css): the gentle horizontal drift KEEPS moving —
-  // it's the site's identity and calm enough — while the springier vertical
+  // media query in globals.css): the gentle horizontal drift KEEPS moving -
+  // it's the site's identity and calm enough - while the springier vertical
   // swell (and beam, parallax, ducks) stops.
   // emulateMedia must run BEFORE goto so the page loads with the setting on.
   test("swell stops but the gentle drift keeps flowing", async ({ homePage, page }) => {

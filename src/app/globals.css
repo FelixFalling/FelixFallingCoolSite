@@ -17,22 +17,22 @@
 :root {
   color-scheme: light;
 
-  /* LIGHT THEME — "overcast Oregon coast, midday fog": cool, desaturated,
+  /* LIGHT THEME - "overcast Oregon coast, midday fog": cool, desaturated,
      silver-grey with deep spruce-teal accents. */
 
   /* Surfaces */
-  --sand: #edf1f1; /* page background — a cool fog-grey, not warm cream */
-  --card-bg: #f8fbfb; /* cards — a touch lighter than the page */
+  --sand: #edf1f1; /* page background - a cool fog-grey, not warm cream */
+  --card-bg: #f8fbfb; /* cards - a touch lighter than the page */
   --card-border: rgba(40, 64, 74, 0.12);
   --card-shadow: 0 2px 12px rgba(35, 55, 65, 0.06);
   --surface-2: rgba(58, 111, 107, 0.1); /* tags, ghost button */
 
   /* Text */
-  --ink: #2a3743; /* default body text — cool charcoal */
-  --navy: #1e3a42; /* headings + brand — deep slate-teal (NOT backgrounds) */
+  --ink: #2a3743; /* default body text - cool charcoal */
+  --navy: #1e3a42; /* headings + brand - deep slate-teal (NOT backgrounds) */
   --slate: #384b53; /* paragraph text */
-  --muted: #5c6d75; /* secondary / meta text (4.7:1 on --sand — WCAG AA) */
-  --text-title: #2f5560; /* hero job title — deep teal */
+  --muted: #5c6d75; /* secondary / meta text (4.7:1 on --sand - WCAG AA) */
+  --text-title: #2f5560; /* hero job title - deep teal */
   --text-subtle: #45585f; /* hero specialties, honors line */
 
   /* Accents */
@@ -40,7 +40,7 @@
   --teal-deep: #2b5450;
   --rule: rgba(58, 111, 107, 0.4); /* the fading line beside section titles */
 
-  /* Primary action (filled buttons) — a real background, kept separate from
+  /* Primary action (filled buttons) - a real background, kept separate from
      --navy so it can stay vivid in dark mode instead of turning light. */
   --primary: #22505a; /* deep sea */
   --primary-hover: #2c6470;
@@ -50,7 +50,7 @@
   --nav-bg: rgba(237, 241, 241, 0.9);
   --nav-link: #3f525a;
 
-  /* Hero — fog-silver sky at the top fading to cold sea-teal at the bottom. */
+  /* Hero - fog-silver sky at the top fading to cold sea-teal at the bottom. */
   --hero-from: #dbe4e5;
   --hero-via: #c4d5d5;
   --hero-to: #9fc0c1;
@@ -58,13 +58,13 @@
   --photo-to: #6f9c9d;
   --photo-text: #274a4c;
 
-  /* Footer (a dark band in both themes) — deep teal-basalt. */
+  /* Footer (a dark band in both themes) - deep teal-basalt. */
   --footer-bg: #152c33;
   --footer-text: #c6d5d6;
   --footer-title: #f2f7f7;
   --footer-subtitle: #93aab0;
   --footer-link-border: rgba(255, 255, 255, 0.3);
-  --footer-copyright: #8ba1a7; /* 5.4:1 on the footer band — WCAG AA */
+  --footer-copyright: #8ba1a7; /* 5.4:1 on the footer band - WCAG AA */
 
   /* Ocean waves under the hero (the "sand" layer uses --sand so it always
      matches the page background it washes onto). Back→front the water deepens;
@@ -72,11 +72,11 @@
   --wave-far: #b6cbcb; /* hazy, distant */
   --wave-mid: #6b9c9b;
   --wave-break: #3d716d; /* deepest, nearest crest */
-  --wave-foam: #e9f0ee; /* soft off-white — misty spray, not stark white */
+  --wave-foam: #e9f0ee; /* soft off-white - misty spray, not stark white */
 
   /* Coastal scene extras (the hero diorama). */
-  --sea-stack: #7f9a9c; /* offshore rock silhouette — hazy grey-blue in fog */
-  --mist: 255, 255, 255; /* fog color as R,G,B — layers set their own alpha */
+  --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
+  --mist: 255, 255, 255; /* fog color as R,G,B - layers set their own alpha */
   --star: #e9f2f2; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
@@ -86,7 +86,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* DARK THEME — "Oregon coast at night, moonlit fog": deep cold blue-greens,
+  /* DARK THEME - "Oregon coast at night, moonlit fog": deep cold blue-greens,
      muted, with a faint moonlit glow. */
 
   --sand: #0c1418;
@@ -125,7 +125,7 @@
   --footer-title: #eef3fb;
   --footer-subtitle: #7f9296;
   --footer-link-border: rgba(255, 255, 255, 0.2);
-  --footer-copyright: #7d8a9c; /* 5.6:1 on the dark footer — WCAG AA */
+  --footer-copyright: #7d8a9c; /* 5.6:1 on the dark footer - WCAG AA */
 
   --wave-far: #223d44;
   --wave-mid: #2b5c5e;
@@ -294,7 +294,7 @@ a {
 /* ── Phone layout ──────────────────────────────────────────────────────────
  * Slightly tighter side padding and section rhythm on small screens, so the
  * content gets more of the width without feeling cramped. The shore (rocks +
- * lighthouse) also shrinks below 1100px — on narrow screens the hero text
+ * lighthouse) also shrinks below 1100px - on narrow screens the hero text
  * column reaches the left edge, and this keeps the lighthouse under it. */
 @media (max-width: 1100px) {
   :root {
@@ -324,7 +324,7 @@ a {
  * Two drift directions so adjacent wave layers move against each other, plus
  * two gentle vertical "swell" bobs. Respects reduced-motion preferences.
  * The drift distance is exactly one 1200px wave tile (see Waves.tsx), so the
- * loop restart lands on an identical crest — seamless at any screen width. */
+ * loop restart lands on an identical crest - seamless at any screen width. */
 @keyframes waveDrift {
   from {
     transform: translateX(0);
@@ -395,7 +395,7 @@ a {
     opacity: 1;
   }
 }
-/* The lantern flashes brightest exactly when the beam points at the viewer —
+/* The lantern flashes brightest exactly when the beam points at the viewer -
  * the 50% mark of beamTurn, where the cone has vanished. */
 @keyframes lampFlash {
   0%,

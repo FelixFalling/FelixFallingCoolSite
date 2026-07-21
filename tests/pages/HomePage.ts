@@ -2,7 +2,7 @@ import type { Page, Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
 import { ProjectCard } from "../components/ProjectCard";
 
-/** Page object for the home page — hero, sections, scene, and the easter egg. */
+/** Page object for the home page - hero, sections, scene, and the easter egg. */
 export class HomePage extends BasePage {
   // ── Hero ────────────────────────────────────────────────────────────────
   readonly heroName: Locator;
@@ -16,11 +16,6 @@ export class HomePage extends BasePage {
   readonly waveSwell: Locator;
   readonly ducks: Locator;
 
-  // ── Extras ──────────────────────────────────────────────────────────────
-  /** The floating "🕑 Curse of Ra" pill (matched exactly, so it can't collide
-      with the Curse of Ra project card's links). */
-  readonly curseOfRaLink: Locator;
-
   constructor(page: Page) {
     super(page);
     const hero = page.locator("header");
@@ -33,8 +28,6 @@ export class HomePage extends BasePage {
     this.waveDrift = page.locator(".wave-drift").first();
     this.waveSwell = page.locator(".wave-swell").first();
     this.ducks = page.locator("[data-duck]");
-
-    this.curseOfRaLink = page.getByRole("link", { name: "🕑 Curse of Ra", exact: true });
   }
 
   /** Text matching the hero's job title line. */

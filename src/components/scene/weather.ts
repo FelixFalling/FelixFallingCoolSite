@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * Live coastal weather for the hero scene.
  *
  * On page load this asks Open-Meteo (a free, no-API-key weather service) for
- * the CURRENT conditions at Newport, on the real Oregon coast — and the scene
+ * the CURRENT conditions at Newport, on the real Oregon coast - and the scene
  * quietly matches them:
  *
  *   • wind → the waves (and their swell) speed up
@@ -14,10 +14,10 @@ import { useEffect, useState } from "react";
  *
  * So the site's weather is the coast's actual weather right now. If the
  * request fails (offline, ad-blocker, API down) everything just keeps the
- * defaults — the scene never depends on the network.
+ * defaults - the scene never depends on the network.
  */
 
-// Newport, Oregon — the stretch of coast the scene is modeled on.
+// Newport, Oregon - the stretch of coast the scene is modeled on.
 const LAT = 44.63;
 const LON = -124.05;
 const API =
@@ -37,7 +37,7 @@ function interpret(code: number, windKmh: number): CoastalWeather {
   const raining =
     (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
 
-  // Wind speeds up the water — clamped so the scene stays calm-ish.
+  // Wind speeds up the water - clamped so the scene stays calm-ish.
   const waveSpeed = Math.min(1.7, Math.max(0.85, 0.85 + windKmh / 45));
 
   return { waveSpeed, raining };
@@ -57,7 +57,7 @@ export function useCoastalWeather(): CoastalWeather {
         setWeather(interpret(current.weather_code, current.wind_speed_10m ?? 0));
       })
       .catch(() => {
-        /* offline / blocked — keep the defaults, no error surfaced */
+        /* offline / blocked - keep the defaults, no error surfaced */
       });
     return () => {
       cancelled = true;

@@ -120,7 +120,7 @@
   }
   .chip.hurt{ animation:chipHurt .4s ease; }
 
-  /* the combo chain chip — appears while a kill-chain is alive, glows gold */
+  /* the combo chain chip - appears while a kill-chain is alive, glows gold */
   .chip.combo{ border-color:rgba(255,214,107,.6); transition:opacity .15s ease; }
   .chip.combo b{ color:#ffd66b; }
   .chip.combo.pulse{ animation:comboPulse .32s ease; }
@@ -435,7 +435,7 @@ function resetMods(){
    `knocked` doubles as spendable loot at the merchant (see openShop). A
    kill-chain builds `combo`: each pounced enemy bumps it and pays out coins
    ×the multiplier, and every object she knocks loose keeps the chain's timer
-   (`comboT`) topped up — so batting shelves between kills sustains the combo.
+   (`comboT`) topped up - so batting shelves between kills sustains the combo.
    `earned` is the run's lifetime take (never spent), `comboBest` the longest
    chain, both shown on the game-over card. */
 let combo = 0, comboT = 0, comboBest = 0, earned = 0;
@@ -920,7 +920,7 @@ function updateItems(dt){
           if (impact > 120) sThud();
         }
       }
-      // flying items can shove neighbours — but ONLY on the same shelf level
+      // flying items can shove neighbours - but ONLY on the same shelf level
       // (the old 160*S band let one swat cascade across half the tower)
       const sp = Math.hypot(it.vx, it.vy);
       if (sp > 200){
@@ -1014,7 +1014,7 @@ function stunCat(t){
   cat.stun = Math.max(cat.stun, t);
   if (cat.state === 'crouch') cat.state = 'ground';
 }
-/* One landed hit on the wizard — from a flying pounce OR a standing swat
+/* One landed hit on the wizard - from a flying pounce OR a standing swat
    when he swoops within paw range. */
 function tryBossPounce(range){
   if (!boss || boss.inv > 0) return;
@@ -1432,7 +1432,7 @@ function updateBoss(dt){
   if (!boss) return;
   boss.inv = Math.max(0, boss.inv - dt);
 
-  // if the cat leaves him far behind (up OR down), he blinks back to her —
+  // if the cat leaves him far behind (up OR down), he blinks back to her -
   // he must never be simply outrun, and never left unreachable
   if (Math.abs(cat.y - boss.ay) > H*.9){
     puff(boss.x, boss.y-20*S, 8);
@@ -1444,7 +1444,7 @@ function updateBoss(dt){
   }
 
   // the dip: every few seconds he swoops down to the cat's level and glides
-  // there for a beat — THAT is the window to pounce him. He holds his fire
+  // there for a beat - THAT is the window to pounce him. He holds his fire
   // while low, so diving in is brave, not suicidal.
   boss.dipCd -= dt;
   if (boss.dipCd <= 0 && boss.dipT <= 0){ boss.dipT = 2.0; boss.dipCd = rnd(3.6,5); }
@@ -2602,7 +2602,7 @@ function frame(t){
     if (cat.blinkT <= 0){ cat.blink = .14; cat.blinkT = rnd(2.2,5); }
     cat.blink = Math.max(0, cat.blink - dt);
   }
-  updateParticles(realDt); // the confetti keeps real time — the show must pop
+  updateParticles(realDt); // the confetti keeps real time - the show must pop
 
   const camT = clamp(cat.y - H*.62, -1e12, FLOOR.y + 60*S - H);
   camY += (camT - camY)*Math.min(1, realDt*5);
@@ -2804,7 +2804,7 @@ function loseLife(){
   if (gameState !== 'playing') return;
   lives--;
   renderLives();
-  // the hearts chip already shows the toll — no toast blocking the action.
+  // the hearts chip already shows the toll - no toast blocking the action.
   // a quick red flash of the lives chip sells the hit instead.
   livesChip.classList.remove('hurt'); void livesChip.offsetWidth;
   livesChip.classList.add('hurt');

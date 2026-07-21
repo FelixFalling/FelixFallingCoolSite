@@ -3,7 +3,7 @@ import { test, expect } from "./fixtures";
 /**
  * Tests for the light/dark theme system.
  *
- * The theme lives in one place — the data-theme attribute on <html> — so most
+ * The theme lives in one place - the data-theme attribute on <html> - so most
  * of these tests just check that attribute after doing something. Navigation
  * and the toggle go through the HomePage / NavBar page objects.
  */
@@ -30,7 +30,7 @@ test.describe("theme", () => {
     await homePage.nav.toggleTheme();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
-    // Reload — the saved choice in localStorage should stick.
+    // Reload - the saved choice in localStorage should stick.
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   });

@@ -1,11 +1,11 @@
 # FelixFallingCoolSite
 
-My personal portfolio / resume site — built with **Next.js + TypeScript**, deployed
+My personal portfolio / resume site - built with **Next.js + TypeScript**, deployed
 as a static site to **GitHub Pages** at
 <https://felixfalling.github.io/FelixFallingCoolSite/>.
 
 The design is a moody Oregon-coast scene: sea stacks and a sweeping lighthouse
-over waves breaking under the hero — with a light theme ("overcast day") and a
+over waves breaking under the hero - with a light theme ("overcast day") and a
 dark theme ("moonlit night").
 
 ## Quick start
@@ -20,7 +20,7 @@ Edit a file and the browser refreshes automatically.
 
 ## The one-file rule: editing your content
 
-**All the site's text lives in [`src/data/resume.ts`](src/data/resume.ts)** —
+**All the site's text lives in [`src/data/resume.ts`](src/data/resume.ts)** -
 name, jobs, projects, education, skills, links. Edit that file and every section
 updates. You never need to touch layout code to change what the site *says*.
 
@@ -30,12 +30,12 @@ updates. You never need to touch layout code to change what the site *says*.
 src/
   app/
     layout.tsx          root <html>, metadata, the no-flash theme script
-    page.tsx            THE PAGE — an ordered list of sections. Reorder or
+    page.tsx            THE PAGE - an ordered list of sections. Reorder or
                         delete a line here to restructure the site.
     globals.css         ALL colors (theme tokens) + shared styles + keyframes
   components/
     sections/           one file per block of the page, top to bottom
-      Hero.tsx          name, title, buttons — sits on top of the coast scene
+      Hero.tsx          name, title, buttons - sits on top of the coast scene
       About.tsx  Experience.tsx  Projects.tsx  Education.tsx  Skills.tsx
       Contact.tsx       the footer
     scene/              the animated coastal diorama behind the hero
@@ -48,7 +48,7 @@ src/
       Stars.tsx         faint stars (dark mode only)
       weather.ts  Rain.tsx  DuckRain.tsx (live weather + the easter egg)
     ui/                 shared building blocks used across pages
-      Button.tsx        THE button (primary/ghost) — hero + 404 use it
+      Button.tsx        THE button (primary/ghost) - hero + 404 use it
       Section.tsx       the section scaffold (reveal + title) every section uses
       Card.tsx  Tag.tsx  ExternalLink.tsx   small shared pieces
       Nav.tsx           sticky top nav
@@ -58,7 +58,7 @@ src/
       FunLink.tsx       the "Curse of Ra" pill (links to the clock page)
   data/
     resume.ts           ← YOUR CONTENT
-tests/                  Playwright tests — Page Object Model (see below)
+tests/                  Playwright tests - Page Object Model (see below)
   fixtures.ts           wires page objects into every test
   pages/                one class per page (HomePage, NotFoundPage, BasePage)
   components/           objects for shared UI (NavBar, Footer, ProjectCard)
@@ -72,10 +72,10 @@ public/
 Every color on the site is a CSS variable ("token") defined **once** at the top
 of [`src/app/globals.css`](src/app/globals.css):
 
-- `:root { … }` — the light theme
-- `:root[data-theme="dark"] { … }` — the dark overrides
+- `:root { … }` - the light theme
+- `:root[data-theme="dark"] { … }` - the dark overrides
 
-Components only ever say `var(--teal)`, never a hex code — so retuning a token
+Components only ever say `var(--teal)`, never a hex code - so retuning a token
 recolors the whole site consistently in both themes. A tiny script in
 `layout.tsx` applies the saved theme before the first paint (no flash), and the
 nav button just flips the `data-theme` attribute.
@@ -87,29 +87,29 @@ Tip while designing: force a theme from the URL with `?theme=dark` or
 
 `HeroScene.tsx` stacks the layers back-to-front: stars → shore (rocks +
 lighthouse) → waves → rain. Each layer is a small
-file where the interesting parts are **plain data arrays** — positions, sizes,
-speeds, opacities — with comments explaining each number. Want a fifth wave?
+file where the interesting parts are **plain data arrays** - positions, sizes,
+speeds, opacities - with comments explaining each number. Want a fifth wave?
 Add a line to `LAYERS` in `Waves.tsx`.
 
 On desktop the scene drifts toward your cursor (parallax). Phones get the
 ambient version, and visitors with "reduce motion" set in their OS get a still
-scene — that's handled by the `prefers-reduced-motion` block in `globals.css`.
+scene - that's handled by the `prefers-reduced-motion` block in `globals.css`.
 
 The scene is also **alive**: at night the lighthouse light turns like the real
-thing — its beam sweeping and flashing as it points your way (`Shore.tsx`) —
+thing - its beam sweeping and flashing as it points your way (`Shore.tsx`) -
 and the wave speed and rain match the *actual current weather* on the Oregon
-coast via Open-Meteo (`weather.ts` — free API, no key; if the request fails
+coast via Open-Meteo (`weather.ts` - free API, no key; if the request fails
 the scene just keeps its defaults). And there's at least one easter egg. Try
 typing something a certain terminator would hunt for.
 
 ## Automated tests (Playwright)
 
 Real-browser tests live in [`tests/`](tests/). They start the dev server
-themselves — you just run:
+themselves - you just run:
 
 ```bash
 npm test                  # run everything headless
-npm run test:ui           # interactive mode — watch the browser, time-travel
+npm run test:ui           # interactive mode - watch the browser, time-travel
 npx playwright codegen    # record your clicks as test code (great for learning)
 npx playwright show-report  # open the HTML report from the last run
 ```
@@ -117,7 +117,7 @@ npx playwright show-report  # open the HTML report from the last run
 Every test runs twice: on a desktop-sized browser and on an emulated phone
 (the `projects` in [`playwright.config.ts`](playwright.config.ts)).
 
-**The framework follows the Page Object Model (POM)** — the industry-standard
+**The framework follows the Page Object Model (POM)** - the industry-standard
 test architecture. Each page gets a class owning its locators and user
 actions (`tests/pages/`), shared UI gets component objects (`tests/components/`),
 and [`tests/fixtures.ts`](tests/fixtures.ts) injects them so a test reads like
@@ -136,21 +136,21 @@ House rules: page objects hold locators + actions, **assertions stay in the
 specs**; locators prefer accessible roles/names over CSS selectors; a selector
 only ever needs changing in one place. The specs to copy from:
 
-- `home.spec.ts` — page loads, sections render, links are right, no JS errors, 404 page
-- `theme.spec.ts` — dark/light switching, persistence, dark-only stars
-- `mobile.spec.ts` — no sideways scrolling, tappable buttons (phone project only)
-- `accessibility.spec.ts` — axe-core WCAG A/AA scans of both themes and the 404 page
+- `home.spec.ts` - page loads, sections render, links are right, no JS errors, 404 page
+- `theme.spec.ts` - dark/light switching, persistence, dark-only stars
+- `mobile.spec.ts` - no sideways scrolling, tappable buttons (phone project only)
+- `accessibility.spec.ts` - axe-core WCAG A/AA scans of both themes and the 404 page
 
 Tests import `resume.ts` directly, so they keep passing when you edit your
-content — they check structure and behavior, not hardcoded strings.
+content - they check structure and behavior, not hardcoded strings.
 
 ## CI and deploying
 
 Two GitHub Actions workflows run on every push to `main`:
 
-- [`test.yml`](.github/workflows/test.yml) — runs the Playwright suite; you get
+- [`test.yml`](.github/workflows/test.yml) - runs the Playwright suite; you get
   a green ✓ / red ✗ on the commit (and on every pull request).
-- [`static.yml`](.github/workflows/static.yml) — builds the static site
+- [`static.yml`](.github/workflows/static.yml) - builds the static site
   (`npm run build` → `./out`) and publishes it to GitHub Pages.
 
 They're independent: a failed test never blocks a deploy. If you want failing

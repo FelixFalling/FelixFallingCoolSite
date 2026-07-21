@@ -11,7 +11,7 @@ export default function Experience() {
           <Card key={i}>
             <div className={styles.head}>
               <h3 className={styles.role}>
-                {job.company} — {job.title}
+                {job.company} - {job.title}
               </h3>
               <span className={styles.period}>{job.period}</span>
             </div>

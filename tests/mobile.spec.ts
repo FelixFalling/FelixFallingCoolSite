@@ -2,7 +2,7 @@ import { test, expect } from "./fixtures";
 
 /**
  * Phone-specific checks. The whole test suite already runs on a phone-sized
- * browser (the "mobile" project in playwright.config.ts) — these tests are for
+ * browser (the "mobile" project in playwright.config.ts) - these tests are for
  * things that only matter, or only go wrong, on small screens.
  *
  * They're skipped on the desktop project via the isMobile check.
@@ -16,7 +16,7 @@ test.describe("phone layout", () => {
   test("no horizontal scrolling anywhere on the page", async ({ homePage }) => {
     await homePage.goto();
     // If any element pokes past the right edge, the page gets a sideways
-    // scrollbar — the classic broken-on-mobile symptom.
+    // scrollbar - the classic broken-on-mobile symptom.
     expect(await homePage.horizontalOverflow()).toBe(0);
   });
 

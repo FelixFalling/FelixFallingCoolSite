@@ -9,11 +9,11 @@ import Activity from "@/components/sections/Activity";
 import Contact from "@/components/sections/Contact";
 
 /**
- * The home page. It's just an ordered list of the section components — read
+ * The home page. It's just an ordered list of the section components - read
  * top-to-bottom, this is the whole structure of the site. To reorder or hide
  * a section, move or delete a line here.
  *
- * PRIVACY: Experience and Education are hidden for now — this public site
+ * PRIVACY: Experience and Education are hidden for now - this public site
  * stays pseudonymous (no employers, school, or other identifying details).
  * To bring a section back: re-add its import, its line below, its link in
  * ui/Nav.tsx, and fill in its data in data/resume.ts.
