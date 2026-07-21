@@ -1,4 +1,4 @@
-import ConstructionBanner from "@/components/ui/ConstructionBanner";
+import ConstructionPopup from "@/components/ui/ConstructionPopup";
 import Nav from "@/components/ui/Nav";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
@@ -7,7 +7,6 @@ import Games from "@/components/sections/Games";
 import Skills from "@/components/sections/Skills";
 import Activity from "@/components/sections/Activity";
 import Contact from "@/components/sections/Contact";
-import FunLink from "@/components/ui/FunLink";
 
 /**
  * The home page. It's just an ordered list of the section components — read
@@ -22,7 +21,7 @@ import FunLink from "@/components/ui/FunLink";
 export default function Home() {
   return (
     <>
-      <ConstructionBanner />
+      <ConstructionPopup />
       <Nav />
       <Hero />
       <main className="container">
@@ -33,7 +32,6 @@ export default function Home() {
         <Activity />
       </main>
       <Contact />
-      <FunLink />
     </>
   );
 }

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <rect width="800" height="500" fill="#eef4f3" />
+
+  <!-- winning diagonal highlight, drawn behind the marks -->
+  <line x1="273" y1="123" x2="527" y2="377" stroke="#3a6f6b" stroke-width="34" stroke-linecap="round" opacity="0.25" />
+
+  <!-- board grid -->
+  <g stroke="#1e3a42" stroke-width="10" stroke-linecap="round">
+    <line x1="337" y1="60" x2="337" y2="440" />
+    <line x1="463" y1="60" x2="463" y2="440" />
+    <line x1="210" y1="187" x2="590" y2="187" />
+    <line x1="210" y1="313" x2="590" y2="313" />
+  </g>
+
+  <!-- X marks: (0,0) (1,1) (2,2) -->
+  <g stroke="#1e3a42" stroke-width="14" stroke-linecap="round">
+    <line x1="248" y1="98" x2="298" y2="148" />
+    <line x1="298" y1="98" x2="248" y2="148" />
+
+    <line x1="375" y1="225" x2="425" y2="275" />
+    <line x1="425" y1="225" x2="375" y2="275" />
+
+    <line x1="502" y1="352" x2="552" y2="402" />
+    <line x1="552" y1="352" x2="502" y2="402" />
+  </g>
+
+  <!-- O marks: (0,1) (1,2) -->
+  <g fill="none" stroke="#3a6f6b" stroke-width="14">
+    <circle cx="400" cy="123" r="38" />
+    <circle cx="527" cy="250" r="38" />
+  </g>
+
+  <text x="400" y="470" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="24" font-weight="600" fill="#1e3a42">
+    Q-agent (X) beats a random opponent
+  </text>
+</svg>

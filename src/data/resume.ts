@@ -167,7 +167,7 @@ export const resume: Resume = {
         "from ~81% to ~95%.",
       links: [{ label: "View the code →", href: "https://github.com/FelixFalling/Tic-Tac-Toe-Agent" }],
       images: [
-        { src: "projects/tictactoe-1.png", alt: "Line chart of the Q-agent's score against a random opponent climbing from about 0.81 to 0.95 over 5000 training epochs" },
+        { src: "projects/tictactoe-1.svg", alt: "A tic-tac-toe board mid-game, with X about to complete the top-left-to-bottom-right diagonal for the win" },
       ],
       tags: ["Python", "Reinforcement learning", "Q-learning", "NumPy", "Matplotlib"],
     },

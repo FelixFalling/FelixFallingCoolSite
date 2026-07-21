@@ -1,0 +1,70 @@
+/* Styles scoped to ConstructionPopup.tsx. */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(10, 16, 20, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dialog {
+  position: relative;
+  max-width: 420px;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  padding: 32px 28px 28px;
+  text-align: center;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 8px;
+  opacity: 0.7;
+}
+
+.close:hover {
+  opacity: 1;
+}
+
+.title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: var(--navy);
+}
+
+.text {
+  margin: 0 0 22px;
+  color: var(--slate);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.action {
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--primary-hover);
+}
