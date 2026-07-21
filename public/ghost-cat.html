@@ -120,6 +120,25 @@
   }
   .chip.hurt{ animation:chipHurt .4s ease; }
 
+  /* the combo chain chip — appears while a kill-chain is alive, glows gold */
+  .chip.combo{ border-color:rgba(255,214,107,.6); transition:opacity .15s ease; }
+  .chip.combo b{ color:#ffd66b; }
+  .chip.combo.pulse{ animation:comboPulse .32s ease; }
+  @keyframes comboPulse{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.2); box-shadow:0 0 22px 3px rgba(255,214,107,.75); }
+    100%{ transform:scale(1); }
+  }
+
+  /* the merchant's wares reuse the .boon card look, plus a price line */
+  .boon .price{ display:block; margin-top:9px; font-size:13px; font-weight:800;
+    color:#ffd66b; letter-spacing:.02em; }
+  .boon.cant{ opacity:.4; cursor:not-allowed; }
+  .boon.cant:hover{ transform:none; border-color:rgba(142,240,221,.3);
+    background:rgba(255,255,255,.06); box-shadow:none; }
+  .boon.bought{ opacity:.5; }
+  .boon.bought .price{ color:#8ef0dd; }
+
   /* ===== the level-up (post-boss) dopamine machine ===== */
   #upg .card{
     position:relative; overflow:hidden;
@@ -213,6 +232,7 @@
   <div class="chip" id="livesChip"></div>
   <div class="chip">&#9650; <b id="ht">0</b> m climbed</div>
   <div class="chip"><b id="count">0</b> knocked</div>
+  <div class="chip combo" id="comboChip" hidden><b id="comboM">&times;2</b> chain</div>
   <button id="menuBtn" type="button">Menu</button>
   <button id="soundBtn" class="iconBtn" type="button" aria-label="Mute">&#128266;</button>
 </div>
@@ -246,11 +266,21 @@
   </div>
 </div>
 
+<div class="overlay" id="shop" hidden>
+  <div class="card">
+    <div class="eyebrow">A tap at the shelf</div>
+    <h2>The Wandering Merchant</h2>
+    <p class="sub">Barter the loot you&rsquo;ve knocked loose. You have <b id="shopCoins">0</b> knocked to spend.</p>
+    <div class="menu-row" id="shopRow"></div>
+    <div class="menu-row"><button id="shopLeave" class="primary" type="button">Leave the stall</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="over" hidden>
   <div class="card">
     <div class="eyebrow">Out of lives</div>
     <h2>Nine lives, well spent.</h2>
-    <p class="stats">She climbed <b id="statH">0</b> m and knocked <b id="statK">0</b> things off the shelves.</p>
+    <p class="stats">She climbed <b id="statH">0</b> m, knocked <b id="statK">0</b> loose, and chained a <b id="statC">&times;1</b> best combo.</p>
     <div class="menu-row">
       <button id="againBtn" class="primary" type="button">Try again</button>
       <button id="overMenuBtn" type="button">Menu</button>
@@ -400,6 +430,26 @@ function resetMods(){
   mods.batReach = 1; mods.thumpReach = 1; mods.invulnBonus = 0;
   mods.shushMul = 1; mods.swoopCdMul = 1;
 }
+
+/* Economy & chains -------------------------------------------------------
+   `knocked` doubles as spendable loot at the merchant (see openShop). A
+   kill-chain builds `combo`: each pounced enemy bumps it and pays out coins
+   ×the multiplier, and every object she knocks loose keeps the chain's timer
+   (`comboT`) topped up — so batting shelves between kills sustains the combo.
+   `earned` is the run's lifetime take (never spent), `comboBest` the longest
+   chain, both shown on the game-over card. */
+let combo = 0, comboT = 0, comboBest = 0, earned = 0;
+const COMBO_WINDOW = 4.5;      // seconds a chain survives with no new input
+const COMBO_KNOCK_EXTEND = 1.1; // an object knock buys the chain this much time
+function comboMult(){ return Math.min(combo, 6); }
+
+/* The wandering merchant appears every so often (offset from the boss floors)
+   and lets her spend `knocked` loot. */
+let nextShopAt = 30, shopVisits = 0;
+
+/* The death sequence: a tumbling ragdoll that falls all the way down, then
+   bursts into a rising ghost before the game-over card slides up. */
+let ragdoll = null, ghost = null;
 
 const cat = {
   x:0, y:0, vx:0, vy:0, face:1, blink:0, blinkT:2,
@@ -1503,6 +1553,38 @@ function defeatBoss(){
   saveGame();
   // let the burst breathe before the boon screen slides up
   setTimeout(showUpgrades, 900);
+}
+
+/* ---------- the loot economy & the kill-chain ---------- */
+function addCoins(n){
+  knocked += n; earned += n;
+  countEl.textContent = knocked;
+}
+function showComboChip(){
+  if (combo < 2){ comboChip.hidden = true; return; }
+  comboMEl.textContent = '×' + comboMult();
+  comboChip.hidden = false;
+  comboChip.classList.remove('pulse'); void comboChip.offsetWidth;
+  comboChip.classList.add('pulse');
+}
+function endCombo(){
+  combo = 0; comboT = 0;
+  comboChip.hidden = true; comboChip.style.opacity = '';
+}
+/* Called each time she pounces an enemy: grows the chain, pays a bounty scaled
+   by the multiplier, and throws up the floating "+N / ×M" numbers. */
+function enemyDefeated(x, y, bounty){
+  combo++;
+  comboT = COMBO_WINDOW;
+  if (combo > comboBest) comboBest = combo;
+  const m = comboMult(), gain = bounty * m;
+  addCoins(gain);
+  showComboChip();
+  particles.push({ kind:'rise', x, y:y-16*S, str:'+'+gain, vx:0, vy:-64,
+    life:1.1, t:0, size:16*S, color:'#ffd66b' });
+  if (combo >= 2) particles.push({ kind:'rise', x, y:y-44*S, str:'×'+m, vx:0, vy:-42,
+    life:1.0, t:0, size:22*S, color:'#8ef0dd' });
+  tone(360 + combo*70, 640 + combo*95, .14, 'triangle', .18);
 }
 
 /* ---------- particles ---------- */

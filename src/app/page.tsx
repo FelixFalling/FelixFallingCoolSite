@@ -1,3 +1,4 @@
+import ConstructionBanner from "@/components/ui/ConstructionBanner";
 import Nav from "@/components/ui/Nav";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
@@ -21,6 +22,7 @@ import FunLink from "@/components/ui/FunLink";
 export default function Home() {
   return (
     <>
+      <ConstructionBanner />
       <Nav />
       <Hero />
       <main className="container">

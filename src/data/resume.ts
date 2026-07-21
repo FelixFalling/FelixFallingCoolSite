@@ -154,16 +154,32 @@ export const resume: Resume = {
       tags: ["Python", "Deep learning", "HPC / SLURM", "Docker", "Geospatial"],
     },
     {
+      eyebrow: "2026 · Personal",
+      title: "Tic-Tac-Toe Q-Learning Agent",
+      description:
+        "A tabular Q-learning agent that learns tic-tac-toe from scratch " +
+        "through self-play — no hardcoded strategy. Board states are encoded " +
+        "as a base-3 integer to index the Q-table, moves are chosen with a " +
+        "decaying epsilon-greedy policy, and rewards (+1 win, +0.5 draw, -1 " +
+        "loss) propagate back through the game via the Q-learning update " +
+        "rule. Trained over 5,000 self-play epochs and evaluated every " +
+        "epoch against a random-move baseline, its win-or-draw rate climbs " +
+        "from ~81% to ~95%.",
+      links: [{ label: "View the code →", href: "https://github.com/FelixFalling/Tic-Tac-Toe-Agent" }],
+      images: [
+        { src: "projects/tictactoe-1.png", alt: "Line chart of the Q-agent's score against a random opponent climbing from about 0.81 to 0.95 over 5000 training epochs" },
+      ],
+      tags: ["Python", "Reinforcement learning", "Q-learning", "NumPy", "Matplotlib"],
+    },
+    {
       eyebrow: "Collection · Python",
       title: "Classic AI, From Scratch",
       description:
         "AI and ML fundamentals implemented by hand: heuristic search, a " +
         "genetic algorithm for the eight-queens problem with population-size " +
-        "experiments, a tic-tac-toe game agent with legal-move and goal-state " +
-        "logic, and hand-rolled gradient descent — plus a transfer-learning " +
-        "CNN in TensorFlow that reached 97.35% accuracy.",
+        "experiments, and hand-rolled gradient descent — plus a " +
+        "transfer-learning CNN in TensorFlow that reached 97.35% accuracy.",
       links: [
-        { label: "Game agent →", href: "https://github.com/FelixFalling/Tic-Tac-Toe-Agent" },
         { label: "♛ Genetic 8-queens →", href: "https://github.com/FelixFalling/eight_queens_problem" },
         { label: "Search →", href: "https://github.com/FelixFalling/problem-solving-search" },
         { label: "Transfer-learning CNN →", href: "https://github.com/FelixFalling/Transfer-Learning" },
