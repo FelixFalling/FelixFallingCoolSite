@@ -18,6 +18,12 @@
  * how wide the row is) comes from Waves.module.css, which steps it up with the
  * viewport. That is load-bearing, not an optimization - see the note there.
  *
+ * WHERE THE WATER SITS: these rows fill --water-height and stand on top of
+ * --beach-height (the bare sand the swash runs over, see Swash.tsx), rather
+ * than filling the whole strip. globals.css derives --waterline from the front
+ * layer's crest position, so if you change that layer's `y` below, or the
+ * bleed values, update --sand-crest-offset over there to match.
+ *
  * All the animation timing is data below - tweak the numbers to taste.
  */
 
@@ -49,6 +55,10 @@ interface Layer {
   swellDur: number;
   opacity: number;
   foam: boolean; // draw a soft foam line on the crest
+  // How far the drawing bleeds below its row, so the swell bobbing a layer
+  // upward can never lift its bottom edge into view. The front (sand) layer
+  // has to cover the whole beach as well, since its fill IS the beach.
+  bleed: string;
 }
 
 // Back-to-front: faint far swell → deeper teal → breaking wave with foam → sand.
@@ -58,10 +68,13 @@ interface Layer {
 // Drift durations are one full 1200px loop - short enough that the motion is
 // unmistakable at a glance (the break layer travels ~110px every second).
 const LAYERS: Layer[] = [
-  { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 0.5, foam: false },
-  { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, opacity: 0.65, foam: false },
-  { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, opacity: 0.85, foam: true },
-  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false },
+  { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 0.5, foam: false, bleed: "28px" },
+  { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, opacity: 0.65, foam: false, bleed: "28px" },
+  { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, opacity: 0.85, foam: true, bleed: "28px" },
+  // The front layer paints the beach as well as the last of the water, so its
+  // bleed has to reach the whole way down past the hero's bottom edge. Without
+  // that you get a teal sliver along the bottom whenever the swell lifts it.
+  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false, bleed: "calc(var(--beach-height) + 28px)" },
 ];
 
 function WaveLayer({ layer }: { layer: Layer }) {
@@ -74,8 +87,9 @@ function WaveLayer({ layer }: { layer: Layer }) {
       style={{
         position: "absolute",
         left: 0,
-        bottom: 0,
-        height: "100%",
+        // The water stands ON the beach rather than filling the whole strip.
+        bottom: "var(--beach-height)",
+        height: "var(--water-height)",
         // Divided by --wave-speed (live wind data via HeroScene): windier on
         // the real coast means faster water here.
         animation: `${layer.drift} calc(${layer.driftDur}s / var(--wave-speed, 1)) linear infinite`,
@@ -97,13 +111,19 @@ function WaveLayer({ layer }: { layer: Layer }) {
             className={styles.tile}
             viewBox="0 0 1200 200"
             preserveAspectRatio="none"
-            // bottom: -28 bleeds each drawing past the hero's bottom edge, so
-            // when the swell bobs a layer upward (up to 15px) it can never
-            // lift its bottom edge into view and flash the layer behind it.
-            // The hero clips the overflow, so the bleed is invisible.
+            // The negative bottom bleeds each drawing below its row, so when
+            // the swell bobs a layer upward (up to 15px) it can never lift its
+            // bottom edge into view and flash whatever is behind it. The hero
+            // clips the overflow, so the bleed itself is invisible.
             // No `display` here on purpose: it's an inline style, so it would
             // beat the module's rule and un-hide the tiles meant to stay off.
-            style={{ position: "absolute", left: i * TILE, bottom: -28, width: TILE, height: "calc(100% + 28px)" }}
+            style={{
+              position: "absolute",
+              left: i * TILE,
+              bottom: `calc(-1 * ${layer.bleed})`,
+              width: TILE,
+              height: `calc(100% + ${layer.bleed})`,
+            }}
           >
             {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
             <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} />

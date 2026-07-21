@@ -123,4 +123,31 @@ test.describe("reduced motion", () => {
     await expect(homePage.waveSwell).toHaveCSS("animation-name", "none");
     await expect(homePage.waveDrift).toHaveCSS("animation-name", /waveDrift/);
   });
+
+  test("the swash and the scroll cue stop too", async ({ homePage, page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await homePage.goto();
+    // Water running up the beach is the springiest thing in the scene, so all
+    // of it holds still. What's left is a calm still: water resting on the
+    // waterline over damp sand (the base styles in Swash.tsx).
+    for (const layer of [homePage.swashRun, homePage.swashFoam, homePage.wetSand]) {
+      const count = await layer.count();
+      expect(count).toBeGreaterThan(0);
+      for (let i = 0; i < count; i++) {
+        await expect(layer.nth(i)).toHaveCSS("animation-name", "none");
+      }
+    }
+    await expect(homePage.scrollCue).toHaveCSS("animation-name", "none");
+  });
+});
+
+test.describe("scene structure", () => {
+  test("there are exactly four wave rows", async ({ homePage }) => {
+    await homePage.goto();
+    // HomePage.waveDrift/waveSwell use .first(), and the reduced-motion test
+    // above depends on that first row being a real wave layer. If anything new
+    // ever borrows these class names and lands earlier in the DOM, those tests
+    // would quietly start checking the wrong element. This is the tripwire.
+    await expect(homePage.waveDriftAll).toHaveCount(4);
+  });
 });

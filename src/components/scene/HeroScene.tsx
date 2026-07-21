@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Stars from "./Stars";
 import Shore from "./Shore";
 import Waves from "./Waves";
+import Swash from "./Swash";
 import Rain from "./Rain";
 import DuckRain from "./DuckRain";
 import { useCoastalWeather } from "./weather";
@@ -99,12 +100,14 @@ export default function HeroScene() {
     >
       <Stars />
       <Shore />
-      {/* The waves live in a fixed-height strip at the bottom so they keep
-          their proportions instead of stretching to the full hero height.
-          The height comes from the .waves-strip class (globals.css): 190px,
-          deepened to 240px on desktop so the sea fills a tall viewport. */}
+      {/* The sea band at the bottom keeps its own fixed height so the waves
+          hold their proportions instead of stretching to the full hero. That
+          height (.waves-strip in globals.css) is the drifting water plus the
+          strip of beach below it that the swash runs over.
+          Swash comes after Waves so it paints in front of the water. */}
       <div className="waves-strip" style={{ position: "absolute", left: 0, right: 0, bottom: 0 }}>
         <Waves />
+        <Swash />
       </div>
       {weather.raining && <Rain />}
       <DuckRain />

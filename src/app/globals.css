@@ -74,6 +74,13 @@
   --wave-break: #3d716d; /* deepest, nearest crest */
   --wave-foam: #e9f0ee; /* soft off-white - misty spray, not stark white */
 
+  /* The swash: the thin sheet of water that runs up the sand and drains back
+     (Swash.tsx). Greener and greyer than the open water, because at the water's
+     edge you are seeing pale sand THROUGH a shallow film. */
+  --swash-water: #93b3ad;
+  --swash-foam: #f4f8f6; /* brighter than --wave-foam: lace at your feet, not distant mist */
+  --wet-sand: 168, 186, 186; /* R,G,B - the gradient picks its own alphas, like --mist */
+
   /* Coastal scene extras (the hero diorama). */
   --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
   --mist: 255, 255, 255; /* fog color as R,G,B - layers set their own alpha */
@@ -132,6 +139,13 @@
   --wave-break: #387672;
   --wave-foam: #6fbfbb; /* a soft moonlit glow on the crest */
 
+  --swash-water: #2f5f61;
+  --swash-foam: #8fd4cf; /* moonlit lace, brighter than the far crest */
+  /* Note the flip: in daylight wet sand is DARKER than dry, but on a
+     near-black night beach the wet sheen catches the moon and reads LIGHTER.
+     Getting that backwards is what makes a night beach look wrong. */
+  --wet-sand: 60, 106, 112;
+
   --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
   --mist: 150, 180, 185; /* fog glows faintly cool at night */
   --star: #cfe2e0;
@@ -188,9 +202,46 @@ a {
   background: linear-gradient(90deg, var(--rule), transparent);
 }
 
-/* The hero's sea band: how tall the waves strip is. */
+/* ── The hero's sea band ───────────────────────────────────────────────────
+ * The strip at the bottom of the hero is split in two:
+ *
+ *   --water-height   the drifting sea. This is exactly what --waves-height
+ *                    used to be, so the waves are drawn just as they were.
+ *   --beach-height   NEW: bare sand below the waterline, the stretch the
+ *                    swash runs up and drains back off (see Swash.tsx).
+ *
+ * --waves-height is now the TOTAL of the two. Everything that already read it
+ * (the strip height, --shore-lift, the hero's bottom padding, the scroll cue)
+ * wants the total, so those rules keep working untouched.
+ *
+ * Why split it at all: the sand crest is drawn at viewBox y=152 of 200 inside
+ * a tile sized from the water height, so growing the water buys only 0.24px
+ * of beach per pixel. The beach has to be its own band to have any depth.
+ */
 :root {
-  --waves-height: 190px;
+  --water-height: 190px;
+  --beach-height: 52px;
+  --waves-height: calc(var(--water-height) + var(--beach-height));
+
+  /* Where the water's edge meets the sand, measured UP from the hero's bottom
+     edge. This is what the swash anchors to.
+     The offset mirrors Waves.tsx: the front (sand) layer's crest sits at
+     viewBox y=152 of 200 and each tile is bled 28px past its row, which is
+     where 0.24 (= 48/200) and 21.28 (= 0.76 * 28) come from. If you change
+     that layer's `y` or the bleed over there, change these two lines too. */
+  --sand-crest-offset: calc(0.24 * var(--water-height) - 21.28px);
+  --waterline: calc(var(--beach-height) + var(--sand-crest-offset));
+
+  /* The swash sheet: how deep the body of water behind its leading edge is,
+     and how far up the beach it runs at most. */
+  --swash-body: 100px;
+  --swash-reach: 46px;
+
+  /* Below 1200px the shore used to sit flat on the hero's bottom edge. The
+     beach lifts the whole waterline, so the rocks have to come up with it.
+     At >=1200px --shore-lift derives from --waves-height, which now includes
+     the beach already, so it needs no change down there. */
+  --shore-lift: var(--beach-height);
 }
 
 .waves-strip {
@@ -209,11 +260,23 @@ a {
     /* Container: 1240px on small desktops, growing to 1560px on 4K. */
     --content-width: clamp(1240px, 68vw, 1560px);
     /* The sea deepens with the screen (240px → 330px on 4K)… */
-    --waves-height: clamp(240px, 14vw, 330px);
-    /* …and the shoreline lifts to sit on the higher waterline. */
+    --water-height: clamp(240px, 14vw, 330px);
+    /* …and the beach widens with it, so there is more sand to wash over. */
+    --beach-height: clamp(46px, 2.8vw, 66px);
+    /* --waves-height needs no redefinition here: it is declared above as
+       water + beach, and custom properties re-resolve with whatever those
+       two are at this breakpoint. */
+
+    /* …and the shoreline lifts to sit on the higher waterline. Reading
+       --waves-height (the total) is what keeps the rocks on the water now
+       that the beach has pushed the waterline up. */
     --shore-lift: calc(var(--waves-height) - 195px);
     /* Bigger rocks + lighthouse so the scene holds its own. */
     --shore-scale: 1.18;
+
+    /* A longer run of water to match the deeper beach. */
+    --swash-body: clamp(110px, 7vw, 150px);
+    --swash-reach: clamp(52px, 3.2vw, 76px);
   }
 
   .section {
@@ -272,6 +335,20 @@ a {
   }
 }
 
+/* Short desktop windows (a laptop, or a half-height browser). The sea band is
+ * a fixed slice off the bottom of the hero, so on a short screen it eats the
+ * room the name/photo need. Pull the water and the beach back in; everything
+ * else (the waterline, the shore lift, the hero's padding, how far the swash
+ * runs) is derived from these two, so it all follows on its own.
+ * Must come after the min-width blocks above to win: same specificity, so
+ * source order decides. */
+@media (min-width: 1200px) and (max-height: 820px) {
+  :root {
+    --water-height: clamp(200px, 11vw, 260px);
+    --beach-height: 44px;
+  }
+}
+
 /* Card used by Experience / Projects / Education. */
 .card {
   background: var(--card-bg);
@@ -294,9 +371,12 @@ a {
 /* ── Phone layout ──────────────────────────────────────────────────────────
  * Slightly tighter side padding and section rhythm on small screens, so the
  * content gets more of the width without feeling cramped. The shore (rocks +
- * lighthouse) also shrinks below 1100px - on narrow screens the hero text
- * column reaches the left edge, and this keeps the lighthouse under it. */
-@media (max-width: 1100px) {
+ * lighthouse) also shrinks below the desktop breakpoint - on narrow screens the
+ * hero text column reaches the left edge, and this keeps the lighthouse under
+ * it. The cutoff is 1199px so it meets the >=1200px rule exactly; at 1100px it
+ * used to leave 1101-1199px with no --shore-scale at all, and the rocks would
+ * snap to full size in that band. */
+@media (max-width: 1199px) {
   :root {
     --shore-scale: 0.7;
   }
@@ -440,16 +520,134 @@ a {
   }
 }
 
+/* ── The swash: water running up the beach and draining back ───────────────
+ * Used by Swash.tsx. Remember the orientation: the viewer stands at the
+ * BOTTOM of the scene, so water running UP the beach moves DOWN the screen,
+ * which is why the uprush is a positive translateY.
+ *
+ * What makes this read as a real wave rather than a bob is that it is
+ * ASYMMETRIC. Water rushes in fast, hangs at the top of its run, then slides
+ * back more slowly and finally rests before the next one. The timing functions
+ * declared INSIDE the keyframes apply to the segment STARTING at that stop,
+ * which is how each phase gets its own feel.
+ */
+@keyframes swashRun {
+  0% {
+    transform: translateY(0);
+    /* The rush: most of the distance is covered early, then it decelerates
+       hard as the water runs out of energy against the slope. */
+    animation-timing-function: cubic-bezier(0.16, 0.9, 0.35, 1);
+  }
+  32% {
+    transform: translateY(var(--swash-up));
+    /* The drain: almost still at first (the sheet hangs at the top of its
+       run), then it slides back and eases out as the film thins. */
+    animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.6);
+  }
+  88% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0); /* a beat of calm before the next one */
+  }
+}
+
+/* The foam on the leading edge: piles up during the rush, stays bright while
+   the sheet hangs, then thins out as the water drains away under it. */
+@keyframes swashFoam {
+  0% {
+    opacity: 0.18;
+  }
+  14% {
+    opacity: 0.9;
+  }
+  32% {
+    opacity: 0.8;
+  }
+  60% {
+    opacity: 0.34;
+  }
+  88%,
+  100% {
+    opacity: 0.1;
+  }
+}
+
+/* The lace: as foam breaks up it stops being a line and becomes scattered
+   flecks, so this dashed copy of the same edge fades IN exactly as the solid
+   one fades out. */
+@keyframes swashLace {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.55;
+  }
+  70% {
+    opacity: 0.3;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Runs on the big sheet only, on a period that does NOT divide into its
+   travel period. How far it runs and how strongly it reads drift in and out
+   of phase, so every so often the two line up and you get a real set wave. */
+@keyframes swashFade {
+  0%,
+  100% {
+    opacity: 0.45; /* quiet, but never so faint the run vanishes entirely */
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Sand the water has just left: darkens quickly as the sheet covers it, then
+   dries slowly from the high-water mark back down. Scaled from the waterline
+   (transform-origin: 50% 0), so the mark itself creeps up and recedes. */
+@keyframes wetSand {
+  0% {
+    opacity: 0.42;
+    transform: scaleY(0.62);
+  }
+  16% {
+    opacity: 0.95;
+    transform: scaleY(0.86);
+  }
+  40% {
+    opacity: 0.82;
+    transform: scaleY(0.84);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scaleY(0.62);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   /* The slow horizontal wave drift is the site's identity and is gentle
      enough to keep. Everything springier or attention-grabbing stops:
-     the vertical swell bob, the lighthouse beam and flash, rain, and the
-     scroll cue (the duck easter egg and cursor parallax are skipped in
-     JavaScript). */
+     the vertical swell bob, the swash running up the beach, the lighthouse
+     beam and flash, rain, and the scroll cue (the duck easter egg and cursor
+     parallax are skipped in JavaScript).
+
+     IMPORTANT for the swash: `animation: none` does NOT freeze an element on
+     its 0% keyframe, it drops the animated values entirely and falls back to
+     the element's own CSS. So each swash piece sets a base style that is
+     already the picture we want at rest (calm water sitting on the waterline,
+     damp sand, a soft foam edge, no lace). See Swash.tsx. */
   .wave-swell,
+  .swash-run,
+  .swash-foam,
+  .swash-lace,
+  .wet-sand,
   .beam-sweep,
   .lamp-flash,
   .rain-fall,

@@ -8,9 +8,11 @@
 .inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  /* Extra bottom padding leaves the taller coastal scene (fog + waves) room to
-     breathe beneath the text/buttons. */
-  padding: 88px 24px 190px;
+  /* Extra bottom padding leaves the taller coastal scene (fog + waves + the
+     beach the swash runs over) room to breathe beneath the text/buttons.
+     Reading --waves-height rather than a hardcoded number means the text keeps
+     clear of the water automatically if the sea band is ever retuned. */
+  padding: 88px 24px var(--waves-height);
   position: relative;
   z-index: 2;
   display: flex;
@@ -149,7 +151,11 @@
  * (≥44px tall, per mobile accessibility guidelines). */
 @media (max-width: 640px) {
   .inner {
-    padding: 56px 20px 170px;
+    /* 20px less than the sea band, so the text column overlaps the very top of
+       the strip a little. That is deliberate: the far crest sits well below the
+       strip's top edge, so nothing actually collides, and it buys back vertical
+       room on a phone. */
+    padding: 56px 20px calc(var(--waves-height) - 20px);
     gap: 24px;
   }
 

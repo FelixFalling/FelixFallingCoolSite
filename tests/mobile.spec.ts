@@ -56,4 +56,64 @@ test.describe("phone layout", () => {
       expect(row.cssWidth).toBeGreaterThanOrEqual(page.viewportSize()!.width + 1200);
     }
   });
+
+  test("the swash sheets never become tiled rows", async ({ homePage, page }) => {
+    // The swash only moves up and down, so unlike the wave rows it never needs
+    // to be wider than the screen. The width assertion is the valuable half:
+    // it fails loudly if someone ever "fixes" the swash by tiling it, which
+    // would multiply GPU layer memory in the busiest part of the page.
+    await homePage.goto();
+    const layers = await page.evaluate(() =>
+      [...document.querySelectorAll(".swash-run, .wet-sand")].map((el) => ({
+        cssWidth: el.getBoundingClientRect().width,
+        devicePx: el.getBoundingClientRect().width * window.devicePixelRatio,
+      })),
+    );
+    expect(layers.length).toBeGreaterThan(0);
+    const viewport = page.viewportSize()!.width;
+    for (const layer of layers) {
+      expect(layer.devicePx, "swash layer must fit in one GPU texture").toBeLessThanOrEqual(8192);
+      expect(layer.cssWidth, "swash must not be tiled").toBeLessThanOrEqual(viewport * 1.25);
+    }
+  });
+
+  test("the water never reaches the hero's bottom cut", async ({ homePage, page }) => {
+    // The hero clips its overflow, so a sheet that ran too far would get its
+    // leading edge sliced off in a dead-straight line. Swash.tsx caps the run
+    // with a min(); this proves the cap is doing its job.
+    await homePage.goto();
+    const px = await page.evaluate(() => {
+      const probe = (value: string) => {
+        const el = document.createElement("div");
+        el.style.cssText = `position:absolute;visibility:hidden;height:${value}`;
+        document.querySelector(".waves-strip")!.appendChild(el);
+        const h = el.getBoundingClientRect().height;
+        el.remove();
+        return h;
+      };
+      const sheet = document.querySelector(".swash-run") as HTMLElement;
+      const up = getComputedStyle(sheet).getPropertyValue("--swash-up");
+      return { waterline: probe("var(--waterline)"), up: probe(up) };
+    });
+    expect(px.waterline).toBeGreaterThan(0);
+    expect(px.up, "the run-up must stop short of the hero's edge").toBeLessThanOrEqual(px.waterline - 20);
+  });
+
+  test("the animated scene stays inside a sane GPU budget", async ({ homePage, page }) => {
+    // Per-element width checks miss the thing that actually hurts: the total.
+    // Everything here is promoted to its own layer because it animates
+    // transform, and each one is rasterized at device-pixel resolution.
+    await homePage.goto();
+    const megapixels = await page.evaluate(() => {
+      const dpr = window.devicePixelRatio;
+      return (
+        [...document.querySelectorAll(".wave-drift, .swash-run, .wet-sand")].reduce((total, el) => {
+          const b = el.getBoundingClientRect();
+          return total + b.width * b.height * dpr * dpr;
+        }, 0) / 1e6
+      );
+    });
+    expect(megapixels).toBeGreaterThan(0);
+    expect(megapixels, "composited scene layers").toBeLessThanOrEqual(16);
+  });
 });
