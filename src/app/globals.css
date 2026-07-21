@@ -573,25 +573,6 @@ a {
   }
 }
 
-/* The lace: as foam breaks up it stops being a line and becomes scattered
-   flecks, so this dashed copy of the same edge fades IN exactly as the solid
-   one fades out. */
-@keyframes swashLace {
-  0%,
-  14% {
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.55;
-  }
-  70% {
-    opacity: 0.3;
-  }
-  92%,
-  100% {
-    opacity: 0;
-  }
-}
 
 /* Runs on the big sheet only, on a period that does NOT divide into its
    travel period. How far it runs and how strongly it reads drift in and out
@@ -646,7 +627,6 @@ a {
   .wave-swell,
   .swash-run,
   .swash-foam,
-  .swash-lace,
   .wet-sand,
   .beam-sweep,
   .lamp-flash,

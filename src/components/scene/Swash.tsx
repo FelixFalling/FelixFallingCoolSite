@@ -71,6 +71,7 @@ interface Sheet {
   reach: number; // fraction of --swash-reach this sheet travels
   overhang: string; // how far it hangs past each screen edge
   restOpacity: number; // what it settles to, and what reduced motion shows
+  foam: boolean; // draw a foam edge. Not every sheet gets one, see below.
   fadePeriod?: number; // only the big sheet: the separate "set wave" rhythm
 }
 
@@ -82,15 +83,19 @@ interface Sheet {
 // irregular edge rather than a flat line on screen. Roughly 2 units per visible
 // pixel. Keep the deepest point near 195 so that at rest the tongue sits on the
 // waterline and the run-up carries it out onto the sand.
+// Only the two larger sheets carry a foam edge. A foam line per sheet reads as
+// several parallel wavy lines drawn across the water rather than as a beach:
+// on a real one you mostly see a single moving edge at a time. The small sheet
+// is texture underneath it, not another edge.
 const SHEETS: Sheet[] = [
   // Constant small lapping at the water's edge.
-  { key: "a", depths: [152, 190, 160, 196, 168, 186, 156], bump: 12, period: 7.3, delay: 0, reach: 0.5, overhang: "0%", restOpacity: 0.7 },
+  { key: "a", depths: [152, 190, 160, 196, 168, 186, 156], bump: 12, period: 7.3, delay: 0, reach: 0.5, overhang: "0%", restOpacity: 0.45, foam: false },
   // The medium ones.
-  { key: "b", depths: [188, 154, 196, 162, 192, 150, 184], bump: 15, period: 11.7, delay: -3.1, reach: 0.75, overhang: "6%", restOpacity: 0.8 },
+  { key: "b", depths: [188, 154, 196, 162, 192, 150, 184], bump: 15, period: 11.7, delay: -3.1, reach: 0.75, overhang: "6%", restOpacity: 0.6, foam: true },
   // The occasional big run-up. Two animations on one element, on two different
   // properties. If you add a third, do NOT let it touch transform: the last
   // declaration would silently win and the sheet would stop running.
-  { key: "c", depths: [166, 197, 150, 188, 172, 194, 158], bump: 18, period: 23.9, delay: -8.4, reach: 1, overhang: "10%", restOpacity: 0.85, fadePeriod: 37 },
+  { key: "c", depths: [166, 197, 150, 188, 172, 194, 158], bump: 18, period: 23.9, delay: -8.4, reach: 1, overhang: "10%", restOpacity: 0.8, foam: true, fadePeriod: 37 },
 ];
 
 function SwashSheet({ sheet }: { sheet: Sheet }) {
@@ -148,14 +153,15 @@ function SwashSheet({ sheet }: { sheet: Sheet }) {
           <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="200" gradientUnits="userSpaceOnUse">
             <stop offset="0" style={{ stopColor: "var(--swash-water)", stopOpacity: 0 }} />
             <stop offset="0.45" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.1 }} />
-            <stop offset="0.68" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.38 }} />
+            <stop offset="0.68" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.26 }} />
             {/* Thickest just behind the edge, then thinning again at the very
                 tip, which is a film a few millimetres deep. That also keeps the
                 leading edge faint as it approaches the hero's bottom cut.
-                These need to be fairly strong: the sand is nearly white (it is
-                the page background), so a timid wash simply disappears. */}
-            <stop offset="0.88" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.72 }} />
-            <stop offset="1" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.55 }} />
+                Strong enough to show on near-white sand, but no stronger: three
+                of these overlap, and if each is too solid they stack up into
+                visible slabs of colour instead of water. */}
+            <stop offset="0.88" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.52 }} />
+            <stop offset="1" style={{ stopColor: "var(--swash-water)", stopOpacity: 0.4 }} />
           </linearGradient>
         </defs>
 
@@ -164,6 +170,7 @@ function SwashSheet({ sheet }: { sheet: Sheet }) {
         {/* Foam piles up along the front during the rush and thins as the
             water drains out from under it. Animating opacity only, so this
             costs a repaint and not another GPU layer. */}
+        {sheet.foam && (
         <g
           className="swash-foam"
           style={{
@@ -171,34 +178,17 @@ function SwashSheet({ sheet }: { sheet: Sheet }) {
             animation: `swashFoam calc(${sheet.period}s / var(--wave-speed, 1)) linear ${sheet.delay}s infinite`,
           }}
         >
-          {/* Stroke widths are in viewBox units, and the box is squashed to
-              roughly half height on screen, so these are about half as thick as
-              the numbers suggest. The wide blurred one is spray hanging over
-              the edge; the tight one is the foam line itself. */}
-          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)", filter: "blur(6px)" }} strokeWidth={22} opacity={0.25} />
-          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)", filter: "blur(1px)" }} strokeWidth={7} strokeLinecap="round" />
+          {/* Stroke widths are in viewBox units and the box is squashed to
+              roughly half height on screen, so these end up about half as thick
+              as the numbers suggest. The wide blurred one is spray hanging over
+              the edge; the tight one is the foam line itself.
+              Keep these restrained. Three sheets stacked up means three foam
+              edges at once, and heavy strokes turn that into a mess of parallel
+              wavy lines rather than water. */}
+          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)", filter: "blur(5px)" }} strokeWidth={14} opacity={0.16} />
+          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)", filter: "blur(0.8px)" }} strokeWidth={3.5} strokeLinecap="round" />
         </g>
-
-        {/* As the foam breaks up it stops being a line and becomes flecks, so
-            this dashed copy fades in exactly as the solid one fades out.
-            Base opacity 0, so at rest (and under reduced motion) there is no
-            broken-up foam sitting there looking odd. */}
-        <g
-          className="swash-lace"
-          style={{
-            opacity: 0,
-            animation: `swashLace calc(${sheet.period}s / var(--wave-speed, 1)) linear ${sheet.delay}s infinite`,
-          }}
-        >
-          <path
-            d={edge}
-            fill="none"
-            style={{ stroke: "var(--swash-foam)", filter: "blur(1px)" }}
-            strokeWidth={6}
-            strokeDasharray="14 20"
-            strokeLinecap="round"
-          />
-        </g>
+        )}
       </svg>
     </div>
   );
