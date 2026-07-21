@@ -73,9 +73,13 @@ test.describe("the Wizard's Tower game", () => {
     await expect
       .poll(() => page.evaluate(() => window.__tower.state.boss), { timeout: 5000 })
       .toBe(true);
+    // The dip cycle (cooldown + dip window) repeats roughly every 5-7s, and
+    // real-time frame jitter under CI can push a given dip short of pounce
+    // range - so this polls long enough to catch a couple of cycles instead
+    // of gambling on the first one.
     await expect
       .poll(() => page.evaluate(() => window.__tower.state.bossDy), {
-        timeout: 10_000,
+        timeout: 25_000,
         message: "the boss should swoop within pounce reach",
       })
       .toBeLessThan(120);

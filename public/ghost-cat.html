@@ -763,6 +763,7 @@ function buildScene(){
   surfaces = []; casesArr = []; arches = []; perches = [];
   knocked = 0; best = 0; nextMile = 10;
   tier = 0; boss = null; bossNum = 0; nextBossAt = 50; bolts.length = 0;
+  nextShopAt = 30; shopVisits = 0; shopBought = new Set();
   resetMods();
   snapTheme(0);
   lives = 9; renderLives();
@@ -2574,6 +2575,7 @@ function frame(t){
     const meters = (FLOOR.y - cat.y)/(90*S);
     tier = Math.min(3, Math.floor(meters/40));
     if (!boss && meters >= nextBossAt) spawnBoss();
+    if (!boss && meters >= nextShopAt) openShop();
     if (meters > best){
       best = meters;
       htEl.textContent = Math.floor(best);
@@ -2779,13 +2781,73 @@ function showUpgrades(){
   document.getElementById('upg').hidden = false;
 }
 
+/* ---------- the wandering merchant (spend `knocked` loot on small perks) ---------- */
+const WARES = [
+  { name:'Long Paws',     ic:'🐾', desc:'+20% batting reach',        price:15, apply:()=>{ mods.batReach *= 1.2; } },
+  { name:'Heavy Landing', ic:'💥', desc:'+30% landing-thump reach',  price:15, apply:()=>{ mods.thumpReach *= 1.3; } },
+  { name:'Quiet Ears',    ic:'🤫', desc:'Shushes reach 20% less',    price:15, apply:()=>{ mods.shushMul *= .8; } },
+  { name:"Owl's Bane",    ic:'🦉', desc:'Owls swoop 25% less often', price:15, apply:()=>{ mods.swoopCdMul *= 1.25; } },
+  { name:'Ninth Wind',    ic:'💜', desc:'+1 life',                   price:20, apply:()=>{ lives = Math.min(9, lives+1); renderLives(); } }
+];
+let shopBought = new Set();
+// Builds the row once per visit (so the boon entrance animation plays), then
+// a purchase only updates classes/text in place - rebuilding the whole row
+// on every buy would restart every card's animation and make them flicker.
+function renderShop(){
+  const row = document.getElementById('shopRow');
+  row.innerHTML = '';
+  for (const w of WARES){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.name = w.name;
+    const ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = w.ic;
+    const t  = document.createElement('b'); t.textContent = w.name;
+    const d  = document.createElement('span'); d.className = 'bd'; d.textContent = w.desc;
+    const p  = document.createElement('span'); p.className = 'price';
+    b.append(ic, t, d, p);
+    b.addEventListener('click', ()=>{
+      if (shopBought.has(w.name) || knocked < w.price) return;
+      knocked -= w.price;
+      countEl.textContent = knocked;
+      w.apply();
+      shopBought.add(w.name);
+      tone(660,1320,.25,'triangle',.18); sMrrp();
+      updateShopButtons();
+    });
+    row.appendChild(b);
+  }
+  updateShopButtons();
+}
+function updateShopButtons(){
+  document.getElementById('shopCoins').textContent = knocked;
+  for (const btn of document.getElementById('shopRow').children){
+    const w = WARES.find(x => x.name === btn.dataset.name);
+    const bought = shopBought.has(w.name);
+    const afford = knocked >= w.price;
+    btn.className = 'boon' + (bought ? ' bought' : !afford ? ' cant' : '');
+    btn.querySelector('.price').textContent = bought ? 'Bought' : w.price + ' knocked';
+  }
+}
+function openShop(){
+  gameState = 'shop'; // pauses the sim: frame() only updates while 'playing'
+  shopVisits++;
+  shopBought = new Set();
+  renderShop();
+  document.getElementById('shop').hidden = false;
+}
+document.getElementById('shopLeave').addEventListener('click', ()=>{
+  document.getElementById('shop').hidden = true;
+  nextShopAt += 75;
+  gameState = 'playing';
+});
+
 /* ---------- save file (career progress survives reloads) ---------- */
 function saveGame(){
   try{
     localStorage.setItem('wizardsTowerSave', JSON.stringify({
       careerBest: Math.floor(careerBest), bossesBeaten, skinIdx, bingus: bingusUnlocked
     }));
-  }catch(e){ /* storage blocked \u2014 progress just won't persist */ }
+  }catch(e){ /* storage blocked - progress just won't persist */ }
 }
 function loadGame(){
   try{
@@ -2798,7 +2860,7 @@ function loadGame(){
     if (skinLocked(SKINS[skinIdx])) skinIdx = 0;
     // don't re-announce unlocks you already have
     for (const sk of SKINS) if (!skinLocked(sk)) sk.announced = true;
-  }catch(e){ /* corrupted save \u2014 start fresh */ }
+  }catch(e){ /* corrupted save - start fresh */ }
 }
 function loseLife(){
   if (gameState !== 'playing') return;

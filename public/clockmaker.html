@@ -1099,14 +1099,14 @@ $('ci').addEventListener('change', ()=>{
   const ci=toMin($('ci').value), lo=toMin($('lo').value);
   if(ci!==null && lo!==null && lo<=ci){
     $('lo').value=''; $('li').value='';
-    note('lunch cleared \u2014 it was before clock-in');
+    note('lunch cleared - it was before clock-in');
   }
   refreshUI();
 });
 $('lo').addEventListener('change', ()=>{
   clampChip('lo','ci','clock-in');
   const lo=toMin($('lo').value), li=toMin($('li').value);
-  if(lo!==null && li!==null && li<=lo){ $('li').value=''; note('back-in cleared \u2014 it was before lunch out'); }
+  if(lo!==null && li!==null && li<=lo){ $('li').value=''; note('back-in cleared - it was before lunch out'); }
   refreshUI();
 });
 $('li').addEventListener('change', ()=>{
