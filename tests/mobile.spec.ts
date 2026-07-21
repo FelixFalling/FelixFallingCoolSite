@@ -33,4 +33,27 @@ test.describe("phone layout", () => {
     expect(box, "GitHub button should be visible").not.toBeNull();
     expect(box!.height).toBeGreaterThanOrEqual(44);
   });
+
+  test("the drifting wave rows stay inside the GPU's texture limit", async ({ homePage, page }) => {
+    // Regression guard for "the waves flicker on my phone". Each wave row
+    // animates transform, so it becomes a GPU layer rasterized at device-pixel
+    // resolution. Mobile GPUs top out around 4096-8192px; past that the browser
+    // splits the layer and re-rasterizes it as it moves, which reads as flicker.
+    // Waves.module.css keeps the row only as wide as the viewport plus one
+    // tile of travel - this fails if that stepping is ever removed.
+    await homePage.goto();
+    const rows = await page.evaluate(() =>
+      [...document.querySelectorAll(".wave-drift")].map((el) => ({
+        cssWidth: el.getBoundingClientRect().width,
+        devicePx: el.getBoundingClientRect().width * window.devicePixelRatio,
+      })),
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row.devicePx, "wave row must fit in one GPU texture").toBeLessThanOrEqual(8192);
+      // It still has to cover the screen plus the 1200px the drift travels,
+      // or the water would run out mid-loop and leave a bare edge.
+      expect(row.cssWidth).toBeGreaterThanOrEqual(page.viewportSize()!.width + 1200);
+    }
+  });
 });

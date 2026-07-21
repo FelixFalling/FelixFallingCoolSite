@@ -1,0 +1,70 @@
+/* Styles scoped to Waves.tsx - how WIDE the drifting wave row is.
+ *
+ * Why this file exists: the row has to cover the viewport plus one full tile
+ * (1200px) of travel, because the drift animation slides it exactly one tile
+ * before looping. Anything wider than that is invisible - but it still costs.
+ *
+ * The row animates `transform`, so the browser promotes it to a GPU layer and
+ * rasterizes it at device-pixel resolution. A phone at DPR 3 turns a 7200px
+ * row into a 21,600px-wide texture, and mobile GPUs top out at 4096-8192px.
+ * Past that limit the browser splits the layer into tiles and re-rasterizes
+ * them as they move, which reads as FLICKERING water.
+ *
+ * So the row grows in steps instead: a phone composites 2 tiles, and only a
+ * genuinely huge monitor ever gets all 6. Each step is (viewport cap + 1200).
+ */
+
+.row {
+  width: 2400px; /* 2 tiles - covers viewports up to 1200px */
+}
+
+/* Tiles past the row's width would draw outside it, so hide them. Keeping the
+   markup identical at every size (and hiding the extras in CSS) is what lets
+   this stay a server component with no viewport JavaScript. */
+.tile {
+  display: none;
+}
+
+.tile:nth-child(-n + 2) {
+  display: block;
+}
+
+@media (min-width: 1201px) {
+  .row {
+    width: 3600px;
+  }
+
+  .tile:nth-child(-n + 3) {
+    display: block;
+  }
+}
+
+@media (min-width: 2401px) {
+  .row {
+    width: 4800px;
+  }
+
+  .tile:nth-child(-n + 4) {
+    display: block;
+  }
+}
+
+@media (min-width: 3601px) {
+  .row {
+    width: 6000px;
+  }
+
+  .tile:nth-child(-n + 5) {
+    display: block;
+  }
+}
+
+@media (min-width: 4801px) {
+  .row {
+    width: 7200px;
+  }
+
+  .tile:nth-child(-n + 6) {
+    display: block;
+  }
+}

@@ -14,11 +14,17 @@
  * makes it read as water rather than a sliding image. Live wind data speeds
  * everything up via --wave-speed (see weather.ts).
  *
+ * TILES below is the MAXIMUM number of tiles; how many are actually drawn (and
+ * how wide the row is) comes from Waves.module.css, which steps it up with the
+ * viewport. That is load-bearing, not an optimization - see the note there.
+ *
  * All the animation timing is data below - tweak the numbers to taste.
  */
 
+import styles from "./Waves.module.css";
+
 const TILE = 1200; // px - one wave period; fixed so crests never flatten
-const TILES = 6; // covers screens up to ~6000px wide plus one tile of travel
+const TILES = 6; // the most we ever draw (only on a ~6000px-wide monitor)
 
 /** Build one irregular wave crest as an SVG path string (one 1200px period). */
 function wavePath(y: number, a1: number, a2: number, a3: number, a4: number): string {
@@ -64,12 +70,11 @@ function WaveLayer({ layer }: { layer: Layer }) {
 
   return (
     <div
-      className="wave-drift"
+      className={`wave-drift ${styles.row}`}
       style={{
         position: "absolute",
         left: 0,
         bottom: 0,
-        width: TILE * TILES,
         height: "100%",
         // Divided by --wave-speed (live wind data via HeroScene): windier on
         // the real coast means faster water here.
@@ -89,13 +94,16 @@ function WaveLayer({ layer }: { layer: Layer }) {
         {Array.from({ length: TILES }, (_, i) => (
           <svg
             key={i}
+            className={styles.tile}
             viewBox="0 0 1200 200"
             preserveAspectRatio="none"
             // bottom: -28 bleeds each drawing past the hero's bottom edge, so
             // when the swell bobs a layer upward (up to 15px) it can never
             // lift its bottom edge into view and flash the layer behind it.
             // The hero clips the overflow, so the bleed is invisible.
-            style={{ position: "absolute", left: i * TILE, bottom: -28, width: TILE, height: "calc(100% + 28px)", display: "block" }}
+            // No `display` here on purpose: it's an inline style, so it would
+            // beat the module's rule and un-hide the tiles meant to stay off.
+            style={{ position: "absolute", left: i * TILE, bottom: -28, width: TILE, height: "calc(100% + 28px)" }}
           >
             {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
             <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} />
