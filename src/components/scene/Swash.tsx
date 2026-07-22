@@ -37,6 +37,8 @@
  * All the tuning is the SHEETS array below.
  */
 
+import Flotsam from "./Flotsam";
+
 /**
  * The tongue: the sheet's irregular leading edge, left to right.
  *
@@ -254,6 +256,10 @@ export default function Swash() {
           willChange: "transform, opacity",
         }}
       />
+
+      {/* What the sea has left on the sand. Over both sand bands, UNDER the
+          water sheets, so a run-up visibly washes across a shell. */}
+      <Flotsam />
 
       {SHEETS.map((sheet) => (
         <SwashSheet key={sheet.key} sheet={sheet} />

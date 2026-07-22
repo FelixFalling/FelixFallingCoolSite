@@ -87,6 +87,16 @@
   --beach-sand: 214, 205, 184;
   --wet-sand: 150, 170, 170; /* R,G,B - darker than dry sand: where the water just was */
 
+  /* Flotsam (Flotsam.tsx): the small things the swash leaves on the sand.
+     Muted, sun-bleached beach-find colours - they should be noticed on a
+     second look, not compete with the hero text. */
+  --flotsam-shell: #b3a184;
+  --flotsam-shell-line: #8a7a5e;
+  --flotsam-kelp: #5a6b44; /* olive-brown bull kelp */
+  --flotsam-wood: #7d6c54; /* grey-brown driftwood */
+  --flotsam-star: #b06e4e; /* dusty ochre starfish */
+  --flotsam-glass: #4f9a8e; /* frosted sea glass */
+
   /* Coastal scene extras (the hero diorama). */
   --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
   --mist: 255, 255, 255; /* fog color as R,G,B - layers set their own alpha */
@@ -154,6 +164,15 @@
      near-black night beach the wet sheen catches the moon and reads LIGHTER,
      so wet sand is the brighter of the two here. */
   --wet-sand: 92, 128, 134;
+
+  /* Flotsam at night: pale silhouettes on the moonlit sand - lighter than
+     their daytime selves, like everything else the moon catches here. */
+  --flotsam-shell: #aec2c0;
+  --flotsam-shell-line: #7e908f;
+  --flotsam-kelp: #6f9077; /* lifted well clear of the night sand */
+  --flotsam-wood: #8b9a9c;
+  --flotsam-star: #9c8a78;
+  --flotsam-glass: #6fb0a6;
 
   --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
   --mist: 150, 180, 185; /* fog glows faintly cool at night */
@@ -618,6 +637,35 @@ a {
   }
 }
 
+/* Flotsam (Flotsam.tsx): one full washed-in → lying there → washed-out cycle.
+   The deposit is quick with a small downward slide (down the screen = up the
+   beach, same orientation note as the swash) - a sheet drops the thing and
+   leaves. It then just LIES there for most of the cycle, and finally fades as
+   a later sheet takes it back. Long periods on the items themselves make the
+   arrivals feel occasional. */
+@keyframes flotsamWash {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  4% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  76% {
+    opacity: 0;
+    transform: translateY(2px); /* dragged a touch seaward as it goes */
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -634,6 +682,7 @@ a {
      already the picture we want at rest (calm water sitting on the waterline,
      damp sand, a soft foam edge, no lace). See Swash.tsx. */
   .wave-swell,
+  .flotsam-item,
   .swash-run,
   .swash-foam,
   .wet-sand,
