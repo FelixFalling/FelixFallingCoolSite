@@ -79,7 +79,13 @@
      edge you are seeing pale sand THROUGH a shallow film. */
   --swash-water: #93b3ad;
   --swash-foam: #f4f8f6; /* brighter than --wave-foam: lace at your feet, not distant mist */
-  --wet-sand: 168, 186, 186; /* R,G,B - the gradient picks its own alphas, like --mist */
+  /* The bare beach the water runs onto. It MUST be its own colour, not --sand
+     (the page background), or there is no visible shore: the water would just
+     wash over the page and back. A soft warm sand, muted to sit in the cool
+     fog palette. R,G,B so the band can fade its own alpha to nothing at the
+     hero's bottom edge, where sand meets the page. */
+  --beach-sand: 214, 205, 184;
+  --wet-sand: 150, 170, 170; /* R,G,B - darker than dry sand: where the water just was */
 
   /* Coastal scene extras (the hero diorama). */
   --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
@@ -141,10 +147,13 @@
 
   --swash-water: #2f5f61;
   --swash-foam: #8fd4cf; /* moonlit lace, brighter than the far crest */
+  /* Moonlit sand: a cool grey, well clear of the near-black page so the shore
+     actually shows. */
+  --beach-sand: 58, 72, 82;
   /* Note the flip: in daylight wet sand is DARKER than dry, but on a
-     near-black night beach the wet sheen catches the moon and reads LIGHTER.
-     Getting that backwards is what makes a night beach look wrong. */
-  --wet-sand: 60, 106, 112;
+     near-black night beach the wet sheen catches the moon and reads LIGHTER,
+     so wet sand is the brighter of the two here. */
+  --wet-sand: 92, 128, 134;
 
   --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
   --mist: 150, 180, 185; /* fog glows faintly cool at night */

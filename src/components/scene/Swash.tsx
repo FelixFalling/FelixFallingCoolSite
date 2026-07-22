@@ -197,12 +197,35 @@ function SwashSheet({ sheet }: { sheet: Sheet }) {
 export default function Swash() {
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }} aria-hidden="true">
-      {/* Sand the water has just left. It sits behind the sheets and in front
-          of the wave layers, scaling down from the waterline so the high-water
-          mark creeps up and dries back. The gradient is fully transparent well
-          before the hero's bottom edge, which is what keeps the seam into the
-          page background invisible (the page background is --sand, the very
-          same colour the beach is painted in). */}
+      {/* The bare beach: a strip of actual sand for the water to run onto and
+          uncover as it drains. Without this the beach is --sand (the page
+          background), so there is no visible shore at all.
+          It spans from the waterline down to the hero's bottom edge, and it is
+          the BACKMOST thing here, so the wet-sand darkening and the water
+          sheets both paint over it. The gradient is soft at the waterline (the
+          water covers that join) and fades to nothing at the very bottom, where
+          the sand has to melt into the page with no hard line. */}
+      <div
+        className="beach-sand"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: "var(--waterline)",
+          background:
+            "linear-gradient(to bottom," +
+            " rgba(var(--beach-sand), 0.35) 0%," +
+            " rgba(var(--beach-sand), 0.92) 24%," +
+            " rgba(var(--beach-sand), 0.92) 66%," +
+            " rgba(var(--beach-sand), 0) 96%)",
+        }}
+      />
+
+      {/* Sand the water has just left. It sits over the dry beach and under the
+          sheets, scaling down from the waterline so the high-water mark creeps
+          up and dries back. The gradient is fully transparent well before the
+          hero's bottom edge, keeping the seam into the page invisible. */}
       <div
         className="wet-sand"
         style={{
