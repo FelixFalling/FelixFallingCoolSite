@@ -18,66 +18,66 @@
   color-scheme: light;
 
   /* LIGHT THEME - "overcast Oregon coast, midday fog": cool, desaturated,
-     silver-grey with deep spruce-teal accents. */
+     silver-grey with sea-glass green accents. */
 
   /* Surfaces */
-  --sand: #edf1f1; /* page background - a cool fog-grey, not warm cream */
-  --card-bg: #f8fbfb; /* cards - a touch lighter than the page */
-  --card-border: rgba(40, 64, 74, 0.12);
-  --card-shadow: 0 2px 12px rgba(35, 55, 65, 0.06);
-  --surface-2: rgba(58, 111, 107, 0.1); /* tags, ghost button */
+  --sand: #edf1ef; /* page background - a cool fog-grey, not warm cream */
+  --card-bg: #f8fbf9; /* cards - a touch lighter than the page */
+  --card-border: rgba(40, 74, 66, 0.12);
+  --card-shadow: 0 2px 12px rgba(35, 65, 59, 0.06);
+  --surface-2: rgba(58, 111, 79, 0.1); /* tags, ghost button */
 
   /* Text */
-  --ink: #2a3743; /* default body text - cool charcoal */
-  --navy: #1e3a42; /* headings + brand - deep slate-teal (NOT backgrounds) */
-  --slate: #384b53; /* paragraph text */
-  --muted: #5c6d75; /* secondary / meta text (4.7:1 on --sand - WCAG AA) */
-  --text-title: #2f5560; /* hero job title - deep teal */
-  --text-subtle: #45585f; /* hero specialties, honors line */
+  --ink: #2a4342; /* default body text - cool charcoal */
+  --navy: #1e4237; /* headings + brand - deep slate-teal (NOT backgrounds) */
+  --slate: #38534d; /* paragraph text */
+  --muted: #576e69; /* secondary / meta text (4.7:1 on --sand - WCAG AA) */
+  --text-title: #2f6051; /* hero job title - deep green */
+  --text-subtle: #455f58; /* hero specialties, honors line */
 
   /* Accents */
-  --teal: #3a6f6b; /* deep spruce-teal */
-  --teal-deep: #2b5450;
-  --rule: rgba(58, 111, 107, 0.4); /* the fading line beside section titles */
+  --teal: #3a6f4f; /* deep spruce-green (token name kept) */
+  --teal-deep: #2b543a;
+  --rule: rgba(58, 111, 79, 0.4); /* the fading line beside section titles */
 
   /* Primary action (filled buttons) - a real background, kept separate from
      --navy so it can stay vivid in dark mode instead of turning light. */
-  --primary: #22505a; /* deep sea */
-  --primary-hover: #2c6470;
+  --primary: #225a46; /* deep sea */
+  --primary-hover: #2c7058;
   --on-primary: #ffffff;
 
   /* Nav bar */
-  --nav-bg: rgba(237, 241, 241, 0.9);
-  --nav-link: #3f525a;
+  --nav-bg: rgba(237, 241, 239, 0.9);
+  --nav-link: #3f5a54;
 
-  /* Hero - fog-silver sky at the top fading to cold sea-teal at the bottom. */
-  --hero-from: #dbe4e5;
-  --hero-via: #c4d5d5;
-  --hero-to: #9fc0c1;
-  --photo-from: #a7c6c6;
-  --photo-to: #6f9c9d;
-  --photo-text: #274a4c;
+  /* Hero - fog-silver sky at the top fading to cold sea-green at the bottom. */
+  --hero-from: #dbe5e1;
+  --hero-via: #c4d5cc;
+  --hero-to: #9fc1b0;
+  --photo-from: #a7c6b5;
+  --photo-to: #6f9d85;
+  --photo-text: #274c3a;
 
-  /* Footer (a dark band in both themes) - deep teal-basalt. */
-  --footer-bg: #152c33;
-  --footer-text: #c6d5d6;
-  --footer-title: #f2f7f7;
-  --footer-subtitle: #93aab0;
+  /* Footer (a dark band in both themes) - deep green-basalt. */
+  --footer-bg: #15332a;
+  --footer-text: #c6d6ce;
+  --footer-title: #f2f7f4;
+  --footer-subtitle: #93b0a7;
   --footer-link-border: rgba(255, 255, 255, 0.3);
-  --footer-copyright: #8ba1a7; /* 5.4:1 on the footer band - WCAG AA */
+  --footer-copyright: #8eaaa1; /* 5.4:1 on the footer band - WCAG AA */
 
   /* Ocean waves under the hero (the "sand" layer uses --sand so it always
      matches the page background it washes onto). Back→front the water deepens;
      the far band is the most desaturated so distance reads as haze. */
-  --wave-far: #b6cbcb; /* hazy, distant */
-  --wave-mid: #6b9c9b;
-  --wave-break: #3d716d; /* deepest, nearest crest */
-  --wave-foam: #e9f0ee; /* soft off-white - misty spray, not stark white */
+  --wave-far: #b6cbc0; /* hazy, distant */
+  --wave-mid: #6b9c81;
+  --wave-break: #3d7151; /* deepest, nearest crest */
+  --wave-foam: #e9f0ea; /* soft off-white - misty spray, not stark white */
 
   /* The swash: the thin sheet of water that runs up the sand and drains back
      (Swash.tsx). Greener and greyer than the open water, because at the water's
      edge you are seeing pale sand THROUGH a shallow film. */
-  --swash-water: #93b3ad;
+  --swash-water: #93b39c;
   --swash-foam: #f4f8f6; /* brighter than --wave-foam: lace at your feet, not distant mist */
   /* The bare beach the water runs onto. It MUST be its own colour, not --sand
      (the page background), or there is no visible shore: the water would just
@@ -85,7 +85,7 @@
      fog palette. R,G,B so the band can fade its own alpha to nothing at the
      hero's bottom edge, where sand meets the page. */
   --beach-sand: 214, 205, 184;
-  --wet-sand: 150, 170, 170; /* R,G,B - darker than dry sand: where the water just was */
+  --wet-sand: 150, 170, 159; /* R,G,B - darker than dry sand: where the water just was */
 
   /* Flotsam (Flotsam.tsx): the small things the swash leaves on the sand.
      Muted, sun-bleached beach-find colours - they should be noticed on a
@@ -95,12 +95,12 @@
   --flotsam-kelp: #5a6b44; /* olive-brown bull kelp */
   --flotsam-wood: #7d6c54; /* grey-brown driftwood */
   --flotsam-star: #b06e4e; /* dusty ochre starfish */
-  --flotsam-glass: #4f9a8e; /* frosted sea glass */
+  --flotsam-glass: #4f9a66; /* frosted sea glass */
 
   /* Coastal scene extras (the hero diorama). */
-  --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
+  --sea-stack: #7f9c8f; /* offshore rock silhouette - hazy grey-blue in fog */
   --mist: 255, 255, 255; /* fog color as R,G,B - layers set their own alpha */
-  --star: #e9f2f2; /* faint stars (dark only) */
+  --star: #e9f2ed; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
   --content-width: 960px;
@@ -112,71 +112,71 @@
   /* DARK THEME - "Oregon coast at night, moonlit fog": deep cold blue-greens,
      muted, with a faint moonlit glow. */
 
-  --sand: #0c1418;
-  --card-bg: #141e23;
+  --sand: #0c1816;
+  --card-bg: #142320;
   --card-border: rgba(255, 255, 255, 0.08);
   --card-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
-  --surface-2: rgba(95, 180, 174, 0.14);
+  --surface-2: rgba(95, 180, 129, 0.14);
 
-  --ink: #bcccce;
-  --navy: #e6f0f0;
-  --slate: #aebdc0;
-  --muted: #7f9296;
-  --text-title: #8fc2c0;
-  --text-subtle: #a0b4b6;
+  --ink: #bccec6;
+  --navy: #e6f0eb;
+  --slate: #aec0b9;
+  --muted: #7f968e;
+  --text-title: #8fc2a5;
+  --text-subtle: #a0b6ac;
 
-  --teal: #5fb4ae;
-  --teal-deep: #7bceca;
-  --rule: rgba(95, 180, 174, 0.32);
+  --teal: #5fb481;
+  --teal-deep: #7bce9e;
+  --rule: rgba(95, 180, 129, 0.32);
 
-  --primary: #2a6a72;
-  --primary-hover: #357f88;
+  --primary: #2a7254;
+  --primary-hover: #358865;
   --on-primary: #ffffff;
 
-  --nav-bg: rgba(12, 20, 24, 0.86);
-  --nav-link: #9fb2b5;
+  --nav-bg: rgba(12, 24, 22, 0.86);
+  --nav-link: #9fb5ac;
 
-  --hero-from: #0e1a20;
-  --hero-via: #10242b;
-  --hero-to: #123038;
-  --photo-from: #1e4a54;
-  --photo-to: #27696a;
-  --photo-text: #d2eeee;
+  --hero-from: #0e201c;
+  --hero-via: #102b24;
+  --hero-to: #12382c;
+  --photo-from: #1e5441;
+  --photo-to: #276a47;
+  --photo-text: #d2eedf;
 
-  --footer-bg: #070d10;
-  --footer-text: #9fb1b4;
+  --footer-bg: #07100e;
+  --footer-text: #9fb4ac;
   --footer-title: #eef3fb;
-  --footer-subtitle: #7f9296;
+  --footer-subtitle: #7f968e;
   --footer-link-border: rgba(255, 255, 255, 0.2);
-  --footer-copyright: #7d8a9c; /* 5.6:1 on the dark footer - WCAG AA */
+  --footer-copyright: #7d9b9c; /* 5.6:1 on the dark footer - WCAG AA */
 
-  --wave-far: #223d44;
-  --wave-mid: #2b5c5e;
-  --wave-break: #387672;
-  --wave-foam: #6fbfbb; /* a soft moonlit glow on the crest */
+  --wave-far: #224439;
+  --wave-mid: #2b5e45;
+  --wave-break: #387651;
+  --wave-foam: #6fbf90; /* a soft moonlit glow on the crest */
 
-  --swash-water: #2f5f61;
-  --swash-foam: #8fd4cf; /* moonlit lace, brighter than the far crest */
+  --swash-water: #2f6148;
+  --swash-foam: #8fd4aa; /* moonlit lace, brighter than the far crest */
   /* Moonlit sand: a cool grey, well clear of the near-black page so the shore
      actually shows. */
-  --beach-sand: 58, 72, 82;
+  --beach-sand: 58, 82, 79;
   /* Note the flip: in daylight wet sand is DARKER than dry, but on a
      near-black night beach the wet sheen catches the moon and reads LIGHTER,
      so wet sand is the brighter of the two here. */
-  --wet-sand: 92, 128, 134;
+  --wet-sand: 92, 134, 118;
 
   /* Flotsam at night: pale silhouettes on the moonlit sand - lighter than
      their daytime selves, like everything else the moon catches here. */
-  --flotsam-shell: #aec2c0;
-  --flotsam-shell-line: #7e908f;
+  --flotsam-shell: #aec2b5;
+  --flotsam-shell-line: #7e9085;
   --flotsam-kelp: #6f9077; /* lifted well clear of the night sand */
-  --flotsam-wood: #8b9a9c;
+  --flotsam-wood: #8b9c95;
   --flotsam-star: #9c8a78;
-  --flotsam-glass: #6fb0a6;
+  --flotsam-glass: #6fb083;
 
-  --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
-  --mist: 150, 180, 185; /* fog glows faintly cool at night */
-  --star: #cfe2e0;
+  --sea-stack: #061210; /* near-black basalt against the moonlit fog */
+  --mist: 150, 185, 171; /* fog glows faintly cool at night */
+  --star: #cfe2d6;
   --star-opacity: 1; /* stars appear in dark mode */
 }
 
