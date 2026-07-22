@@ -137,6 +137,8 @@ export default function Flotsam() {
             // phases, and each switch can flash the region it sits over.
             // These layers are tiny (< 100px), so the memory cost is nothing.
             willChange: "transform, opacity",
+            backfaceVisibility: "hidden", // iOS layer pinning - see Waves.tsx
+            WebkitBackfaceVisibility: "hidden",
           }}
         >
           <div

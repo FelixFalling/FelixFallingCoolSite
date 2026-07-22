@@ -136,6 +136,9 @@ function SwashSheet({ sheet }: { sheet: Sheet }) {
         ["--swash-up" as string]: up,
         animation: run + fade,
         willChange: "transform",
+        // Same iOS layer pinning as the wave rows - see the note in Waves.tsx.
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
       }}
     >
       <svg
@@ -261,6 +264,8 @@ export default function Swash() {
           // darkens just after the water has covered it.
           animation: "wetSand calc(23.9s / var(--wave-speed, 1)) ease-in-out -7.2s infinite",
           willChange: "transform, opacity",
+          backfaceVisibility: "hidden", // see the note in Waves.tsx
+          WebkitBackfaceVisibility: "hidden",
         }}
       />
 

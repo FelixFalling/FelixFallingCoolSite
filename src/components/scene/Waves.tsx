@@ -94,6 +94,13 @@ function WaveLayer({ layer }: { layer: Layer }) {
         // the real coast means faster water here.
         animation: `${layer.drift} calc(${layer.driftDur}s / var(--wave-speed, 1)) linear infinite`,
         willChange: "transform",
+        // Pins the row to a stable GPU layer on iOS, where 2D transform
+        // animations can drop off the compositor and repaint per frame (the
+        // waves read as flickering). Inline on purpose: the equivalent
+        // translate3d hint in the keyframes gets minified back to 2D
+        // translate() by the CSS optimizer, but it can't touch this.
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
       }}
     >
       <div
@@ -103,6 +110,8 @@ function WaveLayer({ layer }: { layer: Layer }) {
           inset: 0,
           animation: `${layer.swell} calc(${layer.swellDur}s / var(--wave-speed, 1)) ease-in-out infinite`,
           willChange: "transform",
+          backfaceVisibility: "hidden", // see the note on the row above
+          WebkitBackfaceVisibility: "hidden",
         }}
       >
         {Array.from({ length: TILES }, (_, i) => (
