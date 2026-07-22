@@ -128,8 +128,17 @@ function WaveLayer({ layer }: { layer: Layer }) {
             {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
             <path d={d} style={{ fill: layer.fill }} opacity={layer.opacity} />
             {layer.foam && (
-              // Thin, soft, low-opacity foam - misty spray rather than a bright line.
-              <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)", filter: "blur(0.6px)" }} strokeWidth={3} strokeLinecap="round" opacity={0.5} />
+              // Thin, soft, low-opacity foam - misty spray rather than a bright
+              // line. The softness is TWO stacked strokes (a faint wide halo
+              // under a stronger core), NOT filter: blur(). A blur filter on an
+              // SVG path inside a layer that animates transform makes iOS
+              // Safari re-run the filter as the layer's tiles move, and the
+              // filtered stroke intermittently blanks - the waves "flicker".
+              // Same rule in Swash.tsx; do not reintroduce filters here.
+              <>
+                <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5.5} strokeLinecap="round" opacity={0.16} />
+                <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={2.5} strokeLinecap="round" opacity={0.42} />
+              </>
             )}
           </svg>
         ))}

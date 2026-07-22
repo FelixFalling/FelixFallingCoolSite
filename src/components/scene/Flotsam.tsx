@@ -132,6 +132,11 @@ export default function Flotsam() {
             // for why: `animation: none` falls back to these values).
             opacity: item.restOpacity,
             animation: `flotsamWash ${item.period}s linear ${item.delay}s infinite`,
+            // Keep the item on its own GPU layer for the whole cycle. Without
+            // this, iOS promotes and demotes the layer around the invisible
+            // phases, and each switch can flash the region it sits over.
+            // These layers are tiny (< 100px), so the memory cost is nothing.
+            willChange: "transform, opacity",
           }}
         >
           <div

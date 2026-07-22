@@ -182,13 +182,20 @@ function SwashSheet({ sheet }: { sheet: Sheet }) {
         >
           {/* Stroke widths are in viewBox units and the box is squashed to
               roughly half height on screen, so these end up about half as thick
-              as the numbers suggest. The wide blurred one is spray hanging over
+              as the numbers suggest. The wide faint ones are spray hanging over
               the edge; the tight one is the foam line itself.
+              The spray is a STACK of concentric strokes fading outward, not
+              filter: blur(). This group's opacity animates every cycle, and on
+              iOS Safari a blur filter inside continuously-animating content
+              re-rasterizes per frame and intermittently blanks - which read as
+              the waves flickering on phones. Same rule in Waves.tsx.
               Keep these restrained. Three sheets stacked up means three foam
               edges at once, and heavy strokes turn that into a mess of parallel
               wavy lines rather than water. */}
-          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)", filter: "blur(5px)" }} strokeWidth={14} opacity={0.16} />
-          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)", filter: "blur(0.8px)" }} strokeWidth={3.5} strokeLinecap="round" />
+          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)" }} strokeWidth={22} opacity={0.05} />
+          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)" }} strokeWidth={14} opacity={0.08} />
+          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)" }} strokeWidth={8} strokeLinecap="round" opacity={0.12} />
+          <path d={edge} fill="none" style={{ stroke: "var(--swash-foam)" }} strokeWidth={3.5} strokeLinecap="round" opacity={0.9} />
         </g>
         )}
       </svg>

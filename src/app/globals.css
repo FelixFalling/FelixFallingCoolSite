@@ -432,39 +432,45 @@ a {
  * Two drift directions so adjacent wave layers move against each other, plus
  * two gentle vertical "swell" bobs. Respects reduced-motion preferences.
  * The drift distance is exactly one 1200px wave tile (see Waves.tsx), so the
- * loop restart lands on an identical crest - seamless at any screen width. */
+ * loop restart lands on an identical crest - seamless at any screen width.
+ *
+ * Everything animated in the water uses translate3d, not translateX/Y. On iOS
+ * Safari a 2D transform animation can drop off the compositor and repaint per
+ * frame, and layers flicker as they are demoted and re-promoted. The explicit
+ * 3D form pins each layer to the GPU for the whole animation. Keep it that way
+ * in every keyframe that touches the sea. */
 @keyframes waveDrift {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateX(-1200px);
+    transform: translate3d(-1200px, 0, 0);
   }
 }
 @keyframes waveDrift2 {
   from {
-    transform: translateX(-1200px);
+    transform: translate3d(-1200px, 0, 0);
   }
   to {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 @keyframes waveSwell {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-15px);
+    transform: translate3d(0, -15px, 0);
   }
 }
 @keyframes waveSwell2 {
   0%,
   100% {
-    transform: translateY(-9px);
+    transform: translate3d(0, -9px, 0);
   }
   50% {
-    transform: translateY(6px);
+    transform: translate3d(0, 6px, 0);
   }
 }
 
@@ -561,22 +567,22 @@ a {
  */
 @keyframes swashRun {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
     /* The rush: most of the distance is covered early, then it decelerates
        hard as the water runs out of energy against the slope. */
     animation-timing-function: cubic-bezier(0.16, 0.9, 0.35, 1);
   }
   32% {
-    transform: translateY(var(--swash-up));
+    transform: translate3d(0, var(--swash-up), 0);
     /* The drain: almost still at first (the sheet hangs at the top of its
        run), then it slides back and eases out as the film thins. */
     animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.6);
   }
   88% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateY(0); /* a beat of calm before the next one */
+    transform: translate3d(0, 0, 0); /* a beat of calm before the next one */
   }
 }
 
@@ -621,19 +627,19 @@ a {
 @keyframes wetSand {
   0% {
     opacity: 0.42;
-    transform: scaleY(0.62);
+    transform: translateZ(0) scaleY(0.62);
   }
   16% {
     opacity: 0.95;
-    transform: scaleY(0.86);
+    transform: translateZ(0) scaleY(0.86);
   }
   40% {
     opacity: 0.82;
-    transform: scaleY(0.84);
+    transform: translateZ(0) scaleY(0.84);
   }
   100% {
     opacity: 0.4;
-    transform: scaleY(0.62);
+    transform: translateZ(0) scaleY(0.62);
   }
 }
 
@@ -646,23 +652,23 @@ a {
 @keyframes flotsamWash {
   0% {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translate3d(0, -6px, 0);
   }
   4% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   70% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   76% {
     opacity: 0;
-    transform: translateY(2px); /* dragged a touch seaward as it goes */
+    transform: translate3d(0, 2px, 0); /* dragged a touch seaward as it goes */
   }
   100% {
     opacity: 0;
-    transform: translateY(2px);
+    transform: translate3d(0, 2px, 0);
   }
 }
 
