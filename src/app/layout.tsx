@@ -39,6 +39,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: ["og.png"],
   },
+  // The AI opt-out that actually works on this host (see robots.ts for why the
+  // robots.txt alone doesn't, on a Pages project path). It's server-rendered
+  // into the static HTML, so scrapers that don't run JS still see it. Only the
+  // non-standard noai/noimageai tokens are set, so ordinary search engines -
+  // which ignore directives they don't recognize - keep indexing the site
+  // normally; nothing here says noindex.
+  other: { robots: "noai, noimageai" },
 };
 
 /**
