@@ -8,10 +8,10 @@
 .inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  /* Extra bottom padding leaves the taller coastal scene (fog + waves + the
-     beach the swash runs over) room to breathe beneath the text/buttons.
-     Reading --waves-height rather than a hardcoded number means the text keeps
-     clear of the water automatically if the sea band is ever retuned. */
+  /* Extra bottom padding leaves the coastal scene (fog + waves) room to
+     breathe beneath the text/buttons. Reading --waves-height rather than a
+     hardcoded number means the text keeps clear of the water automatically if
+     the sea band is ever retuned. */
   padding: 88px 24px var(--waves-height);
   position: relative;
   z-index: 2;

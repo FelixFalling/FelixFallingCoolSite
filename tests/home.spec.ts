@@ -124,19 +124,9 @@ test.describe("reduced motion", () => {
     await expect(homePage.waveDrift).toHaveCSS("animation-name", /waveDrift/);
   });
 
-  test("the swash and the scroll cue stop too", async ({ homePage, page }) => {
+  test("the scroll cue stops too", async ({ homePage, page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await homePage.goto();
-    // Water running up the beach is the springiest thing in the scene, so all
-    // of it holds still. What's left is a calm still: water resting on the
-    // waterline over damp sand (the base styles in Swash.tsx).
-    for (const layer of [homePage.swashRun, homePage.swashFoam, homePage.wetSand]) {
-      const count = await layer.count();
-      expect(count).toBeGreaterThan(0);
-      for (let i = 0; i < count; i++) {
-        await expect(layer.nth(i)).toHaveCSS("animation-name", "none");
-      }
-    }
     await expect(homePage.scrollCue).toHaveCSS("animation-name", "none");
   });
 });

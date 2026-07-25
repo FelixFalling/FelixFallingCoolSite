@@ -16,10 +16,6 @@ export class HomePage extends BasePage {
   readonly waveDrift: Locator;
   readonly waveSwell: Locator;
   readonly waveDriftAll: Locator;
-  /** The swash: water running up the beach (Swash.tsx). */
-  readonly swashRun: Locator;
-  readonly swashFoam: Locator;
-  readonly wetSand: Locator;
   readonly scrollCue: Locator;
   readonly ducks: Locator;
 
@@ -35,9 +31,6 @@ export class HomePage extends BasePage {
     this.waveDrift = page.locator(".wave-drift").first();
     this.waveSwell = page.locator(".wave-swell").first();
     this.waveDriftAll = page.locator(".wave-drift");
-    this.swashRun = page.locator(".swash-run");
-    this.swashFoam = page.locator(".swash-foam");
-    this.wetSand = page.locator(".wet-sand");
     this.scrollCue = page.locator(".scroll-cue");
     this.ducks = page.locator("[data-duck]");
   }

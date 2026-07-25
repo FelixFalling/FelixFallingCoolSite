@@ -18,11 +18,9 @@
  * how wide the row is) comes from Waves.module.css, which steps it up with the
  * viewport. That is load-bearing, not an optimization - see the note there.
  *
- * WHERE THE WATER SITS: these rows fill --water-height and stand on top of
- * --beach-height (the bare sand the swash runs over, see Swash.tsx), rather
- * than filling the whole strip. globals.css derives --waterline from the front
- * layer's crest position, so if you change that layer's `y` below, or the
- * bleed values, update --sand-crest-offset over there to match.
+ * WHERE THE WATER SITS: these rows fill the whole .waves-strip from the
+ * bottom up. The front (sand) layer is filled with --sand, the page
+ * background, so the sea always looks like it washes onto the page itself.
  *
  * All the animation timing is data below - tweak the numbers to taste.
  */
@@ -71,10 +69,7 @@ const LAYERS: Layer[] = [
   { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 0.5, foam: false, bleed: "28px" },
   { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, opacity: 0.65, foam: false, bleed: "28px" },
   { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, opacity: 0.85, foam: true, bleed: "28px" },
-  // The front layer paints the beach as well as the last of the water, so its
-  // bleed has to reach the whole way down past the hero's bottom edge. Without
-  // that you get a teal sliver along the bottom whenever the swell lifts it.
-  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false, bleed: "calc(var(--beach-height) + 28px)" },
+  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false, bleed: "28px" },
 ];
 
 function WaveLayer({ layer }: { layer: Layer }) {
@@ -87,9 +82,8 @@ function WaveLayer({ layer }: { layer: Layer }) {
       style={{
         position: "absolute",
         left: 0,
-        // The water stands ON the beach rather than filling the whole strip.
-        bottom: "var(--beach-height)",
-        height: "var(--water-height)",
+        bottom: 0,
+        height: "100%",
         // Divided by --wave-speed (live wind data via HeroScene): windier on
         // the real coast means faster water here.
         animation: `${layer.drift} calc(${layer.driftDur}s / var(--wave-speed, 1)) linear infinite`,
@@ -143,7 +137,7 @@ function WaveLayer({ layer }: { layer: Layer }) {
               // SVG path inside a layer that animates transform makes iOS
               // Safari re-run the filter as the layer's tiles move, and the
               // filtered stroke intermittently blanks - the waves "flicker".
-              // Same rule in Swash.tsx; do not reintroduce filters here.
+              // So keep the foam filter-free: do not reintroduce blur here.
               <>
                 <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5.5} strokeLinecap="round" opacity={0.16} />
                 <path d={openCrest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={2.5} strokeLinecap="round" opacity={0.42} />
