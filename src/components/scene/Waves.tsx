@@ -87,14 +87,15 @@ function WaveLayer({ layer }: { layer: Layer }) {
         // Divided by --wave-speed (live wind data via HeroScene): windier on
         // the real coast means faster water here.
         animation: `${layer.drift} calc(${layer.driftDur}s / var(--wave-speed, 1)) linear infinite`,
+        // will-change composites the drifting row on its own GPU layer.
+        // DO NOT add backface-visibility/translateZ here: it was tried as extra
+        // GPU pinning during the flicker fix, but on iOS it made the row
+        // visibly SNAP BACK at every animation restart. The loop is otherwise
+        // seamless (the tiles repeat every 1200px, so translating one tile and
+        // resetting lands on identical pixels); the 3D-context hint was making
+        // Safari flash that reset. The flicker itself was cured by the
+        // filter-free foam below, so this hint was only ever redundant.
         willChange: "transform",
-        // Pins the row to a stable GPU layer on iOS, where 2D transform
-        // animations can drop off the compositor and repaint per frame (the
-        // waves read as flickering). Inline on purpose: the equivalent
-        // translate3d hint in the keyframes gets minified back to 2D
-        // translate() by the CSS optimizer, but it can't touch this.
-        backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
       }}
     >
       <div
@@ -103,9 +104,7 @@ function WaveLayer({ layer }: { layer: Layer }) {
           position: "absolute",
           inset: 0,
           animation: `${layer.swell} calc(${layer.swellDur}s / var(--wave-speed, 1)) ease-in-out infinite`,
-          willChange: "transform",
-          backfaceVisibility: "hidden", // see the note on the row above
-          WebkitBackfaceVisibility: "hidden",
+          willChange: "transform", // no backface-visibility here either - see the row note
         }}
       >
         {Array.from({ length: TILES }, (_, i) => (
