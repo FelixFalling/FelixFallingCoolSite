@@ -23,6 +23,11 @@ export default function ThemeToggle() {
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
+    // Keep the mobile browser-chrome color in sync with the theme (the meta tag
+    // is first created by the no-flash script in layout.tsx). Mirrors --sand.
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", next === "dark" ? "#0c1418" : "#edf1f1");
     try {
       localStorage.setItem("theme", next);
     } catch {

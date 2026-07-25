@@ -47,6 +47,12 @@ export const metadata: Metadata = {
  * operating system's light/dark preference. The nav's toggle updates both the
  * <html data-theme> attribute and the saved value. The clock page reads the
  * same "theme" key, so your choice carries across the whole site.
+ *
+ * It also sets <meta name="theme-color"> so the mobile browser chrome (iOS
+ * Safari's status bar, Android's address bar) matches the page background.
+ * Done here rather than via Next's viewport export because that can only react
+ * to the OS preference, not the saved/toggled override this script honors. The
+ * nav's ThemeToggle keeps the meta in sync when you flip the theme.
  */
 const themeInitScript = `
 (function () {
@@ -58,6 +64,11 @@ const themeInitScript = `
     var q = new URLSearchParams(location.search).get('theme');
     if (q === 'light' || q === 'dark') t = q;
     document.documentElement.setAttribute('data-theme', t);
+    // Mirrors --sand (globals.css) for each theme.
+    var c = t === 'dark' ? '#0c1418' : '#edf1f1';
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (!m) { m = document.createElement('meta'); m.setAttribute('name', 'theme-color'); document.head.appendChild(m); }
+    m.setAttribute('content', c);
   } catch (e) {}
 })();
 `;

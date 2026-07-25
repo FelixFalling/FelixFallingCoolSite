@@ -33,6 +33,12 @@ export default function Activity() {
           src={CHART_URL}
           alt={`${resume.name}'s GitHub contribution graph over the last year`}
           loading="lazy"
+          // Intrinsic size of the ghchart SVG. With height:auto in CSS these
+          // give the browser the aspect ratio up front, so it reserves the row
+          // instead of shoving the caption down when the remote chart arrives
+          // (cumulative layout shift).
+          width={663}
+          height={104}
         />
       </div>
       <p className={styles.caption}>

@@ -41,6 +41,11 @@ export default function Hero() {
                 className={styles.photo}
                 src={`${BASE_PATH}/${resume.photo}`}
                 alt={resume.name}
+                // me.jpg is a 400x400 square; the attrs let the browser hold
+                // the circle's space before it loads (the CSS also fixes the
+                // size, but this keeps it correct if styles are late).
+                width={400}
+                height={400}
               />
             ) : (
               <div className={styles.photo}>

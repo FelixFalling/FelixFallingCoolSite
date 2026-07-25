@@ -15,6 +15,11 @@
   min-width: 660px; /* keep the squares readable instead of shrinking to mush */
   width: 100%;
   height: auto;
+  /* Reserve the row's height before the remote chart loads, so its arrival
+     doesn't push the caption (and everything below) down. Matches the SVG's
+     663x104 intrinsic size; the width/height attrs in Activity.tsx back this
+     up if the stylesheet is late. */
+  aspect-ratio: 663 / 104;
 }
 
 .caption {

@@ -27,7 +27,7 @@ export interface Job {
 
 /** One slide in a project card's little slideshow. */
 export interface ProjectImage {
-  src: string; // path under /public, e.g. "projects/clock-1.png"
+  src: string; // path under /public, e.g. "projects/clock-1.webp"
   alt: string; // describes the image for screen readers
 }
 
@@ -133,7 +133,7 @@ export const resume: Resume = {
         { label: "View the code →", href: "https://github.com/FelixFalling/Rubber-Duckie-Terminator" },
       ],
       images: [
-        { src: "projects/ducky-1.jpg", alt: "Live detection feed - RGB view with a duck bounding box beside the depth view" },
+        { src: "projects/ducky-1.webp", alt: "Live detection feed - RGB view with a duck bounding box beside the depth view" },
       ],
       tags: ["Python", "YOLOv8", "OpenCV", "Arduino", "Synthetic data"],
     },
@@ -149,7 +149,7 @@ export const resume: Resume = {
         "server behind the live site.",
       links: [{ label: "Visit the live site →", href: "https://wdt.cecs.pdx.edu/" }],
       images: [
-        { src: "projects/wildfire-1.png", alt: "The wildfire forecast dashboard - a WRF-SFIRE fire-spread simulation over a map" },
+        { src: "projects/wildfire-1.webp", alt: "The wildfire forecast dashboard - a WRF-SFIRE fire-spread simulation over a map" },
       ],
       tags: ["Python", "Deep learning", "HPC / SLURM", "Docker", "Geospatial"],
     },
@@ -185,8 +185,8 @@ export const resume: Resume = {
         { label: "Transfer-learning CNN →", href: "https://github.com/FelixFalling/Transfer-Learning" },
       ],
       images: [
-        { src: "projects/queens-board.png", alt: "Chessboard showing one valid 8-queens solution, with a queen chess piece emblem" },
-        { src: "projects/queens-1.png", alt: "Fitness-over-generations plot from the genetic 8-queens solver, population size 1000" },
+        { src: "projects/queens-board.webp", alt: "Chessboard showing one valid 8-queens solution, with a queen chess piece emblem" },
+        { src: "projects/queens-1.webp", alt: "Fitness-over-generations plot from the genetic 8-queens solver, population size 1000" },
       ],
       tags: ["Python", "NumPy", "Genetic algorithms", "TensorFlow"],
     },
@@ -200,8 +200,8 @@ export const resume: Resume = {
         "GitHub Pages by CI on every push.",
       links: [{ label: "View the code →", href: "https://github.com/FelixFalling/FelixFallingCoolSite" }],
       images: [
-        { src: "projects/site-light.png", alt: "The portfolio homepage in light mode - fog and sea stacks under the hero" },
-        { src: "projects/site-dark.png", alt: "The portfolio homepage in dark mode - moonlit waves and stars" },
+        { src: "projects/site-light.webp", alt: "The portfolio homepage in light mode - fog and sea stacks under the hero" },
+        { src: "projects/site-dark.webp", alt: "The portfolio homepage in dark mode - moonlit waves and stars" },
       ],
       tags: ["Next.js", "TypeScript", "Playwright", "GitHub Actions"],
     },
@@ -221,8 +221,8 @@ export const resume: Resume = {
         "shipped it as one self-contained HTML file.",
       links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
       images: [
-        { src: "projects/clock-1.png", alt: "The Curse of Ra clock at night - a moonlit Egyptian tomb with a golden clock" },
-        { src: "projects/clock-2.png", alt: "The Curse of Ra clock by day - sunbeams lighting the tomb in gold" },
+        { src: "projects/clock-1.webp", alt: "The Curse of Ra clock at night - a moonlit Egyptian tomb with a golden clock" },
+        { src: "projects/clock-2.webp", alt: "The Curse of Ra clock by day - sunbeams lighting the tomb in gold" },
       ],
       tags: ["HTML", "CSS animation", "Vanilla JS", "AI-assisted"],
     },
@@ -237,8 +237,8 @@ export const resume: Resume = {
         "Vibe-coded: AI-paired, human-directed, one dependency-free HTML file.",
       links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
       images: [
-        { src: "projects/wizard-2.png", alt: "The Wizard's Tower gameplay - a cat chasing a laser dot up shelves, dodging ghost librarians" },
-        { src: "projects/wizard-1.png", alt: "The Wizard's Tower title screen with unlockable cat skins" },
+        { src: "projects/wizard-2.webp", alt: "The Wizard's Tower gameplay - a cat chasing a laser dot up shelves, dodging ghost librarians" },
+        { src: "projects/wizard-1.webp", alt: "The Wizard's Tower title screen with unlockable cat skins" },
       ],
       tags: ["JavaScript", "Game", "CSS", "AI-assisted"],
     },

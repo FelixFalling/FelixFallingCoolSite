@@ -1,4 +1,3 @@
-import ConstructionPopup from "@/components/ui/ConstructionPopup";
 import Nav from "@/components/ui/Nav";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
@@ -21,7 +20,6 @@ import Contact from "@/components/sections/Contact";
 export default function Home() {
   return (
     <>
-      <ConstructionPopup />
       <Nav />
       <Hero />
       <main className="container">
