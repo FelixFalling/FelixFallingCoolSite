@@ -15,7 +15,7 @@ import styles from "./not-found.module.css";
  */
 
 export const metadata: Metadata = {
-  title: "Lost at sea - Flying Felix",
+  title: "Lost at sea - Nick",
 };
 
 export default function NotFound() {

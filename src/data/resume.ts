@@ -6,10 +6,11 @@
  *  just render whatever you put here, so you never have to touch layout/HTML
  *  to change your name, projects, skills, etc.
  *
- *  PRIVACY NOTE: this site is public and scrapable. It deliberately uses the
- *  "Flying Felix" handle and contains no real name, employers, school, photo,
- *  location, or contact details. Keep it that way unless you decide otherwise.
- *  (The Experience/Education sections are currently hidden - see page.tsx.)
+ *  PRIVACY NOTE: this site is public and scrapable. The display name is the
+ *  owner's first name ("Nick") by choice; it still carries no last name,
+ *  employers, school, location, or contact details beyond the GitHub link.
+ *  Keep it minimal unless you decide otherwise. (The Experience/Education
+ *  sections are currently hidden - see page.tsx.)
  *
  *  TypeScript tip: the `: SomeType` annotations below describe the shape of
  *  each piece of data. If you mistype a field (e.g. forget a project's title),
@@ -91,7 +92,7 @@ export function primaryProjectLink(project: Project): { label: string; href: str
 }
 
 export const resume: Resume = {
-  name: "Flying Felix",
+  name: "Nick",
   jobTitle: "Software Developer",
   location: "Somewhere along a foggy coast",
   specialties: "Test automation · Embedded systems · DevOps",

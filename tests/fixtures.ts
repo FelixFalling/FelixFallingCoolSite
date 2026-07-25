@@ -13,7 +13,7 @@ import { NotFoundPage } from "./pages/NotFoundPage";
  *
  *   test("shows my name", async ({ homePage }) => {
  *     await homePage.goto();
- *     await expect(homePage.heroName).toHaveText("Flying Felix");
+ *     await expect(homePage.heroName).toHaveText("Nick");
  *   });
  *
  * Specs import `test` and `expect` from THIS file instead of

@@ -13,7 +13,7 @@ const SITE_URL = "https://felixfalling.github.io/FelixFallingCoolSite/";
 
 const TITLE = `${resume.name} - ${resume.jobTitle}`;
 const DESCRIPTION =
-  "Portfolio of Flying Felix - software developer focused on test automation, " +
+  "Portfolio of Nick - software developer focused on test automation, " +
   "embedded systems, and DevOps. Featuring an animated Oregon-coast scene.";
 
 /**
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: resume.name,
     type: "website",
-    images: [{ url: "og.png", width: 1200, height: 630, alt: "Flying Felix - an animated foggy coast with sea stacks and waves" }],
+    images: [{ url: "og.png", width: 1200, height: 630, alt: "Nick - an animated foggy coast with sea stacks and waves" }],
   },
   twitter: {
     card: "summary_large_image",
