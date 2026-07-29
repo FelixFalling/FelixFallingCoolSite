@@ -19,8 +19,17 @@ export class HomePage extends BasePage {
   readonly scrollCue: Locator;
   readonly ducks: Locator;
 
+  // ── Accessibility / structure ───────────────────────────────────────────
+  readonly skipLink: Locator;
+  readonly main: Locator;
+  /** The GitHub contribution graph (a third-party image that may fail). */
+  readonly activityChart: Locator;
+
   constructor(page: Page) {
     super(page);
+    this.skipLink = page.locator("a.skip-link");
+    this.main = page.locator("main#main");
+    this.activityChart = page.locator("#activity img");
     const hero = page.locator("header");
     this.heroName = page.locator("h1");
     this.githubButton = hero.getByRole("link", { name: "GitHub" });
@@ -58,6 +67,45 @@ export class HomePage extends BasePage {
   /** Type the secret word that makes it rain rubber ducks. */
   async typeDuckCode(): Promise<void> {
     await this.page.keyboard.type("duck");
+  }
+
+  /**
+   * Jump the window to an absolute scroll position, instantly.
+   *
+   * `behavior: "instant"` matters: the site sets `scroll-behavior: smooth`, so
+   * a plain scrollTo animates and anything read straight afterwards describes
+   * the page mid-glide rather than where it ended up.
+   */
+  async scrollTo(y: number): Promise<void> {
+    await this.page.evaluate(async (top) => {
+      window.scrollTo({ top, behavior: "instant" });
+      // The nav's scroll spy updates once per animation frame, so give it a
+      // couple of frames to react - otherwise a test reads the highlight from
+      // before the scroll and sees a stale (or still-empty) value.
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }, y);
+  }
+
+  /** The furthest the page can scroll (document height minus one screen). */
+  async maxScroll(): Promise<number> {
+    return this.page.evaluate(
+      () => document.documentElement.scrollHeight - window.innerHeight,
+    );
+  }
+
+  /**
+   * Scroll to the bottom and back, so the page settles at its final height.
+   *
+   * Needed before any test that walks the page by scroll offset: the reveal
+   * animations and the lazily-loaded screenshots both change the document
+   * height as they come in, so a height measured on a fresh load goes stale
+   * underneath you. One round trip triggers them all.
+   */
+  async settleHeight(): Promise<void> {
+    await this.scrollTo(await this.maxScroll());
+    await this.page.waitForTimeout(400);
+    await this.scrollTo(0);
+    await this.page.waitForTimeout(200);
   }
 
   /** How far the page overflows horizontally (0 = no sideways scrolling). */

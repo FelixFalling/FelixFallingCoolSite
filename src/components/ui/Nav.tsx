@@ -1,21 +1,12 @@
 import { resume } from "@/data/resume";
 import ThemeToggle from "./ThemeToggle";
+import NavLinks from "./NavLinks";
 import styles from "./Nav.module.css";
 
 /**
- * Sticky top navigation. Links jump to each section by its `id`.
- * Experience/Education links are omitted while those sections are hidden -
- * see the PRIVACY note in app/page.tsx.
+ * Sticky top navigation. The links themselves live in NavLinks.tsx, which
+ * highlights whichever section you've scrolled to.
  */
-const links = [
-  { href: "#about", label: "About" },
-  { href: "#projects", label: "Projects" },
-  { href: "#games", label: "Games" },
-  { href: "#skills", label: "Skills" },
-  { href: "#activity", label: "Activity" },
-  { href: "#contact", label: "Contact" },
-];
-
 export default function Nav() {
   return (
     <nav className={styles.nav}>
@@ -24,13 +15,7 @@ export default function Nav() {
           {resume.name}
         </a>
         <div className={styles.right}>
-          <div className={styles.links}>
-            {links.map((link) => (
-              <a key={link.href} href={link.href} className={styles.link}>
-                {link.label}
-              </a>
-            ))}
-          </div>
+          <NavLinks />
           <ThemeToggle />
         </div>
       </div>

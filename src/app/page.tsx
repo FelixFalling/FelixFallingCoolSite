@@ -20,9 +20,17 @@ import Contact from "@/components/sections/Contact";
 export default function Home() {
   return (
     <>
+      {/* First thing in the tab order: lets keyboard and screen-reader users
+          jump past the nav to the content. Hidden until focused (globals.css). */}
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
       <Nav />
       <Hero />
-      <main className="container">
+      {/* tabIndex={-1}: makes <main> a valid focus target, so the skip link
+          actually MOVES focus here rather than only scrolling the page - the
+          next Tab then continues from the content, not from the nav. */}
+      <main id="main" tabIndex={-1} className="container">
         <About />
         <Projects />
         <Games />

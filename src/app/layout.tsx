@@ -46,6 +46,16 @@ export const metadata: Metadata = {
   // which ignore directives they don't recognize - keep indexing the site
   // normally; nothing here says noindex.
   other: { robots: "noai, noimageai" },
+  manifest: "manifest.json",
+  // apple-touch-icon must be a PNG - iOS ignores the SVG favicon in app/icon.svg.
+  // These are rendered from that same SVG (see the icons in public/).
+  icons: {
+    apple: [{ url: "icon-180.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    title: resume.name,
+    statusBarStyle: "default",
+  },
 };
 
 /**
@@ -71,6 +81,12 @@ const themeInitScript = `
     var q = new URLSearchParams(location.search).get('theme');
     if (q === 'light' || q === 'dark') t = q;
     document.documentElement.setAttribute('data-theme', t);
+    // Marks that JavaScript is running, BEFORE the first paint. globals.css
+    // uses html.js to pre-hide the scroll-reveal sections, so they start
+    // invisible instead of being painted and then blanked by React after
+    // hydration (which flashed on slow devices). Without JS the class never
+    // lands and every section stays plainly visible.
+    document.documentElement.classList.add('js');
     // Mirrors --sand (globals.css) for each theme.
     var c = t === 'dark' ? '#0c1418' : '#edf1f1';
     var m = document.querySelector('meta[name="theme-color"]');
@@ -100,6 +116,16 @@ export default function RootLayout({
     // silences the resulting harmless mismatch warning for the <html> element.
     <html lang="en" suppressHydrationWarning>
       <body>
+        {/*
+          Warm up the two third-party origins the page pulls from, so the DNS
+          lookup + TLS handshake happen while the HTML is still parsing instead
+          of when the request is made. React hoists these into <head>.
+
+          ghchart is the GitHub contribution graph in the Activity section (an
+          image far down the page); gc.zgo.at is the GoatCounter script below.
+        */}
+        <link rel="preconnect" href="https://ghchart.rshah.org" />
+        <link rel="preconnect" href="https://gc.zgo.at" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
         <script data-goatcounter={GOATCOUNTER_URL} async src="https://gc.zgo.at/count.js" />

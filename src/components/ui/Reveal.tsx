@@ -9,6 +9,17 @@ import { useEffect, useRef } from "react";
  * APIs (IntersectionObserver), so it must run in the browser. Most components
  * in this project are "server components" that render to static HTML at build
  * time - you only add `"use client"` when a component needs interactivity.
+ *
+ * WHO HIDES THE SECTION: the CSS does, not this file. `html.js .reveal` in
+ * globals.css starts each section transparent, and the theme script in the
+ * layout adds that `js` class before the first paint - so a section is never
+ * painted and then blanked. This component only decides WHEN to reveal it, by
+ * adding `.is-visible`. Two consequences worth knowing:
+ *
+ *   • With JavaScript off, `html.js` never matches, so every section stays
+ *     visible as plain static HTML - the content is never lost.
+ *   • Reduced motion is handled in the CSS (the sections simply start
+ *     visible), so there's nothing to check for it here.
  */
 export default function Reveal({
   id,
@@ -23,28 +34,19 @@ export default function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    // Respect users who prefer no motion - show it immediately, no animation.
-    // Same if the browser lacks IntersectionObserver: never hide content we
-    // can't reveal again.
-    if (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      !("IntersectionObserver" in window)
-    ) {
-      el.style.opacity = "1";
+    // No IntersectionObserver: reveal immediately rather than leaving the
+    // section hidden with no way to bring it back.
+    if (!("IntersectionObserver" in window)) {
+      el.classList.add("is-visible");
       return;
     }
-
-    el.style.opacity = "0";
-    el.style.transform = "translateY(18px)";
-    el.style.transition = "opacity 0.7s ease, transform 0.7s ease";
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
-            observer.unobserve(el); // animate once, then stop watching
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target); // animate once, then stop watching
           }
         }
       },
@@ -59,7 +61,7 @@ export default function Reveal({
   }, []);
 
   return (
-    <section id={id} ref={ref} className="section">
+    <section id={id} ref={ref} className="section reveal">
       {children}
     </section>
   );

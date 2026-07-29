@@ -1,6 +1,7 @@
 import { resume } from "@/data/resume";
 import Section from "@/components/ui/Section";
 import ExternalLink from "@/components/ui/ExternalLink";
+import ActivityChart from "./ActivityChart";
 import styles from "./Activity.module.css";
 
 /**
@@ -20,27 +21,11 @@ const CHART_URL = `https://ghchart.rshah.org/3a6f6b/${GITHUB_USER}`;
 export default function Activity() {
   return (
     <Section id="activity" title="GitHub Activity">
-      {/* tabIndex + role: the chart box scrolls sideways on small screens, so
-          keyboard users must be able to focus it and scroll with arrow keys. */}
-      <div
-        className={styles.chartScroll}
-        tabIndex={0}
-        role="region"
-        aria-label="GitHub contribution chart (scrolls horizontally)"
-      >
-        <img
-          className={styles.chart}
-          src={CHART_URL}
-          alt={`${resume.name}'s GitHub contribution graph over the last year`}
-          loading="lazy"
-          // Intrinsic size of the ghchart SVG. With height:auto in CSS these
-          // give the browser the aspect ratio up front, so it reserves the row
-          // instead of shoving the caption down when the remote chart arrives
-          // (cumulative layout shift).
-          width={663}
-          height={104}
-        />
-      </div>
+      <ActivityChart
+        src={CHART_URL}
+        alt={`${resume.name}'s GitHub contribution graph over the last year`}
+        label="GitHub contribution chart (scrolls horizontally)"
+      />
       <p className={styles.caption}>
         A year of commits, green-squares style -{" "}
         <ExternalLink href={resume.links.github}>more experiments on GitHub →</ExternalLink>

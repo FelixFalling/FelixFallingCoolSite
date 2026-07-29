@@ -56,10 +56,49 @@
   transition: color 0.15s ease;
   /* A little vertical padding makes each link an easier tap target. */
   padding: 4px 0;
+  /* Anchors the active underline below. */
+  position: relative;
 }
 
 .link:hover {
   color: var(--navy);
+}
+
+/* ── The section you're currently reading ──────────────────────────────────
+ * Set by NavLinks.tsx as you scroll. Deliberately NOT a font-weight change:
+ * that would change each link's width and make the row re-wrap as you scroll.
+ * The underline is a positioned pseudo-element for the same reason - it takes
+ * up no space, so nothing shifts when it appears.
+ */
+.linkActive {
+  color: var(--navy);
+}
+
+.linkActive::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--teal);
+}
+
+/* The underline only grows in for users who haven't asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .linkActive::after {
+    animation: linkUnderline 0.25s ease;
+  }
+}
+
+@keyframes linkUnderline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* ── Phone layout ──────────────────────────────────────────────────────────
