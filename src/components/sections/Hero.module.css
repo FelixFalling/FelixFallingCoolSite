@@ -21,6 +21,22 @@
   flex-wrap: wrap;
 }
 
+/* Applied by Hero.tsx only while the photo circle is hidden (resume.showPhoto
+   is false). The text column is the sole child then, so centre it in the row
+   rather than leaving it pinned left with the whole right half empty. */
+.centered {
+  justify-content: center;
+}
+
+.centered .text {
+  text-align: center;
+}
+
+/* The buttons are their own flex row, so centring the text doesn't move them. */
+.centered .actions {
+  justify-content: center;
+}
+
 .text {
   /* No grow: the text keeps its natural width so the photo hugs it as one
      unit instead of being flung to the far edge on wide monitors. */

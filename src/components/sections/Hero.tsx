@@ -10,7 +10,10 @@ export default function Hero() {
 
   return (
     <header id="top" className={styles.hero}>
-      <div className={styles.inner}>
+      {/* With the photo hidden there's no second column to sit beside, so the
+          text is centred instead of clinging to the left edge. See .centered
+          in the stylesheet - it also centres the buttons and the text itself. */}
+      <div className={resume.showPhoto ? styles.inner : `${styles.inner} ${styles.centered}`}>
         <div className={styles.text}>
           <div className={styles.eyebrow}>{resume.location}</div>
           <h1 className={styles.name}>{resume.name}</h1>
