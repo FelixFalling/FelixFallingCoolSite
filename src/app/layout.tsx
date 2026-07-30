@@ -99,9 +99,11 @@ const themeInitScript = `
 /**
  * Privacy-friendly visit counts via GoatCounter - no cookies, no personal
  * data, GDPR-safe. The dashboard lives at https://felixfalling.goatcounter.com
- * (create the free account with that exact code to claim it; until then the
- * script quietly no-ops). To remove analytics entirely, delete the <script>
- * tag below.
+ * (create the free account with that exact code to claim it). Until it IS
+ * claimed the endpoint rejects every hit with a 400, which shows up in the
+ * console on the deployed site - harmless, nothing is recorded, and the page
+ * is unaffected, but it is not silent. To remove analytics entirely, delete
+ * the <script> tag below.
  */
 const GOATCOUNTER_URL = "https://felixfalling.goatcounter.com/count";
 
