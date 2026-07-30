@@ -101,10 +101,10 @@ export const resume: Resume = {
     "documentation-driven development, from embedded firmware up to web " +
     "interfaces. This site is one of my projects: everything on it, from the " +
     "waves to the CI pipeline, is hand-built and open source.",
-  // Shows a placeholder circle in the hero (no real photo - that stays off
-  // the pseudonymous site). Drop a real image in later by replacing the
-  // placeholder markup in sections/Hero.tsx.
-  showPhoto: true,
+  // The hero photo circle is off for now - flip this back to true to bring it
+  // back. `photo` is kept so that's a one-word change; with showPhoto false
+  // nothing in the hero reads it, and public/me.jpg just goes unused.
+  showPhoto: false,
   photo: "me.jpg",
 
   links: {
