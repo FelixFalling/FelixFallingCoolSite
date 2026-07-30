@@ -2973,6 +2973,23 @@ window.__tower = {
     if (!boss) return;
     boss.hp--;
     if (boss.hp <= 0) defeatBoss();
+  },
+  forceDip(){
+    /* Starts the swoop-down attack NOW instead of waiting out the random
+       cooldown (dipCd is rnd(3.6,5) seconds - see updateBoss).
+
+       This exists for the test that guards "the wizard must dip close enough
+       to be pounced". Waiting for a natural dip made that test wall-clock
+       dependent: it had to sit through up to two ~5-7s cycles, and when the
+       machine was busy enough for requestAnimationFrame to throttle, the
+       cycles stretched past the timeout and the test failed for no real
+       reason. Zeroing the timers makes the next frame begin a dip, so the
+       test measures the dip's GEOMETRY - the thing that would actually
+       regress - rather than the scheduler's luck. */
+    if (!boss) return false;
+    boss.dipCd = 0;
+    boss.dipT = 0;
+    return true;
   }
 };
 

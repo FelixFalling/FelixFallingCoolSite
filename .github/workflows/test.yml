@@ -1,10 +1,18 @@
-# Runs the Playwright test suite on every push and pull request.
+# Lints, type-checks, builds, and runs the Playwright suite on every push and
+# pull request.
 #
 # This is separate from the deploy workflow (static.yml) on purpose: deploys
 # stay simple and never get blocked by a flaky test, while this workflow gives
 # you a green check / red X on every commit and PR. If you later want failing
 # tests to BLOCK deploys, the cleanest way is branch protection on main
 # requiring this check to pass.
+#
+# WHY THE BUILD STEP IS HERE: `npm test` starts the DEV server, which does not
+# fail on a type error. So before this step existed, a commit that broke
+# `npm run build` sailed through green here and only failed later in the deploy
+# workflow - which runs after the merge, not before. That happened for real
+# (commit 5dcf019 removed a required field from resume.ts, the deploy failed,
+# and the live site silently went stale). Building here catches it first.
 name: Tests
 
 on:
@@ -29,6 +37,18 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # Ordered cheapest-first so an obvious mistake fails in seconds rather
+      # than after a full browser run. Each is a separate step so the run page
+      # shows exactly which one broke.
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Build (the production static export)
+        run: npm run build
 
       # The Playwright config uses channel "chrome" - GitHub's runners already
       # have Chrome installed, so there's no browser download step.

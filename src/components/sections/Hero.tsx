@@ -15,7 +15,11 @@ export default function Hero() {
           in the stylesheet - it also centres the buttons and the text itself. */}
       <div className={resume.showPhoto ? styles.inner : `${styles.inner} ${styles.centered}`}>
         <div className={styles.text}>
-          <div className={styles.eyebrow}>{resume.location}</div>
+          {/* Optional - with no `location` set there's no empty eyebrow div
+              taking up its 14px bottom margin above the name. */}
+          {resume.location && (
+            <div className={styles.eyebrow}>{resume.location}</div>
+          )}
           <h1 className={styles.name}>{resume.name}</h1>
           <p className={styles.title}>{resume.jobTitle}</p>
           <p className={styles.specialties}>{resume.specialties}</p>

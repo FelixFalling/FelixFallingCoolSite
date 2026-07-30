@@ -22,7 +22,12 @@ type TowerState = {
 
 declare global {
   interface Window {
-    __tower: { state: TowerState; jumpTo(m: number): void };
+    __tower: {
+      state: TowerState;
+      jumpTo(m: number): void;
+      /** Begins the boss's swoop immediately; false if no boss is present. */
+      forceDip(): boolean;
+    };
   }
 }
 
@@ -73,13 +78,16 @@ test.describe("the Wizard's Tower game", () => {
     await expect
       .poll(() => page.evaluate(() => window.__tower.state.boss), { timeout: 5000 })
       .toBe(true);
-    // The dip cycle (cooldown + dip window) repeats roughly every 5-7s, and
-    // real-time frame jitter under CI can push a given dip short of pounce
-    // range - so this polls long enough to catch a couple of cycles instead
-    // of gambling on the first one.
+    // Trigger the dip rather than waiting for the random 3.6-5s cooldown. The
+    // thing worth guarding is the dip's GEOMETRY - that it brings him inside
+    // paw range - not the scheduler. Waiting for a natural cycle made this the
+    // only flaky test in the suite: it needed up to two ~5-7s cycles, and when
+    // requestAnimationFrame throttled under load the cycles outran even a 25s
+    // timeout. The dip window is 2s, so 8s is a wide margin for a 1s descent.
+    expect(await page.evaluate(() => window.__tower.forceDip())).toBe(true);
     await expect
       .poll(() => page.evaluate(() => window.__tower.state.bossDy), {
-        timeout: 25_000,
+        timeout: 8_000,
         message: "the boss should swoop within pounce reach",
       })
       .toBeLessThan(120);

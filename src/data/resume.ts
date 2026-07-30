@@ -56,7 +56,12 @@ export interface SkillGroup {
 export interface Resume {
   name: string;
   jobTitle: string;
-  location: string; // shown as the small eyebrow above your name in the hero
+  /**
+   * The small uppercase eyebrow above your name in the hero. Optional: leave
+   * it out (or comment it out below) and the hero simply renders no eyebrow -
+   * the name moves up to take the space.
+   */
+  location?: string;
   specialties: string; // one line, e.g. "Backend · Distributed systems · Go"
   about: string;
   showPhoto: boolean;
