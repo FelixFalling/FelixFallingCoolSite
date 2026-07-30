@@ -94,7 +94,7 @@ export function primaryProjectLink(project: Project): { label: string; href: str
 export const resume: Resume = {
   name: "Nick",
   jobTitle: "Software Developer",
-  location: "Somewhere along a foggy coast",
+  //location: "Somewhere along a foggy coast",
   specialties: "Test automation · Embedded systems · DevOps",
   about:
     "I build software with a tester's mindset - automation, validation, and " +
