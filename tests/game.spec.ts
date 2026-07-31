@@ -27,6 +27,11 @@ declare global {
       jumpTo(m: number): void;
       /** Begins the boss's swoop immediately; false if no boss is present. */
       forceDip(): boolean;
+      /**
+       * Steps the boss simulation `seconds` of game time without waiting for
+       * frames, returning the closest he came to the cat (-1 if no boss).
+       */
+      advanceBoss(seconds: number): number;
     };
   }
 }
@@ -78,19 +83,17 @@ test.describe("the Wizard's Tower game", () => {
     await expect
       .poll(() => page.evaluate(() => window.__tower.state.boss), { timeout: 5000 })
       .toBe(true);
-    // Trigger the dip rather than waiting for the random 3.6-5s cooldown. The
-    // thing worth guarding is the dip's GEOMETRY - that it brings him inside
-    // paw range - not the scheduler. Waiting for a natural cycle made this the
-    // only flaky test in the suite: it needed up to two ~5-7s cycles, and when
-    // requestAnimationFrame throttled under load the cycles outran even a 25s
-    // timeout. The dip window is 2s, so 8s is a wide margin for a 1s descent.
+    // Start the dip, then step the simulation through it rather than waiting
+    // for real frames. What's worth guarding is the dip's GEOMETRY - that it
+    // brings him inside paw range - and that doesn't depend on the wall clock.
+    // Polling for it did: this was the suite's only flaky test, swinging
+    // 3.8s-18.4s and failing whenever requestAnimationFrame throttled under
+    // load. Stepping updateBoss directly makes the outcome pure physics, so a
+    // busy CI runner gets the same answer as an idle laptop.
     expect(await page.evaluate(() => window.__tower.forceDip())).toBe(true);
-    await expect
-      .poll(() => page.evaluate(() => window.__tower.state.bossDy), {
-        timeout: 8_000,
-        message: "the boss should swoop within pounce reach",
-      })
-      .toBeLessThan(120);
+    // The dip window is 2s of game time; 3s covers the full descent and rise.
+    const closest = await page.evaluate(() => window.__tower.advanceBoss(3));
+    expect(closest, "the boss should swoop within pounce reach").toBeLessThan(120);
   });
 
   test("he who types the name summons Bingus", async ({ page }) => {

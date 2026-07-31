@@ -50,6 +50,12 @@ jobs:
       - name: Build (the production static export)
         run: npm run build
 
+      # The Chrome projects use the runner's preinstalled Google Chrome, but
+      # WebKit (the Safari engine) is a browser Playwright has to download.
+      # --with-deps also pulls the system libraries it needs on Ubuntu.
+      - name: Install WebKit for the Safari projects
+        run: npx playwright install webkit --with-deps
+
       # The Playwright config uses channel "chrome" - GitHub's runners already
       # have Chrome installed, so there's no browser download step.
       - name: Run Playwright tests

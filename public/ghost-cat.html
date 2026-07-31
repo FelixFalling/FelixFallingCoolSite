@@ -2990,6 +2990,28 @@ window.__tower = {
     boss.dipCd = 0;
     boss.dipT = 0;
     return true;
+  },
+  advanceBoss(seconds){
+    /* Steps the boss simulation forward by `seconds` of GAME time, in fixed
+       1/60 slices, and returns the closest he got to the cat along the way
+       (in scene units - the same figure as state.bossDy).
+
+       The point is to take the wall clock out of the test entirely. Calling
+       forceDip() alone still left the assertion waiting on real frames, and
+       requestAnimationFrame throttles hard when the machine is busy - running
+       four browser projects at once was enough to starve it and fail a test
+       that passes in 2.4s on its own. Driving updateBoss directly means the
+       result depends only on the physics, so it is identical on an idle
+       laptop and a loaded CI runner. */
+    if (!boss) return -1;
+    const STEP = 1/60;
+    let closest = Infinity;
+    for (let t = 0; t < seconds; t += STEP){
+      updateBoss(STEP);
+      if (!boss) break; // he can be defeated mid-step
+      closest = Math.min(closest, Math.abs(boss.y - cat.y)/S);
+    }
+    return closest === Infinity ? -1 : Math.round(closest);
   }
 };
 

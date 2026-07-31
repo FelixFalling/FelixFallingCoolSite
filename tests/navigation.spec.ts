@@ -9,8 +9,27 @@ import { test, expect } from "./fixtures";
 /** Every section link in the nav, in page order. */
 const NAV_LABELS = ["About", "Projects", "Games", "Skills", "Activity", "Contact"];
 
+/*
+ * A NOTE ON SAFARI AND THE TAB KEY, which shapes the three tests below.
+ *
+ * WebKit does not put links in the tab order. That is Safari's default
+ * ("Press Tab to highlight each item on a webpage" is off in Advanced
+ * settings), and Playwright's WebKit mirrors it. Probed on this page, four
+ * presses of Tab give:
+ *
+ *   Chromium: skip-link -> brand -> nav link -> nav link
+ *   WebKit:   the Slides carousel, four times
+ *
+ * - because <div tabindex="0"> IS focusable there while <a href> is not.
+ *
+ * That is a browser setting, not something the markup can fix, and the skip
+ * link is still correct: Safari users who turn full keyboard access on, and
+ * every screen reader, reach it normally. So the tests split by what they
+ * actually assert - the CSS/markup contract runs everywhere, and only the
+ * claim about tab ORDER is limited to the engines that have one for links.
+ */
 test.describe("skip link", () => {
-  test("is hidden until the first Tab, then focused", async ({ homePage, page }) => {
+  test("is off-screen at rest and slides in when focused", async ({ homePage }) => {
     await homePage.goto();
 
     // Off-screen at rest: present in the DOM (so it's in the tab order) but
@@ -19,8 +38,9 @@ test.describe("skip link", () => {
     expect(before).not.toBeNull();
     expect(before!.y + before!.height).toBeLessThanOrEqual(0);
 
-    // It must be the very FIRST thing you reach - that's the whole point.
-    await page.keyboard.press("Tab");
+    // focus() rather than Tab, so this covers WebKit too - what's under test
+    // here is the :focus rule, not the browser's tab order.
+    await homePage.skipLink.focus();
     await expect(homePage.skipLink).toBeFocused();
 
     // It slides in over 150ms, so poll rather than measuring mid-transition.
@@ -29,12 +49,22 @@ test.describe("skip link", () => {
       .toBeGreaterThanOrEqual(0);
   });
 
+  test("is the very first thing Tab reaches", async ({ homePage, page, browserName }) => {
+    test.skip(
+      browserName === "webkit",
+      "Safari leaves links out of the tab order by default - see the note above",
+    );
+    await homePage.goto();
+    await page.keyboard.press("Tab");
+    await expect(homePage.skipLink).toBeFocused();
+  });
+
   test("moves focus to the main content, not just the scroll position", async ({
     homePage,
     page,
   }) => {
     await homePage.goto();
-    await page.keyboard.press("Tab");
+    await homePage.skipLink.focus();
     await page.keyboard.press("Enter");
 
     // If this only scrolled, the next Tab would drop the user back at the top

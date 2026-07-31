@@ -36,9 +36,23 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
 
-  // Run every test twice: once as a desktop browser, once as a phone.
-  // `channel: "chrome"` uses the Google Chrome already installed on your
-  // machine (and on GitHub's runners) instead of downloading a browser.
+  /*
+   * Every test runs on a desktop browser and a phone, in BOTH engines.
+   *
+   * `channel: "chrome"` uses the Google Chrome already installed on your
+   * machine (and on GitHub's runners) instead of downloading a browser.
+   *
+   * WHY WEBKIT IS HERE: it is the engine behind Safari and every browser on
+   * iOS. Until it was added, all four projects were Chromium, so the suite
+   * could not see a Safari-only bug at all - and this project has already had
+   * one: commit 4eff7a1, "stop the waves snapping back on iPhone at each
+   * loop", was an iOS rendering bug found by hand because no test could catch
+   * it. Animation, backdrop-filter and viewport-unit behaviour are exactly
+   * where WebKit diverges, and this site leans on all three.
+   *
+   * Unlike the Chrome projects, WebKit is a browser Playwright downloads:
+   * `npx playwright install webkit` locally, and a step in the CI workflow.
+   */
   projects: [
     {
       name: "desktop",
@@ -47,6 +61,16 @@ export default defineConfig({
     {
       name: "mobile",
       use: { ...devices["Pixel 7"], channel: "chrome" },
+    },
+    {
+      name: "desktop-safari",
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      // A real iPhone viewport in the real iOS engine - the combination the
+      // wave bug lived in.
+      name: "mobile-safari",
+      use: { ...devices["iPhone 14"] },
     },
   ],
 
