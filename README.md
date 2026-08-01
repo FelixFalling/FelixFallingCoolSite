@@ -18,6 +18,19 @@ npm test         # run the automated browser tests
 
 Edit a file and the browser refreshes automatically.
 
+Before pushing, the same three checks CI runs - in the same order, cheapest
+first:
+
+```bash
+npm run lint       # ESLint (Next's core-web-vitals + TypeScript rules)
+npm run typecheck  # tsc --noEmit
+npm run build      # the production static export -> ./out
+```
+
+`npm run dev` does **not** fail on a type error, so `npm test` alone can pass
+while the real build is broken. That happened once; the build step in CI exists
+because of it.
+
 ## The one-file rule: editing your content
 
 **All the site's text lives in [`src/data/resume.ts`](src/data/resume.ts)** -
@@ -36,8 +49,14 @@ src/
   components/
     sections/           one file per block of the page, top to bottom
       Hero.tsx          name, title, buttons - sits on top of the coast scene
-      About.tsx  Experience.tsx  Projects.tsx  Education.tsx  Skills.tsx
+      About.tsx  Projects.tsx  Games.tsx  Skills.tsx  Activity.tsx
+      ProjectCards.tsx  the shared card list behind Projects and Games
+      ActivityChart.tsx the GitHub contribution graph (a third-party image)
       Contact.tsx       the footer
+      Experience.tsx  Education.tsx
+                        written and working, but NOT on the page: page.tsx
+                        leaves them out while the site stays pseudonymous,
+                        and their arrays in resume.ts are empty
     scene/              the animated coastal diorama behind the hero
       HeroScene.tsx     assembles the layers + mouse parallax (the only file
                         here with JavaScript logic)
@@ -51,11 +70,12 @@ src/
       Button.tsx        THE button (primary/ghost) - hero + 404 use it
       Section.tsx       the section scaffold (reveal + title) every section uses
       Card.tsx  Tag.tsx  ExternalLink.tsx   small shared pieces
-      Nav.tsx           sticky top nav
+      Nav.tsx           sticky top nav (server-rendered)
+      NavLinks.tsx      just the section links + the "you are here" highlight -
+                        split out so only this small piece ships as JavaScript
       ThemeToggle.tsx   the ☀️/🌙 button
       Reveal.tsx        fades sections in as you scroll to them
       Slides.tsx        the project screenshot slideshow
-      FunLink.tsx       the "Curse of Ra" pill (links to the clock page)
   data/
     resume.ts           ← YOUR CONTENT
 tests/                  Playwright tests - Page Object Model (see below)
@@ -65,6 +85,11 @@ tests/                  Playwright tests - Page Object Model (see below)
   *.spec.ts             the tests themselves
 public/
   clockmaker.html       the Curse of Ra clock (standalone page)
+  ghost-cat.html        The Wizard's Tower game (standalone page)
+  manifest.json         web app manifest (installable to a home screen) +
+  clock-manifest.json   a separate one for the clock, and icon-*.png
+  resume.pdf            generated from scripts/resume-pdf.html - see below
+  projects/             the screenshots the project cards show
 ```
 
 ## How theming works (change any color in one place)
@@ -114,8 +139,28 @@ npx playwright codegen    # record your clicks as test code (great for learning)
 npx playwright show-report  # open the HTML report from the last run
 ```
 
-Every test runs twice: on a desktop-sized browser and on an emulated phone
-(the `projects` in [`playwright.config.ts`](playwright.config.ts)).
+Every test runs **four times** - desktop and phone, in each of two browser
+engines (the `projects` in [`playwright.config.ts`](playwright.config.ts)):
+
+| project          | engine   | viewport            |
+| ---------------- | -------- | ------------------- |
+| `desktop`        | Chromium | Desktop Chrome      |
+| `mobile`         | Chromium | Pixel 7             |
+| `desktop-safari` | WebKit   | Desktop Safari      |
+| `mobile-safari`  | WebKit   | iPhone 14           |
+
+WebKit is there because it is the engine behind Safari and every browser on
+iOS, where this site has already had a bug Chromium could not have shown
+(the hero waves snapping back each loop). Chrome comes from your machine;
+WebKit is downloaded once with `npx playwright install webkit`.
+
+Run one project at a time while iterating - the full matrix is four times the
+work:
+
+```bash
+npx playwright test --project=desktop
+npx playwright test --project=mobile-safari
+```
 
 **The framework follows the Page Object Model (POM)** - the industry-standard
 test architecture. Each page gets a class owning its locators and user
@@ -138,7 +183,12 @@ only ever needs changing in one place. The specs to copy from:
 
 - `home.spec.ts` - page loads, sections render, links are right, no JS errors, 404 page
 - `theme.spec.ts` - dark/light switching, persistence, dark-only stars
-- `mobile.spec.ts` - no sideways scrolling, tappable buttons (phone project only)
+- `mobile.spec.ts` - no sideways scrolling, tappable buttons, and the GPU
+  budget for the animated scene (phone projects only)
+- `navigation.spec.ts` - the skip link, the nav's "you are here" highlight,
+  and the scroll-reveal
+- `game.spec.ts` - The Wizard's Tower: it starts, the boss spawns and can be
+  reached (desktop only)
 - `accessibility.spec.ts` - axe-core WCAG A/AA scans of both themes and the 404 page
 
 Tests import `resume.ts` directly, so they keep passing when you edit your
@@ -148,14 +198,38 @@ content - they check structure and behavior, not hardcoded strings.
 
 Two GitHub Actions workflows run on every push to `main`:
 
-- [`test.yml`](.github/workflows/test.yml) - runs the Playwright suite; you get
-  a green ✓ / red ✗ on the commit (and on every pull request).
+- [`test.yml`](.github/workflows/test.yml) - lint → type-check → build →
+  install WebKit → run the Playwright suite, in that order so an obvious
+  mistake fails in seconds instead of after a full browser matrix. Runs on
+  every pull request too, and gives the commit its green ✓ / red ✗.
 - [`static.yml`](.github/workflows/static.yml) - builds the static site
   (`npm run build` → `./out`) and publishes it to GitHub Pages.
 
 They're independent: a failed test never blocks a deploy. If you want failing
 tests to block deploys later, add branch protection on `main` that requires the
 "Tests" check.
+
+**Worth knowing:** because they're independent, a commit that breaks the build
+still triggers a deploy - which then fails, leaving the previous version live.
+The site does not go down, it silently stops updating. If a change seems not to
+have shipped, check the Actions tab before debugging the page.
+
+## The resume PDF
+
+The "Download resume ↓" button serves [`public/resume.pdf`](public/resume.pdf),
+which is printed from [`scripts/resume-pdf.html`](scripts/resume-pdf.html):
+
+```bash
+google-chrome-stable --headless --disable-gpu --no-sandbox \
+  --print-to-pdf=public/resume.pdf --no-pdf-header-footer \
+  scripts/resume-pdf.html
+```
+
+⚠️ **That file duplicates content from `resume.ts` by hand** - the tagline, the
+projects, the skills are all typed out a second time. Nothing keeps them in
+sync, so editing `resume.ts` silently leaves the PDF stale. If you change your
+content, change both. (Rendering the PDF from `resume.ts` instead would remove
+this trap - it just hasn't been done yet.)
 
 ## Cheat sheet
 
@@ -167,3 +241,6 @@ tests to block deploys later, add branch protection on `main` that requires the
 | Restyle one section              | `src/components/sections/<Name>.module.css`    |
 | Tune the waves / rocks / fog     | data arrays in `src/components/scene/*.tsx`    |
 | Add a test                       | copy a spec in `tests/`                        |
+| Show my job history / education  | fill the empty arrays in `src/data/resume.ts`, then add the sections back to `src/app/page.tsx` |
+| Bring back the hero photo        | `showPhoto: true` in `src/data/resume.ts`      |
+| Check a change before pushing    | `npm run lint && npm run typecheck && npm run build` |
