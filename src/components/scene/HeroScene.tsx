@@ -94,11 +94,24 @@ export default function HeroScene() {
           pointerEvents: "none",
           // Weather knob the Waves read: durations divide by --wave-speed.
           "--wave-speed": weather.waveSpeed,
+          // 0 most of the day, 1 at the coast's real sunrise/sunset. Read by
+          // the golden-hour wash below (and nothing else).
+          "--golden": weather.golden,
         } as React.CSSProperties
       }
     >
       <Stars />
       <Shore />
+      {/* Golden hour: a warm wash that only exists near the coast's actual
+          sunrise or sunset (see weather.ts). It sits above the sky and the
+          headland but below the water, so the sun catches the rocks and the
+          horizon rather than the foam.
+
+          --golden defaults to 0, so before the weather request resolves - and
+          forever, if it fails or is blocked - this layer is fully transparent
+          and the scene is exactly what it was. It never changes geometry, so
+          it cannot shift the layout either. */}
+      <div className="golden-hour" aria-hidden="true" />
       {/* The waves live in a fixed-height strip at the bottom so they keep
           their proportions instead of stretching to the full hero height. The
           height comes from the .waves-strip class (globals.css): 190px,

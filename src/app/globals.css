@@ -80,6 +80,12 @@
   --star: #e9f2f2; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
+  /* Golden hour - the warm wash at the coast's real sunrise/sunset. Two stops:
+     the low sun near the horizon, fading out before it reaches the top of the
+     sky. Overcast daylight, so the amber is soft rather than tropical. */
+  --golden-high: 255, 190, 120; /* R,G,B - the layer sets its own alpha */
+  --golden-low: 255, 140, 90;
+
   --content-width: 960px;
 }
 
@@ -136,6 +142,11 @@
   --mist: 150, 180, 185; /* fog glows faintly cool at night */
   --star: #cfe2e0;
   --star-opacity: 1; /* stars appear in dark mode */
+
+  /* Dusk in the dark theme is a deeper, redder band - the last of the light on
+     the horizon rather than a lit sky. */
+  --golden-high: 190, 105, 70;
+  --golden-low: 150, 60, 55;
 }
 
 * {
@@ -254,6 +265,48 @@ main:focus {
 
 .waves-strip {
   height: var(--waves-height);
+}
+
+/* ── Golden hour ───────────────────────────────────────────────────────────
+ * The warm wash over the scene at the coast's real sunrise/sunset. HeroScene
+ * sets --golden (0..1) from the live weather data; everything here is driven
+ * by that one number.
+ *
+ * At --golden: 0 the layer is fully transparent, which is both the default and
+ * what a failed/blocked weather request leaves in place - so the scene without
+ * a network is exactly the scene as it was before this existed.
+ *
+ * The gradient sits low: strongest just above the horizon where the sun
+ * actually is, gone by the top of the sky. `screen` lets it lift the colours
+ * underneath rather than muddying them like a flat overlay would.
+ */
+.golden-hour {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* NO z-index on purpose. Every layer in the scene paints in DOM order, so
+     sitting between <Shore /> and the waves strip in HeroScene is what puts
+     the light on the sky and the rocks but not on the water. Giving this a
+     z-index lifts it over the waves instead, which drains the teal out of
+     them and reads as a washed-out grey sea. */
+  opacity: calc(var(--golden, 0) * 0.55);
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    to top,
+    rgba(var(--golden-low), 0.85) 0%,
+    rgba(var(--golden-high), 0.5) 18%,
+    rgba(var(--golden-high), 0) 45%
+  );
+  /* Fades in when the weather request lands rather than snapping. */
+  transition: opacity 1.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The tint itself is static, so it stays - only its arrival is animated,
+     and that's what gets dropped. */
+  .golden-hour {
+    transition: none;
+  }
 }
 
 /* ── Desktop layout (≥1200px): the site's own look on big screens ──────────
