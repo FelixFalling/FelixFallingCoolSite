@@ -6,6 +6,7 @@ import Games from "@/components/sections/Games";
 import Skills from "@/components/sections/Skills";
 import Activity from "@/components/sections/Activity";
 import Contact from "@/components/sections/Contact";
+import DeepSea from "@/components/scene/DeepSea";
 
 /**
  * The home page. It's just an ordered list of the section components - read
@@ -25,6 +26,9 @@ export default function Home() {
       <a href="#main" className="skip-link">
         Skip to content
       </a>
+      {/* The water everything below the hero sinks into. Sits behind the whole
+          page (z-index: -1), so it goes first. */}
+      <DeepSea />
       <Nav />
       <Hero />
       {/* tabIndex={-1}: makes <main> a valid focus target, so the skip link

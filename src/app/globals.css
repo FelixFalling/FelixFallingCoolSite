@@ -89,7 +89,20 @@
   --content-width: 960px;
 }
 
-:root[data-theme="dark"] {
+/* [data-submerged] rides along with the dark theme on purpose.
+ *
+ * Once you have sunk below the waterline the page is dark water, so it needs
+ * light-on-dark text - and this palette is exactly that, already tuned to
+ * WCAG AA and checked by axe in CI. Reusing it means the descent never
+ * invents an intermediate set of colours that nobody has verified: text is
+ * always on one of these two audited palettes, and the water only ever gets
+ * DARKER underneath it, which can only raise the contrast ratio.
+ *
+ * scene/depth.ts sets the attribute, and only once the water is opaque enough
+ * to sit behind light text.
+ */
+:root[data-theme="dark"],
+:root[data-submerged] {
   color-scheme: dark;
 
   /* DARK THEME - "Oregon coast at night, moonlit fog": deep cold blue-greens,
@@ -265,6 +278,50 @@ main:focus {
 
 .waves-strip {
   height: var(--waves-height);
+}
+
+/* ── The dive ──────────────────────────────────────────────────────────────
+ * Scrolling past the hero takes you underwater. scene/depth.ts publishes two
+ * numbers on <html>: --water (0→1, opaque early) and --depth (0→1 across the
+ * whole descent). Everything below reads those; no JavaScript touches style
+ * here directly.
+ *
+ * z-index: -1 puts this behind the page's content but still in front of the
+ * body background, so the text, cards and nav all sit ON the water rather
+ * than under it. The layer is fixed, so it costs one screenful of compositing
+ * however long the page grows - see DeepSea.tsx.
+ */
+.deep-sea {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--water, 0);
+  /* --water is 0 or 1, never in between: this transition IS the crossfade,
+     and it runs at the same 0.25s as the body's colour transition so the
+     water and the text palette arrive together. A gradual, scroll-linked fade
+     was tried first and put dark text on a half-dark page at ~3:1 - see
+     scene/depth.ts for why no crossfade can avoid that. */
+  transition: opacity 0.25s ease;
+  /* Sunlight zone at the top of the gradient, abyss at the bottom, and the
+     whole thing slides from "shallow" to "deep" as --depth climbs: at full
+     depth even the top of the screen is black water. */
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, #2e6f74, #01070b calc(var(--depth, 0) * 100%)) 0%,
+      color-mix(in oklab, #123c47, #01070b calc(var(--depth, 0) * 100%)) 45%,
+      #01070b 100%
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The water is a colour change rather than movement, so it stays. Nothing
+     to disable here yet - the creatures that will swim in it are gated in
+     their own block. */
+  .deep-sea {
+    transition: none;
+  }
 }
 
 /* ── Golden hour ───────────────────────────────────────────────────────────

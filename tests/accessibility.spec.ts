@@ -44,4 +44,42 @@ test.describe("accessibility (axe-core, WCAG A/AA)", () => {
     const results = await scan(notFoundPage, () => notFoundPage.goto());
     expect(results.violations).toEqual([]);
   });
+
+  test("home page - submerged at the bottom of the dive", async ({ homePage }) => {
+    /*
+     * The scans above only ever look at the top of the page, where the site is
+     * on its ordinary palette. Scrolling swaps it onto the dark one and puts
+     * near-black water behind everything (scene/depth.ts), so this is a
+     * genuinely different set of colours that nothing else checks.
+     *
+     * Worth having because the first version of the dive DID break contrast -
+     * fading the water in under dark text left the body copy near 3:1. axe
+     * resolves the real composited background, so it catches that class of
+     * mistake in a way a unit-style assertion on tokens cannot.
+     */
+    await homePage.page.emulateMedia({ reducedMotion: "reduce" });
+    await homePage.goto();
+    await homePage.settleHeight();
+
+    // Put the section ON SCREEN and scan only it.
+    //
+    // Scanning the whole page from the seafloor does not work, and the reason
+    // is worth recording: the water is a position:fixed layer covering the
+    // viewport, and axe composites every element against it - including the
+    // ones scrolled thousands of pixels above, which that layer is not
+    // actually behind. It reported the About copy at 2.5:1 while sitting at
+    // top:-2798, off screen. Hiding the layer dropped the violation count from
+    // ten to one, which is what identified it as an artifact rather than a
+    // real failure. Scanning a section while it is genuinely in view compares
+    // the colours a person would actually see.
+    const contact = homePage.page.locator("#contact");
+    await contact.scrollIntoViewIfNeeded();
+    await homePage.page.waitForTimeout(400);
+
+    const results = await new AxeBuilder({ page: homePage.page })
+      .include("#contact")
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
 });
