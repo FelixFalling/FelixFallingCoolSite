@@ -45,7 +45,7 @@ test.describe("accessibility (axe-core, WCAG A/AA)", () => {
     expect(results.violations).toEqual([]);
   });
 
-  test("home page - submerged at the bottom of the dive", async ({ homePage }) => {
+  test("home page - dark theme, at the bottom of the dive", async ({ homePage }) => {
     /*
      * The scans above only ever look at the top of the page, where the site is
      * on its ordinary palette. Scrolling swaps it onto the dark one and puts
@@ -58,7 +58,7 @@ test.describe("accessibility (axe-core, WCAG A/AA)", () => {
      * mistake in a way a unit-style assertion on tokens cannot.
      */
     await homePage.page.emulateMedia({ reducedMotion: "reduce" });
-    await homePage.goto();
+    await homePage.goto("./", "dark"); // the dive only runs in dark mode
     await homePage.settleHeight();
 
     // Put the section ON SCREEN and scan only it.

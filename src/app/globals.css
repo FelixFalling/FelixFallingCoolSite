@@ -89,20 +89,7 @@
   --content-width: 960px;
 }
 
-/* [data-submerged] rides along with the dark theme on purpose.
- *
- * Once you have sunk below the waterline the page is dark water, so it needs
- * light-on-dark text - and this palette is exactly that, already tuned to
- * WCAG AA and checked by axe in CI. Reusing it means the descent never
- * invents an intermediate set of colours that nobody has verified: text is
- * always on one of these two audited palettes, and the water only ever gets
- * DARKER underneath it, which can only raise the contrast ratio.
- *
- * scene/depth.ts sets the attribute, and only once the water is opaque enough
- * to sit behind light text.
- */
-:root[data-theme="dark"],
-:root[data-submerged] {
+:root[data-theme="dark"] {
   color-scheme: dark;
 
   /* DARK THEME - "Oregon coast at night, moonlit fog": deep cold blue-greens,
@@ -296,13 +283,12 @@ main:focus {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  /* Scroll-linked and smooth. This can be gradual precisely BECAUSE the dive
+     is dark-mode only: the text is already light-on-dark, so deepening the
+     water behind it only raises contrast. In light mode the page would have
+     had to flip polarity partway down, which cannot be done gradually and
+     read as a jarring snap - see scene/depth.ts. */
   opacity: var(--water, 0);
-  /* --water is 0 or 1, never in between: this transition IS the crossfade,
-     and it runs at the same 0.25s as the body's colour transition so the
-     water and the text palette arrive together. A gradual, scroll-linked fade
-     was tried first and put dark text on a half-dark page at ~3:1 - see
-     scene/depth.ts for why no crossfade can avoid that. */
-  transition: opacity 0.25s ease;
   /* Sunlight zone at the top of the gradient, abyss at the bottom, and the
      whole thing slides from "shallow" to "deep" as --depth climbs: at full
      depth even the top of the screen is black water. */

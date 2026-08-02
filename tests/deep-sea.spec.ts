@@ -2,28 +2,29 @@ import { test, expect } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 /**
- * The dive: scrolling past the hero sinks the page underwater.
+ * The dive: in DARK MODE, scrolling past the hero sinks the page underwater
+ * and the light fails as you go down.
  *
- * scene/depth.ts publishes --depth (0 at the waterline, 1 at the seafloor),
- * --water (0 or 1, never between), and the data-submerged attribute that
- * swaps the page onto its dark palette.
+ * scene/depth.ts publishes --depth (0 at the waterline, 1 at the seafloor)
+ * and --water (how opaque the water is). In light mode neither moves - see
+ * the "stays dry in light mode" test at the bottom, which is the one that
+ * pins the deliberate decision rather than an accident.
  */
 
-/** Everything the dive publishes on <html>, read in one go. */
+/** What the dive is publishing on <html> right now. */
 async function diveState(page: Page) {
   return page.evaluate(() => {
     const style = getComputedStyle(document.documentElement);
     return {
       depth: Number(style.getPropertyValue("--depth").trim() || "0"),
       water: Number(style.getPropertyValue("--water").trim() || "0"),
-      submerged: document.documentElement.hasAttribute("data-submerged"),
     };
   });
 }
 
-test.describe("the dive", () => {
+test.describe("the dive (dark mode)", () => {
   test("goes from the surface to the seafloor as you scroll", async ({ homePage, page }) => {
-    await homePage.goto();
+    await homePage.goto("./", "dark");
     await homePage.settleHeight();
 
     expect((await diveState(page)).depth).toBe(0);
@@ -33,7 +34,7 @@ test.describe("the dive", () => {
   });
 
   test("only ever descends on the way down", async ({ homePage, page }) => {
-    await homePage.goto();
+    await homePage.goto("./", "dark");
     await homePage.settleHeight();
     const max = await homePage.maxScroll();
 
@@ -46,59 +47,75 @@ test.describe("the dive", () => {
     }
   });
 
-  test("you are dry at the top and under once past the hero", async ({ homePage, page }) => {
-    await homePage.goto();
-    await homePage.settleHeight();
-    await homePage.scrollTo(0);
-    expect((await diveState(page)).submerged).toBe(false);
-
-    await homePage.scrollTo(await homePage.maxScroll());
-    expect((await diveState(page)).submerged).toBe(true);
-  });
-
-  test("the water and the text palette are never out of step", async ({ homePage, page }) => {
+  test("the water floods in gradually rather than snapping", async ({ homePage, page }) => {
     /*
-     * THE REGRESSION GUARD, and the reason the water steps instead of fading.
+     * The point of this one is the WORD gradually. An earlier version stepped
+     * the water on in a single frame, because back then the effect also ran
+     * in light mode and the text palette had to flip with it. Dark-mode-only
+     * removed that constraint, and the snap was the thing that read worst.
      *
-     * The first version faded the water in gradually while the text stayed
-     * dark-on-light until later. Every frame in between put dark text on a
-     * half-dark background - measured at roughly 3:1, under the 4.5:1 this
-     * site holds everywhere else. There is no crossfade that avoids it: a
-     * mid-tone background has poor contrast with dark AND light text.
-     *
-     * So the invariant is that the water is only ever fully absent or fully
-     * present, and always agrees with the palette. If someone reintroduces a
-     * ramp, --water lands between 0 and 1 here and this fails.
+     * So: partway down, the water must be genuinely part-way - not 0, not 1.
      */
-    await homePage.goto();
+    await homePage.goto("./", "dark");
     await homePage.settleHeight();
     const max = await homePage.maxScroll();
 
-    for (let i = 0; i <= 12; i++) {
-      await homePage.scrollTo(Math.round((max * i) / 12));
-      const { water, submerged } = await diveState(page);
-      expect([0, 1], `--water must be 0 or 1, never mid-fade (at ${Math.round((i / 12) * 100)}%)`)
-        .toContain(water);
-      expect(water === 1, `water and palette must agree (at ${Math.round((i / 12) * 100)}%)`) //
-        .toBe(submerged);
-    }
+    await homePage.scrollTo(Math.round(max * 0.12));
+    const { water } = await diveState(page);
+    expect(water, "water should be easing in, not already full").toBeGreaterThan(0);
+    expect(water, "water should be easing in, not still empty").toBeLessThan(1);
   });
 
   test("the water sits behind the content, never over it", async ({ homePage, page }) => {
-    // z-index -1 and pointer-events: none. If either regresses, the layer
+    // z-index -1 and pointer-events: none. If either regresses the layer
     // starts swallowing clicks and covering the text.
-    await homePage.goto();
+    await homePage.goto("./", "dark");
     const layer = page.locator(".deep-sea");
     await expect(layer).toHaveCSS("z-index", "-1");
     await expect(layer).toHaveCSS("pointer-events", "none");
   });
 
   test("the nav still works from the bottom of the ocean", async ({ homePage }) => {
-    // The dive writes to <html> on every frame; the scroll spy reads the same
+    // The dive writes to <html> every frame; the scroll spy reads the same
     // scroll. This checks the two haven't started fighting.
-    await homePage.goto();
+    await homePage.goto("./", "dark");
     await homePage.settleHeight();
     await homePage.scrollTo(await homePage.maxScroll());
     await expect(homePage.nav.activeLink).toHaveText("Contact");
+  });
+});
+
+test.describe("the dive stays out of light mode", () => {
+  test("nothing sinks, however far you scroll", async ({ homePage, page }) => {
+    /*
+     * Deliberate, not an oversight. Sinking a light page means flipping the
+     * text from dark-on-light to light-on-dark partway down, which cannot be
+     * done gradually - a mid-tone background has poor contrast with both - so
+     * it had to snap, and a page changing polarity under you while you read
+     * is jarring. The light theme is a bright overcast morning and stays one.
+     */
+    await homePage.goto("./", "light");
+    await homePage.settleHeight();
+    await homePage.scrollTo(await homePage.maxScroll());
+
+    const { depth, water } = await diveState(page);
+    expect(depth, "light mode must not descend").toBe(0);
+    expect(water, "light mode must stay dry").toBe(0);
+    await expect(page.locator(".deep-sea")).toHaveCSS("opacity", "0");
+  });
+
+  test("switching to dark mid-page fills the water without a scroll", async ({
+    homePage,
+    page,
+  }) => {
+    // The hook watches data-theme, so the toggle has to take effect straight
+    // away rather than waiting for the next scroll event.
+    await homePage.goto("./", "light");
+    await homePage.settleHeight();
+    await homePage.scrollTo(await homePage.maxScroll());
+    expect((await diveState(page)).water).toBe(0);
+
+    await homePage.nav.toggleTheme();
+    await expect.poll(async () => (await diveState(page)).water).toBeGreaterThan(0.9);
   });
 });
