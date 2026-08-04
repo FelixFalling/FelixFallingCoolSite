@@ -81,9 +81,18 @@
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
   /* The colour of the water you sink into (scene/depth.ts drives --depth and
-     --water; the dive is dark-mode only, so in light both stay 0). It starts
-     as the nearest wave crest and slides to black as you descend. */
-  --deep-water: color-mix(in oklab, var(--wave-break), #01070b calc(var(--depth, 0) * 100%));
+     --water; the dive is dark-mode only, so in light both stay 0).
+
+     It begins at --hero-to, the colour the sky has already reached by the
+     time it meets the waves, and only ever darkens toward black from there.
+
+     STARTING FROM THE CREST WAS WRONG. --wave-break is a lit highlight on the
+     top of the swell, much brighter than the night sky above it, so beginning
+     the water there made the page get LIGHTER as you started going down and
+     only darken afterwards - a dive that brightens on the way in. Beginning
+     level with the sky means every step down is darker than the last, which
+     is the only progression that makes sense for descending. */
+  --deep-water: color-mix(in oklab, var(--hero-to), #01070b calc(var(--depth, 0) * 100%));
 
   /* What the front wave layer washes onto. Above water that is the page
      background; below it, the water itself.
@@ -307,17 +316,16 @@ main:focus {
   opacity: var(--water, 0);
   /* FLAT, not a vertical gradient - and that is the whole point.
 
-     The water continues the waves: it starts as exactly --wave-break, the
-     nearest crest in the hero, so the sea you sink into is the sea you were
-     just looking at. Then the single colour slides toward black as --depth
-     climbs. The descent is carried by that, not by a gradient.
+     The colour itself is --deep-water (see the token, which explains why it
+     starts level with the sky). The single flat colour slides toward black as
+     --depth climbs; the descent is carried by that, not by a gradient.
 
      A top-to-bottom gradient was tried first and could not work here. This
      layer is fixed to the VIEWPORT, so its gradient never lines up with the
      waves, which move up the screen as you scroll - whatever colour sat
      directly under the crest depended on where the crest happened to be, and
      the mismatch showed as a hard line at the waterline. Flat has no such
-     seam at any scroll position. Reading --wave-break rather than a hex also
+     seam at any scroll position. Reading a theme token rather than a hex also
      means the water tracks the theme instead of ignoring it. */
   background: var(--deep-water);
 }

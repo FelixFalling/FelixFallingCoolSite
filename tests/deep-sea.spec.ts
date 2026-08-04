@@ -73,6 +73,70 @@ test.describe("the dive (dark mode)", () => {
       .toBeLessThan(0.35);
   });
 
+  test("gets darker the whole way down, never brighter", async ({ homePage, page }) => {
+    /*
+     * The dive has to get darker the whole way, and the interesting half of
+     * that is the FIRST step - the water against the sky it continues from.
+     *
+     * The bug this guards was exactly there: the water started from
+     * --wave-break, a lit highlight on the top of the swell and much brighter
+     * than the night sky above it. Scrolling down brightened the page first
+     * and only darkened afterwards - dark sky, bright band, black abyss. The
+     * water's own progression was perfectly monotonic throughout, which is
+     * why an earlier version of this test, comparing only the water against
+     * itself, passed while the bug was present. It has to be compared against
+     * the hero.
+     *
+     * Colours are normalised through a canvas because the two sides arrive in
+     * different formats - a hex token for the sky, oklab() for the
+     * color-mix()ed water - and 1x1 fills give directly comparable sRGB.
+     */
+    await homePage.goto("./", "dark");
+    await homePage.settleHeight();
+    const max = await homePage.maxScroll();
+
+    /** Relative luminance of any CSS colour string, via a 1x1 canvas fill. */
+    const luminanceOf = async (cssColor: string) =>
+      page.evaluate((color) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1;
+        const ctx = canvas.getContext("2d")!;
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        const channel = (c: number) => {
+          const s = c / 255;
+          return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+        };
+        return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+      }, cssColor);
+
+    const waterColour = async () =>
+      page.evaluate(
+        () => getComputedStyle(document.querySelector(".deep-sea")!).backgroundColor,
+      );
+
+    // The sky where it meets the waves - what the water has to continue from.
+    const skyColour = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue("--hero-to").trim(),
+    );
+    const sky = await luminanceOf(skyColour);
+
+    let previous = Infinity;
+    for (let i = 0; i <= 8; i++) {
+      await homePage.scrollTo(Math.round((max * i) / 8));
+      const current = await luminanceOf(await waterColour());
+
+      if (i === 0) {
+        expect(current, "the water must not be brighter than the sky it continues from") //
+          .toBeLessThanOrEqual(sky + 0.001);
+      }
+      expect(current, `the water brightened on the way down at ${Math.round((i / 8) * 100)}%`) //
+        .toBeLessThanOrEqual(previous + 0.001);
+      previous = current;
+    }
+  });
+
   test("the water sits behind the content, never over it", async ({ homePage, page }) => {
     // z-index -1 and pointer-events: none. If either regresses the layer
     // starts swallowing clicks and covering the text.
