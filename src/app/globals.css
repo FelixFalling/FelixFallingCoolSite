@@ -80,6 +80,22 @@
   --star: #e9f2f2; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
+  /* The colour of the water you sink into (scene/depth.ts drives --depth and
+     --water; the dive is dark-mode only, so in light both stay 0). It starts
+     as the nearest wave crest and slides to black as you descend. */
+  --deep-water: color-mix(in oklab, var(--wave-break), #01070b calc(var(--depth, 0) * 100%));
+
+  /* What the front wave layer washes onto. Above water that is the page
+     background; below it, the water itself.
+
+     This exists because the waves are drawn to meet the page: the front layer
+     is filled with the page colour so the sea has something to break against.
+     Once the page behind it became water, that fill stayed the old background
+     and showed as a dark band between the crest and the sea - the last seam
+     at the waterline. Blending on --water means it follows the dive exactly,
+     and in light mode resolves to plain --sand. */
+  --waterline-fill: color-mix(in oklab, var(--sand), var(--deep-water) calc(var(--water, 0) * 100%));
+
   /* Golden hour - the warm wash at the coast's real sunrise/sunset. Two stops:
      the low sun near the horizon, fading out before it reaches the top of the
      sky. Overcast daylight, so the amber is soft rather than tropical. */
@@ -289,16 +305,21 @@ main:focus {
      had to flip polarity partway down, which cannot be done gradually and
      read as a jarring snap - see scene/depth.ts. */
   opacity: var(--water, 0);
-  /* Sunlight zone at the top of the gradient, abyss at the bottom, and the
-     whole thing slides from "shallow" to "deep" as --depth climbs: at full
-     depth even the top of the screen is black water. */
-  background:
-    linear-gradient(
-      to bottom,
-      color-mix(in oklab, #2e6f74, #01070b calc(var(--depth, 0) * 100%)) 0%,
-      color-mix(in oklab, #123c47, #01070b calc(var(--depth, 0) * 100%)) 45%,
-      #01070b 100%
-    );
+  /* FLAT, not a vertical gradient - and that is the whole point.
+
+     The water continues the waves: it starts as exactly --wave-break, the
+     nearest crest in the hero, so the sea you sink into is the sea you were
+     just looking at. Then the single colour slides toward black as --depth
+     climbs. The descent is carried by that, not by a gradient.
+
+     A top-to-bottom gradient was tried first and could not work here. This
+     layer is fixed to the VIEWPORT, so its gradient never lines up with the
+     waves, which move up the screen as you scroll - whatever colour sat
+     directly under the crest depended on where the crest happened to be, and
+     the mismatch showed as a hard line at the waterline. Flat has no such
+     seam at any scroll position. Reading --wave-break rather than a hex also
+     means the water tracks the theme instead of ignoring it. */
+  background: var(--deep-water);
 }
 
 @media (prefers-reduced-motion: reduce) {

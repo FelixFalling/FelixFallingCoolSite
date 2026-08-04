@@ -47,23 +47,30 @@ test.describe("the dive (dark mode)", () => {
     }
   });
 
-  test("the water floods in gradually rather than snapping", async ({ homePage, page }) => {
+  test("the sea is already there by the time the waves leave the screen", async ({
+    homePage,
+    page,
+  }) => {
     /*
-     * The point of this one is the WORD gradually. An earlier version stepped
-     * the water on in a single frame, because back then the effect also ran
-     * in light mode and the text palette had to flip with it. Dark-mode-only
-     * removed that constraint, and the snap was the thing that read worst.
+     * Continuity at the waterline, which is the thing that looked worst when
+     * it was wrong. The water sits behind the hero, so it can fill while the
+     * hero still hides it; what must not happen is the waves scrolling away
+     * to reveal page background, then water arriving afterwards. That showed
+     * as the sea's colour jumping at the seam.
      *
-     * So: partway down, the water must be genuinely part-way - not 0, not 1.
+     * So by a short way into the descent the water is fully present, and the
+     * gradual part of the dive is the colour darkening from --wave-break
+     * toward black rather than anything fading in.
      */
     await homePage.goto("./", "dark");
     await homePage.settleHeight();
     const max = await homePage.maxScroll();
 
-    await homePage.scrollTo(Math.round(max * 0.12));
-    const { water } = await diveState(page);
-    expect(water, "water should be easing in, not already full").toBeGreaterThan(0);
-    expect(water, "water should be easing in, not still empty").toBeLessThan(1);
+    await homePage.scrollTo(Math.round(max * 0.2));
+    const { water, depth } = await diveState(page);
+    expect(water, "the sea must be fully present once you are under").toBe(1);
+    expect(depth, "and still near the top of the descent, with the darkening to come")
+      .toBeLessThan(0.35);
   });
 
   test("the water sits behind the content, never over it", async ({ homePage, page }) => {

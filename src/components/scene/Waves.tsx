@@ -61,15 +61,18 @@ interface Layer {
 
 // Back-to-front: faint far swell → deeper teal → breaking wave with foam → sand.
 // Fills are theme tokens (defined in globals.css) so the waves recolor in dark
-// mode. The top "sand" layer uses --sand - the page background - so the waves
-// always look like they wash onto the page itself, in either theme.
+// mode. The front layer uses --waterline-fill so the waves always look like
+// they wash onto whatever is actually behind them: the page background at the
+// top, and - once you start scrolling down in dark mode - the water you are
+// sinking into. Filling it with plain --sand left a dark band between the
+// crest and the sea, which was the last visible seam at the waterline.
 // Drift durations are one full 1200px loop - short enough that the motion is
 // unmistakable at a glance (the break layer travels ~110px every second).
 const LAYERS: Layer[] = [
   { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 0.5, foam: false, bleed: "28px" },
   { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, opacity: 0.65, foam: false, bleed: "28px" },
   { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, opacity: 0.85, foam: true, bleed: "28px" },
-  { fill: "var(--sand)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false, bleed: "28px" },
+  { fill: "var(--waterline-fill)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false, bleed: "28px" },
 ];
 
 function WaveLayer({ layer }: { layer: Layer }) {
