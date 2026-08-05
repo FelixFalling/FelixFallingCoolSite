@@ -214,6 +214,35 @@ still triggers a deploy - which then fails, leaving the previous version live.
 The site does not go down, it silently stops updating. If a change seems not to
 have shipped, check the Actions tab before debugging the page.
 
+## The site's own screenshots
+
+The two images in the "This Portfolio Site" card are generated, not taken by
+hand:
+
+```bash
+npm run screenshots   # builds, then shoots ./out and writes the webp files
+```
+
+They are **taken of the real static export**, not the dev server — the picture
+on the site is a picture of the artifact that actually ships. Both are
+committed, so review the diff before pushing.
+
+Why it's a script: they used to be hand-made, and they rotted. For twelve days
+the site showed a screenshot of itself branded "Flying Felix" — a name changed
+back in `9bbd0cd` — alongside a hero reading "Nick". By then they also predated
+the Games link, the centred hero and the redrawn sea.
+
+The output is deterministic: the weather request is blocked (so the sea is
+always at default speed, no rain, no golden hour) and every animation is pinned
+to a fixed moment via the Web Animations API. Two runs produce byte-identical
+files, so rerunning never creates a spurious diff. If you ever change that
+code, check that property still holds:
+
+```bash
+npm run screenshots && shasum -a 256 public/projects/site-*.webp
+npm run screenshots && shasum -a 256 public/projects/site-*.webp   # same hashes
+```
+
 ## The resume PDF
 
 The "Download resume ↓" button serves [`public/resume.pdf`](public/resume.pdf),
