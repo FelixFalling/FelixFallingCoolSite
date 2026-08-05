@@ -144,9 +144,22 @@
   --nav-bg: rgba(12, 20, 24, 0.86);
   --nav-link: #9fb2b5;
 
-  --hero-from: #0e1a20;
+  /* The night sky darkens DOWNWARD, toward the water - the reverse of what it
+     used to do.
+
+     It used to run near-black at the top and glow at the horizon, which is a
+     fair drawing of a moonlit night but made the page as a whole read as
+     dark, then lighter, then dark again: 0.0094 luminance at the top, 0.0253
+     at the waterline, then the dive taking it down to 0.0018. Descending
+     should never brighten, and the brightest point of the page sitting
+     halfway down was the part that looked wrong.
+
+     Reversed, the whole page falls away continuously from the top of the sky
+     to the seafloor. --deep-water reads --hero-to, so the water still starts
+     exactly where the sky stops and simply keeps going. */
+  --hero-from: #123038;
   --hero-via: #10242b;
-  --hero-to: #123038;
+  --hero-to: #0e1a20;
   --photo-from: #1e4a54;
   --photo-to: #27696a;
   --photo-text: #d2eeee;

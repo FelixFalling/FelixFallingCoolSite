@@ -116,24 +116,40 @@ test.describe("the dive (dark mode)", () => {
         () => getComputedStyle(document.querySelector(".deep-sea")!).backgroundColor,
       );
 
-    // The sky where it meets the waves - what the water has to continue from.
-    const skyColour = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue("--hero-to").trim(),
-    );
-    const sky = await luminanceOf(skyColour);
+    const token = async (name: string) =>
+      page.evaluate(
+        (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(),
+        name,
+      );
 
+    /*
+     * Start at the top of the SKY, not at the water.
+     *
+     * The first version of this test began at the waterline, and missed the
+     * real fault: the hero's own gradient ran near-black at the top and
+     * brightest at the horizon, so the brightest point of the entire page sat
+     * halfway down it. The water was innocent - it was monotonic all along.
+     * Walking the sky's three stops first is what makes this cover the thing
+     * that actually looked wrong.
+     */
     let previous = Infinity;
+    let where = "";
+    for (const stop of ["--hero-from", "--hero-via", "--hero-to"]) {
+      const current = await luminanceOf(await token(stop));
+      expect(current, `the sky brightened downward at ${stop} (after ${where})`) //
+        .toBeLessThanOrEqual(previous + 0.001);
+      previous = current;
+      where = stop;
+    }
+
     for (let i = 0; i <= 8; i++) {
       await homePage.scrollTo(Math.round((max * i) / 8));
       const current = await luminanceOf(await waterColour());
-
-      if (i === 0) {
-        expect(current, "the water must not be brighter than the sky it continues from") //
-          .toBeLessThanOrEqual(sky + 0.001);
-      }
-      expect(current, `the water brightened on the way down at ${Math.round((i / 8) * 100)}%`) //
+      const pct = `${Math.round((i / 8) * 100)}%`;
+      expect(current, `the page brightened going down, at ${pct} (after ${where})`) //
         .toBeLessThanOrEqual(previous + 0.001);
       previous = current;
+      where = `water ${pct}`;
     }
   });
 
