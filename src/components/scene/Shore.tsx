@@ -6,9 +6,11 @@
  * absolute pixels - on very wide screens they drifted apart and the
  * lighthouse floated in mid-air. The fix: each cluster is ONE SVG, and the
  * lighthouse is DRAWN ON its rock inside the same drawing, so they can never
- * separate. Clusters anchor to the waterline (a fixed height above the hero
- * bottom) at a percentage across the scene - sizes stay constant, positions
- * scale, nothing stretches.
+ * separate. Clusters anchor to --waterline - the top of the solid water,
+ * derived from the sea band's height in globals.css - at a percentage across
+ * the scene, and size themselves in em from --shore-size. So the rocks stand
+ * the same depth in the water at every screen width, and grow smoothly rather
+ * than jumping at breakpoints. Nothing stretches.
  *
  *   • Headland (left ~16%): a broad crag with the lighthouse on its summit.
  *     In dark mode the lantern glows and a beam sweeps a slow full circle
@@ -20,20 +22,34 @@
  * Both main clusters share the sea stacks' parallax shift.
  */
 
-/* One reusable wrapper: anchors a cluster to the waterline at `left`%.
-   `scale` shrinks a cluster from its base (waterline stays put), and the
-   whole shore also shrinks on phones via --shore-scale (globals.css). */
+/* One reusable wrapper: anchors a cluster at `left`%, with `bottom` given as a
+   CSS length so each cluster can hang off --waterline (globals.css) - the top
+   of the solid water - rather than a raw pixel offset.
+
+   WHY THAT MATTERS. This used to be `bottom: Npx + --shore-lift`, where the
+   lift rose 1:1 with the sea band. But the band's crests are drawn at
+   FRACTIONS of its height (the wave tiles stretch, preserveAspectRatio="none"),
+   so the water surface only climbs about a quarter as fast as the lift did.
+   The rocks drew steadily clear of the sea as the window widened - roughly
+   37px of daylight under them at 1200px, 106px at 4K - which is why they
+   looked like they were floating, and why their proportions appeared to
+   change while a window was being dragged. Hanging them off --waterline makes
+   submersion identical at every width by construction.
+
+   `size` scales the whole cluster by setting the font size every part of it is
+   drawn in, so the rock, the lighthouse and its beam grow together. That
+   replaced a transform scale() driven by stepped breakpoints. */
 function Cluster({
   left,
   bottom,
-  scale = 1,
+  size = 1,
   children,
   opacity = 0.85,
   blur = 0,
 }: {
   left: string;
-  bottom: number;
-  scale?: number;
+  bottom: string;
+  size?: number;
   children: React.ReactNode;
   opacity?: number;
   blur?: number;
@@ -43,12 +59,10 @@ function Cluster({
       style={{
         position: "absolute",
         left,
-        // --shore-lift (globals.css) raises the whole shoreline on desktop,
-        // where the sea band is deeper and the waterline sits higher.
-        bottom: `calc(${bottom}px + var(--shore-lift, 0px))`,
+        bottom,
+        fontSize: `calc(var(--shore-size, 16px) * ${size})`,
         transform:
-          "translateX(-50%) translate(calc(var(--mx, 0) * 12px), calc(var(--my, 0) * 7px))" +
-          ` scale(calc(${scale} * var(--shore-scale, 1)))`,
+          "translateX(-50%) translate(calc(var(--mx, 0) * 12px), calc(var(--my, 0) * 7px))",
         transformOrigin: "50% 100%",
         transition: "transform 0.3s ease-out",
         opacity,
@@ -66,7 +80,9 @@ export default function Shore() {
       {/* ── The headland with the lighthouse ──────────────────────────────
           Kept left of the hero text column and scaled down so the tower's tip
           stays below the text at any screen width. */}
-      <Cluster left="9%" bottom={50} scale={0.75}>
+      {/* Tucked 0.8em under the solid water, so the front wave crosses the
+          crag's foot instead of the whole rock sitting on top of the sea. */}
+      <Cluster left="9%" bottom="calc(var(--waterline) - 0.8em)" size={0.75}>
         {/* The turning light, dark mode only (the wrapper's opacity is the
             theme gate, so the animations inside are free to fade the parts).
 
@@ -83,10 +99,10 @@ export default function Shore() {
             className="beam-sweep"
             style={{
               position: "absolute",
-              left: 214,
-              bottom: 216 - 21,
-              width: 470,
-              height: 42,
+              left: "13.375em", // 214 of the 360-wide drawing
+              bottom: "12.1875em", // 195
+              width: "29.375em", // 470
+              height: "2.625em", // 42
               transformOrigin: "0 50%",
               background:
                 "linear-gradient(90deg, rgba(233, 242, 242, 0.42), rgba(233, 242, 242, 0) 88%)",
@@ -100,17 +116,17 @@ export default function Shore() {
             className="lamp-flash"
             style={{
               position: "absolute",
-              left: 214 - 14,
-              bottom: 216 - 14,
-              width: 28,
-              height: 28,
+              left: "12.5em", // 200
+              bottom: "12.625em", // 202
+              width: "1.75em", // 28
+              height: "1.75em",
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(233, 242, 242, 0.9), rgba(233, 242, 242, 0) 70%)",
               animation: "lampFlash 8s ease-in-out infinite",
             }}
           />
         </div>
-        <svg width="360" height="240" viewBox="0 0 360 240" style={{ display: "block" }}>
+        <svg width="22.5em" height="15em" viewBox="0 0 360 240" style={{ display: "block" }}>
           <g style={{ fill: "var(--sea-stack)" }}>
             {/* The crag: broad and heavy, with a flat summit under the tower. */}
             <path
@@ -132,8 +148,10 @@ export default function Shore() {
       </Cluster>
 
       {/* ── A small distant stack, hazier, for depth ─────────────────────── */}
-      <Cluster left="42%" bottom={92} opacity={0.4} blur={1}>
-        <svg width="90" height="72" viewBox="0 0 90 72" style={{ display: "block" }}>
+      {/* Far out, so it sits high against the distant crests rather than at the
+          near waterline - height on screen is what reads as distance. */}
+      <Cluster left="42%" bottom="calc(var(--waves-height) * 0.45)" opacity={0.4} blur={1}>
+        <svg width="5.625em" height="4.5em" viewBox="0 0 90 72" style={{ display: "block" }}>
           <path
             d="M0 72 L8 34 C18 12 34 8 46 20 C58 30 70 26 80 42 L90 72 Z"
             style={{ fill: "var(--sea-stack)" }}
@@ -142,8 +160,9 @@ export default function Shore() {
       </Cluster>
 
       {/* ── The monolith (Haystack Rock) with a stout companion ──────────── */}
-      <Cluster left="63%" bottom={62} opacity={0.8}>
-        <svg width="280" height="220" viewBox="0 0 280 220" style={{ display: "block" }}>
+      {/* Same treatment as the headland: its base goes under the solid water. */}
+      <Cluster left="63%" bottom="calc(var(--waterline) - 0.5em)" opacity={0.8}>
+        <svg width="17.5em" height="13.75em" viewBox="0 0 280 220" style={{ display: "block" }}>
           <g style={{ fill: "var(--sea-stack)" }}>
             {/* the big dome */}
             <path d="M14 220 C20 128 42 66 94 38 C122 22 152 22 174 46 C212 82 236 142 248 220 Z" />

@@ -310,6 +310,31 @@ main:focus {
  */
 :root {
   --waves-height: 190px;
+
+  /* WHERE THE SOLID WATER STARTS, measured up from the hero's bottom edge.
+   *
+   * The shore anchors to this so the rocks stand IN the sea at every screen
+   * size instead of floating on it. Derived rather than guessed: the wave
+   * tiles use viewBox="0 0 1200 200" with preserveAspectRatio="none", so each
+   * crest sits at a FRACTION of the band's height, and the front (opaque)
+   * layer is drawn at y=152 of 200. Each tile is also anchored 28px below the
+   * band (the `bleed` in Waves.tsx, which stops the swell lifting a bottom
+   * edge into view), which is where the constant comes from:
+   *
+   *   height − (152 / 200) × (height + 28)  =  0.24 × height − 21.3
+   *
+   * Because it follows --waves-height, it tracks every breakpoint on its own.
+   */
+  --waterline: calc(var(--waves-height) * 0.24 - 21px);
+
+  /* How big the shore is drawn. One length that every part of a cluster sizes
+   * itself from, in em - the rocks, the lighthouse, and its beam together.
+   *
+   * It replaced a --shore-scale that stepped 0.7 → 1.18 → 1.35 → 1.55 at
+   * breakpoints, so the rocks jumped size while a window was being dragged. A
+   * unitless scale cannot be made fluid (calc() will not divide a length by a
+   * length), but a font-size can, and em does the rest. */
+  --shore-size: clamp(10px, 0.9vw, 13px);
 }
 
 .waves-strip {
@@ -416,13 +441,17 @@ main:focus {
   :root {
     /* Container: 1240px on small desktops, growing to 1560px on 4K. */
     --content-width: clamp(1240px, 68vw, 1560px);
-    /* The sea deepens with the screen (240px → 330px on 4K). */
+    /* The sea deepens with the screen (240px → 330px on 4K). The shoreline
+       follows on its own now: --waterline is a fraction of this, and the
+       clusters anchor to --waterline. The old --shore-lift, which raised the
+       shore 1:1 with the sea band while the crests only rose a quarter as
+       fast, is gone - that mismatch is what lifted the rocks clear of the
+       water as the window widened. */
     --waves-height: clamp(240px, 14vw, 330px);
 
-    /* …and the shoreline lifts so the rocks sit on the deeper water. */
-    --shore-lift: calc(var(--waves-height) - 195px);
-    /* Bigger rocks + lighthouse so the scene holds its own. */
-    --shore-scale: 1.18;
+    /* Bigger rocks + lighthouse so the scene holds its own - fluid from the
+       desktop breakpoint up, so it never snaps mid-drag. */
+    --shore-size: clamp(18px, calc(0.75vw + 9px), 25px);
   }
 
   .section {
@@ -458,13 +487,10 @@ main:focus {
   }
 }
 
-/* Very large screens (≥1600px, e.g. QHD/4K): the shore steps up again and
- * card text grows so it doesn't read tiny inside the wider grid. */
+/* Very large screens (≥1600px, e.g. QHD/4K): card text grows so it doesn't
+ * read tiny inside the wider grid. The shore no longer needs a rule here - it
+ * grows continuously with --shore-size instead of stepping at 1600 and 2100. */
 @media (min-width: 1600px) {
-  :root {
-    --shore-scale: 1.35;
-  }
-
   .card {
     padding: 30px 32px;
   }
@@ -472,12 +498,6 @@ main:focus {
   .tag {
     font-size: 13.5px;
     padding: 4px 12px;
-  }
-}
-
-@media (min-width: 2100px) {
-  :root {
-    --shore-scale: 1.55;
   }
 }
 
@@ -514,18 +534,15 @@ main:focus {
 
 /* ── Phone layout ──────────────────────────────────────────────────────────
  * Slightly tighter side padding and section rhythm on small screens, so the
- * content gets more of the width without feeling cramped. The shore (rocks +
- * lighthouse) also shrinks below the desktop breakpoint - on narrow screens the
- * hero text column reaches the left edge, and this keeps the lighthouse under
- * it. The cutoff is 1199px so it meets the >=1200px rule exactly; at 1100px it
- * used to leave 1101-1199px with no --shore-scale at all, and the rocks would
- * snap to full size in that band. */
-@media (max-width: 1199px) {
-  :root {
-    --shore-scale: 0.7;
-  }
-}
-
+ * content gets more of the width without feeling cramped.
+ *
+ * The shore's size below the desktop breakpoint is the base --shore-size in
+ * :root (a clamp on vw), so it shrinks smoothly on narrow screens rather than
+ * sitting at one fixed value - on those widths the hero text column reaches
+ * the left edge and a big lighthouse would collide with it. There is still a
+ * step at 1200px, where the whole desktop layout changes anyway; the steps
+ * that were jarring were the ones at 1600 and 2100, mid-drag, with nothing
+ * else changing around them. */
 @media (max-width: 640px) {
   .container {
     padding: 0 20px;
