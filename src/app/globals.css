@@ -83,16 +83,16 @@
   /* The colour of the water you sink into (scene/depth.ts drives --depth and
      --water; the dive is dark-mode only, so in light both stay 0).
 
-     It begins at --hero-to, the colour the sky has already reached by the
-     time it meets the waves, and only ever darkens toward black from there.
+     It begins at --wave-break - the nearest crest, the last surface water you
+     see before you go under - and darkens toward black from there, which is
+     simply light being absorbed as you descend.
 
-     STARTING FROM THE CREST WAS WRONG. --wave-break is a lit highlight on the
-     top of the swell, much brighter than the night sky above it, so beginning
-     the water there made the page get LIGHTER as you started going down and
-     only darken afterwards - a dive that brightens on the way in. Beginning
-     level with the sky means every step down is darker than the last, which
-     is the only progression that makes sense for descending. */
-  --deep-water: color-mix(in oklab, var(--hero-to), #01070b calc(var(--depth, 0) * 100%));
+     Starting it from the crest only works because the sea's own palette now
+     darkens toward the viewer (see the wave tokens). While the crest was the
+     BRIGHTEST part of the sea, beginning here made the page brighten as you
+     started down; the fix for that was the sea's lighting, not moving the
+     water's starting point away from the surface it continues. */
+  --deep-water: color-mix(in oklab, var(--wave-break), #01070b calc(var(--depth, 0) * 100%));
 
   /* What the front wave layer washes onto. Above water that is the page
      background; below it, the water itself.
@@ -144,22 +144,14 @@
   --nav-bg: rgba(12, 20, 24, 0.86);
   --nav-link: #9fb2b5;
 
-  /* The night sky darkens DOWNWARD, toward the water - the reverse of what it
-     used to do.
-
-     It used to run near-black at the top and glow at the horizon, which is a
-     fair drawing of a moonlit night but made the page as a whole read as
-     dark, then lighter, then dark again: 0.0094 luminance at the top, 0.0253
-     at the waterline, then the dive taking it down to 0.0018. Descending
-     should never brighten, and the brightest point of the page sitting
-     halfway down was the part that looked wrong.
-
-     Reversed, the whole page falls away continuously from the top of the sky
-     to the seafloor. --deep-water reads --hero-to, so the water still starts
-     exactly where the sky stops and simply keeps going. */
-  --hero-from: #123038;
+  /* Dark overhead, glowing where it meets the sea - a moonlit horizon, which
+     is how a night sky actually looks. The brightening downward is correct
+     here and is NOT the thing that made the page read as dark-light-dark:
+     that was the water surface below, which used to run brighter still (see
+     the wave tokens). */
+  --hero-from: #0e1a20;
   --hero-via: #10242b;
-  --hero-to: #0e1a20;
+  --hero-to: #123038;
   --photo-from: #1e4a54;
   --photo-to: #27696a;
   --photo-text: #d2eeee;
@@ -171,10 +163,29 @@
   --footer-link-border: rgba(255, 255, 255, 0.2);
   --footer-copyright: #7d8a9c; /* 5.6:1 on the dark footer - WCAG AA */
 
-  --wave-far: #223d44;
-  --wave-mid: #2b5c5e;
-  --wave-break: #387672;
-  --wave-foam: #6fbfbb; /* a soft moonlit glow on the crest */
+  /* THE SEA AT NIGHT, LIT THE WAY WATER ACTUALLY IS.
+   *
+   * Water is not a light source: it shows you the sky reflected in it. Far
+   * out, you see the surface at a shallow angle, so it is nearly all
+   * reflection and sits just under the brightness of the horizon it mirrors
+   * (0.0228 against the sky's 0.0253 - a reflection can't outshine what it
+   * reflects). The closer it gets, the steeper your view into it, the less
+   * you see reflected and the more you see water - so it darkens toward you,
+   * and keeps darkening below the surface as the light is absorbed.
+   *
+   * It used to run the other way: 0.041 far, 0.090 mid, 0.150 at the nearest
+   * crest, over sixteen times brighter than the sky above it and with dark
+   * water below. That is what read as a bright band across the middle of the
+   * page - the sea glowing on its own, with no light to glow from. The light
+   * theme always had this right (0.570 → 0.293 → 0.139, darkening toward the
+   * viewer); only the dark theme was inverted.
+   */
+  --wave-far: #152d34; /* 0.0228 - almost all reflected horizon */
+  --wave-mid: #12262c; /* 0.0170 */
+  --wave-break: #101f25; /* 0.0122 - nearest crest, you are seeing INTO it */
+  --wave-foam: #3f7a77; /* 0.163 - spray scatters light, so it stays the one
+                           bright thing; dimmed from 0.442, which made the
+                           crest line read as a lit stripe rather than foam */
 
   --sea-stack: #060e12; /* near-black basalt against the moonlit fog */
   --mist: 150, 180, 185; /* fog glows faintly cool at night */

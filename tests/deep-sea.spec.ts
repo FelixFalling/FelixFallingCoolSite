@@ -123,20 +123,27 @@ test.describe("the dive (dark mode)", () => {
       );
 
     /*
-     * Start at the top of the SKY, not at the water.
+     * Start at the HORIZON and walk down: sky glow → the three surface bands
+     * → the water below.
      *
-     * The first version of this test began at the waterline, and missed the
-     * real fault: the hero's own gradient ran near-black at the top and
-     * brightest at the horizon, so the brightest point of the entire page sat
-     * halfway down it. The water was innocent - it was monotonic all along.
-     * Walking the sky's three stops first is what makes this cover the thing
-     * that actually looked wrong.
+     * Not from the top of the sky, deliberately. A night sky is darkest
+     * overhead and brightest where it meets the sea, so the hero legitimately
+     * brightens downward; the horizon is the brightest point of the scene and
+     * everything after it should fall away. Asserting from the top would fail
+     * on a moonlit horizon, which is correct and wanted.
+     *
+     * What this DOES catch is the fault that made the page read as
+     * dark-light-dark: the sea's own bands ran 0.041 → 0.090 → 0.150 toward
+     * the viewer, brighter than the sky they reflect, leaving a lit stripe
+     * across the middle of the page with darkness above and below. Water
+     * cannot outshine what it reflects, so each band must be no brighter than
+     * the horizon and each must be darker than the one behind it.
      */
     let previous = Infinity;
     let where = "";
-    for (const stop of ["--hero-from", "--hero-via", "--hero-to"]) {
+    for (const stop of ["--hero-to", "--wave-far", "--wave-mid", "--wave-break"]) {
       const current = await luminanceOf(await token(stop));
-      expect(current, `the sky brightened downward at ${stop} (after ${where})`) //
+      expect(current, `the sea brightened toward the viewer at ${stop} (after ${where})`) //
         .toBeLessThanOrEqual(previous + 0.001);
       previous = current;
       where = stop;
