@@ -57,30 +57,68 @@ export default defineConfig({
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"], channel: "chrome" },
+      testIgnore: /export\.spec\.ts/,
     },
     {
       name: "mobile",
       use: { ...devices["Pixel 7"], channel: "chrome" },
+      testIgnore: /export\.spec\.ts/,
     },
     {
       name: "desktop-safari",
       use: { ...devices["Desktop Safari"] },
+      testIgnore: /export\.spec\.ts/,
     },
     {
       // A real iPhone viewport in the real iOS engine - the combination the
       // wave bug lived in.
       name: "mobile-safari",
       use: { ...devices["iPhone 14"] },
+      testIgnore: /export\.spec\.ts/,
+    },
+    {
+      /*
+       * The odd one out, and the point of it: every project above runs against
+       * `next dev`, which is NOT what ships. Dev doesn't minify, serves modules
+       * instead of built chunks, and will happily run code `next build`
+       * rejects. That gap has cost this project before - a CSS minifier dropped
+       * a transform hint from a keyframe and nothing caught it, because nothing
+       * ever looked at the built output.
+       *
+       * This project points at ./out, served the way Pages serves it, and runs
+       * only export.spec.ts - the assertions that are meaningless anywhere else.
+       * One browser is enough: it is checking what the BUILD produced, not how
+       * an engine renders it.
+       */
+      name: "export",
+      testMatch: /export\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        channel: "chrome",
+        baseURL: `http://localhost:${process.env.EXPORT_PORT ?? 3100}/FelixFallingCoolSite/`,
+      },
     },
   ],
 
   // Playwright manages the dev server: starts it before tests, stops it after.
   // `reuseExistingServer` means: if you already have `npm run dev` running
   // locally, tests just use it (faster) - CI always starts a fresh one.
-  webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000/FelixFallingCoolSite/",
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: [
+    {
+      command: "npm run dev",
+      url: "http://localhost:3000/FelixFallingCoolSite/",
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+    {
+      // The static export, for the "export" project. It builds first on
+      // purpose: serving a stale ./out would quietly test the wrong artifact,
+      // which is exactly the failure mode this project exists to prevent. The
+      // build is incremental, so it costs seconds after the first run.
+      command: "npm run build && node scripts/serve-out-cli.mjs",
+      url: `http://localhost:${process.env.EXPORT_PORT ?? 3100}/FelixFallingCoolSite/`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+  ],
 });

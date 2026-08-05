@@ -148,6 +148,15 @@ engines (the `projects` in [`playwright.config.ts`](playwright.config.ts)):
 | `mobile`         | Chromium | Pixel 7             |
 | `desktop-safari` | WebKit   | Desktop Safari      |
 | `mobile-safari`  | WebKit   | iPhone 14           |
+| `export`         | Chromium | the built `./out`   |
+
+`export` is the odd one out and the important one: the four browser projects
+all run against `next dev`, which is **not what ships**. Dev doesn't minify,
+serves modules instead of built chunks, and runs code `next build` would
+reject — so the suite could be green while the deployed site is broken. That
+already happened once, when a CSS minifier dropped a transform hint out of a
+keyframe and nothing noticed. The `export` project serves `./out` the way Pages
+does and asserts on the built output (`tests/export.spec.ts`).
 
 WebKit is there because it is the engine behind Safari and every browser on
 iOS, where this site has already had a bug Chromium could not have shown
@@ -190,6 +199,12 @@ only ever needs changing in one place. The specs to copy from:
 - `game.spec.ts` - The Wizard's Tower: it starts, the boss spawns and can be
   reached (desktop only)
 - `accessibility.spec.ts` - axe-core WCAG A/AA scans of both themes and the 404 page
+- `shore.spec.ts` - the rocks stand in the water at every width, and don't
+  snap size while a window is resized
+- `deep-sea.spec.ts` - the dark-mode dive: depth, and the sea only darkening
+- `export.spec.ts` - the built `./out` (the `export` project only): the
+  minifier kept the rules the scene needs, the manifest's icons exist, the
+  sitemap's URLs resolve, and the bundle runs without console errors
 
 Tests import `resume.ts` directly, so they keep passing when you edit your
 content - they check structure and behavior, not hardcoded strings.
