@@ -220,11 +220,12 @@ export const resume: Resume = {
       eyebrow: "Vibe-coded · Just for fun",
       title: "Curse of Ra",
       description:
-        "A work-hours punch clock disguised as an animated Egyptian tomb - " +
-        "tap the cartouche to clock in and out, and it tracks your day and " +
-        "your weekly 40 while the scene glitters around you. Vibe-coded " +
-        "with an AI pair as a side experiment: I directed, reviewed, and " +
-        "shipped it as one self-contained HTML file.",
+        "Works out when you can clock out, disguised as an animated Egyptian " +
+        "tomb - give it the time you came back from lunch and the decimal " +
+        "hours your timeclock shows, and it counts down to the moment the " +
+        "curse lifts, for a day or a whole period. Vibe-coded with an AI " +
+        "pair as a side experiment: I directed, reviewed, and shipped it as " +
+        "one self-contained HTML file.",
       links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
       images: [
         { src: "projects/clock-1.webp", alt: "The Curse of Ra clock at night - a moonlit Egyptian tomb with a golden clock" },

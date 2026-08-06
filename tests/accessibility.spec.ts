@@ -40,18 +40,6 @@ test.describe("accessibility (axe-core, WCAG A/AA)", () => {
     expect(results.violations).toEqual([]);
   });
 
-  test("clock-out calculator", async ({ page }) => {
-    // A form page, so it exercises rules the rest of the site never hits:
-    // labels bound to inputs, the segmented control's radiogroup, and the
-    // aria-live answer.
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("./clockout.html");
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
-    expect(results.violations).toEqual([]);
-  });
-
   test("404 page", async ({ notFoundPage }) => {
     const results = await scan(notFoundPage, () => notFoundPage.goto());
     expect(results.violations).toEqual([]);
