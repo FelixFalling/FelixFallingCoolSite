@@ -143,7 +143,7 @@
   .action:focus-visible{outline:3px solid var(--faience);outline-offset:2px}
 
   /* ---------- Punch chips: tap to edit ---------- */
-  .chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:var(--gap)}
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:var(--gap)}
   .chip{position:relative;background:var(--inset);border-radius:10px;
     padding:8px 4px;text-align:center;cursor:pointer;
     box-shadow:inset 0 3px 6px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
@@ -151,8 +151,17 @@
     text-transform:uppercase;color:var(--ink-soft);text-shadow:0 1px 0 var(--carve-hi)}
   .chip b{display:block;font-family:var(--mono);font-size:14px;font-weight:600;
     color:var(--ink);margin-top:2px;white-space:nowrap}
+  /* On touch, the input covers its chip invisibly so the whole carved tile is
+     the tap target - the <b> above shows the value. The pointer:fine block
+     below swaps that for a real typeable field on a computer. */
   .chip input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;
-    color-scheme:light}
+    color-scheme:light;border:none;font-size:16px}
+  .chip:focus-within{outline:2px solid var(--faience);outline-offset:2px}
+  /* Number spinners would poke out of the invisible overlay on the decimal
+     chip, and there is no room for them on a tile this size. */
+  .chip input[type=number]{appearance:textfield;-moz-appearance:textfield}
+  .chip input::-webkit-outer-spin-button,
+  .chip input::-webkit-inner-spin-button{appearance:none;margin:0}
   .chip.off{opacity:.45}
   .chip.off input{pointer-events:none}
   /* On a computer, show a real typeable time field instead of the invisible
@@ -178,26 +187,32 @@
   summary::-webkit-details-marker{display:none}
   summary::after{content:'▾';transition:transform .2s}
   details[open] summary::after{transform:rotate(180deg)}
-  .wkRow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:stretch;
-    margin-bottom:8px}
+  .wkRow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;
+    margin-top:var(--gap)}
   .wkRow label{font-family:var(--egypt);font-size:14px;align-self:center;
     text-shadow:0 1px 0 var(--carve-hi)}
-  .wkRow input{font-family:var(--mono);font-size:16px;color:var(--ink);
-    background:var(--inset);border:none;border-radius:10px;padding:0 10px;
-    min-height:var(--tap);width:130px;color-scheme:light;
+  /* The target control fills the row. Carved into the stone like the chips,
+     rather than looking like a form dropped onto the panel. */
+  .wkRow select,.wkRow input{width:100%;font-family:var(--mono);font-size:15px;
+    color:var(--ink);background:var(--inset);border:none;border-radius:10px;
+    padding:0 10px;min-height:var(--tap);color-scheme:light;appearance:none;
     box-shadow:inset 0 3px 6px var(--carve-sh),inset 0 -1px 0 var(--carve-hi)}
-  .wkRow input:focus-visible{outline:2px solid var(--faience)}
-  .miniBtn{background:linear-gradient(180deg,var(--gold-lt),var(--gold));border:none;
-    border-radius:999px;min-height:var(--tap);padding:0 14px;cursor:pointer;
-    font-family:var(--egypt);font-size:13px;color:#2a1f0c;
-    box-shadow:inset 0 1px 0 rgba(255,250,220,.8),inset 0 -2px 3px rgba(107,83,16,.6)}
+  /* appearance:none removes the arrow, so draw one back on. */
+  .wkRow select{background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),
+    linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);
+    background-position:calc(100% - 16px) 52%,calc(100% - 11px) 52%;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
+  .wkRow select:focus-visible,.wkRow input:focus-visible{outline:2px solid var(--faience)}
 
   .reset{display:block;margin:6px auto 0;background:none;border:none;color:var(--ink-soft);
     font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:underline;
     min-height:var(--tap)}
 
+  /* Collapsed, the sheet is just the answer. Everything you'd only touch
+     while setting it up folds away - including the target row, which used
+     to be a <details> and so was covered by the old list. */
   #panel.collapsed .action,#panel.collapsed .chips,#panel.collapsed .hint,
-  #panel.collapsed details,#panel.collapsed .reset,#panel.collapsed .glyphs{display:none}
+  #panel.collapsed .wkRow,#panel.collapsed .reset,#panel.collapsed .glyphs{display:none}
   #panel.collapsed .hero .sub{display:none}
 
   @media (min-width:900px){
