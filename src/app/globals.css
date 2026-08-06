@@ -309,7 +309,14 @@ main:focus {
  * retuning it moves the whole scene together.
  */
 :root {
-  --waves-height: 190px;
+  /* The sea band, and on phones it has to SCALE - a fixed height doesn't.
+     At 190px flat it was 29% of an iPhone's visible screen and 46% of the
+     hero itself, so the water crowded the name and buttons on exactly the
+     screens with the least room. Tied to viewport height instead, it keeps
+     its share: ~133px on a 664px iPhone viewport, back to the full 190px on
+     a tall phone. The hero's bottom padding and the shore both derive from
+     this, so they follow on their own. Desktop overrides it below. */
+  --waves-height: clamp(110px, 20vh, 190px);
 
   /* WHERE THE SOLID WATER STARTS, measured up from the hero's bottom edge.
    *
