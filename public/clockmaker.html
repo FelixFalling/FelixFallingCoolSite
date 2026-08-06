@@ -215,6 +215,31 @@
   #panel.collapsed .wkRow,#panel.collapsed .reset,#panel.collapsed .glyphs{display:none}
   #panel.collapsed .hero .sub{display:none}
 
+  /* ── Phone: give the tomb back the screen ────────────────────────────────
+   * The sheet was taking 70% of an iPhone's viewport expanded and 30%
+   * collapsed, which left the clock - the whole point of the page - as a
+   * sliver. Everything here is the panel spending less room on itself:
+   * decoration goes, the type comes down, the padding tightens. The 3D scene
+   * scales into whatever strip is left (see the resize handler), so every
+   * pixel taken off the panel goes straight back to the clock. */
+  @media (max-width:899px){
+    #panel{max-height:56vh;padding:6px 14px calc(10px + env(safe-area-inset-bottom))}
+    /* Pure ornament, and the first thing that should go when space is tight. */
+    .glyphs{display:none}
+    .hero{padding:10px}
+    .hero .out{font-size:clamp(34px,10vw,44px)}
+    .hero .count{font-size:13px}
+    .hero .sub{font-size:11px}
+    .bar{height:7px;margin-top:8px}
+    .action{min-height:44px}
+
+    /* Collapsed, the sheet should be the answer and nothing else - the label
+       above it says "the curse lifts at", which a 44px time already implies. */
+    #panel.collapsed .hero .cue{display:none}
+    #panel.collapsed .hero{padding:8px 10px}
+    #panel.collapsed .bar{margin-top:6px}
+  }
+
   @media (min-width:900px){
     /* Cap the height so the centered panel always clears the fixed top-row
        controls (title / greeting pill / theme button ≈ top 64px) on short
