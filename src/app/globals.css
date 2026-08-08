@@ -638,6 +638,62 @@ main:focus {
   }
 }
 /* The desktop scroll cue bobs gently above the waves. */
+/* ── The night sky ─────────────────────────────────────────────────────────
+ * Stars twinkle; meteors are rare. Both live inside the group whose opacity is
+ * --star-opacity, so they exist only in dark mode with no JavaScript involved.
+ * scene/Stars.tsx supplies each element's duration and delay inline.
+ */
+.star {
+  animation-name: starTwinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* A streak with a bright head and a tail fading out behind it. The element is
+   drawn flat and rotated into its fall, so `travel` moves it along its own
+   axis - which is why the rotate has to be repeated in every keyframe: a
+   transform list replaces the previous one wholesale rather than adding to it. */
+.meteor {
+  position: absolute;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--star));
+  opacity: 0;
+  animation-name: meteorStreak;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+/* Visible for barely 5% of the cycle - that's what makes it a surprise rather
+   than a decoration. Note this leaves .meteor at opacity 0 whenever the
+   animation is off, so the reduced-motion rule below simply removes them. */
+@keyframes meteorStreak {
+  0%,
+  92% {
+    transform: rotate(var(--meteor-angle, 24deg)) translateX(0);
+    opacity: 0;
+  }
+  93% {
+    opacity: 0.9;
+  }
+  97%,
+  100% {
+    transform: rotate(var(--meteor-angle, 24deg)) translateX(var(--meteor-travel, 280px));
+    opacity: 0;
+  }
+}
+
 @keyframes cueBob {
   0%,
   100% {
@@ -706,9 +762,16 @@ main:focus {
   .beam-sweep,
   .lamp-flash,
   .rain-fall,
-  .scroll-cue {
+  .scroll-cue,
+  .star,
+  .meteor {
     animation: none !important;
   }
+
+  /* The stars stay - they just stop twinkling, holding the steady opacity
+     their inline style gives them. The meteors go entirely: .meteor sits at
+     opacity 0 with the animation off, and a streak flying across the sky is
+     exactly the kind of sudden movement this preference asks us not to make. */
 
   /* Sections appear immediately instead of fading up from below. This
      overrides the html.js rule above, so it holds whether or not Reveal has
