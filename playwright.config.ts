@@ -25,7 +25,17 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
 
-  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
+  /*
+   * The "github" reporter matters more than it looks. It turns each failure
+   * into a GitHub annotation attached to the file and line, which shows up on
+   * the run, on the commit, and - unlike the run's logs or the HTML report
+   * artifact - can be read back without a token. Without it a red build says
+   * only "Process completed with exit code 1", which is exactly as useful as
+   * it sounds when the failure doesn't reproduce locally.
+   */
+  reporter: process.env.CI
+    ? [["github"], ["list"], ["html", { open: "never" }]]
+    : "list",
 
   use: {
     // The site lives under the GitHub Pages base path, so tests navigate with
