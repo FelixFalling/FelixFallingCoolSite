@@ -116,6 +116,37 @@
   display: none;
 }
 
+/* ── Phones: fill the screen so the sea sits at the BOTTOM ─────────────────
+ * Without this the hero was only as tall as its content - about 374px of a
+ * 774px iPhone viewport - so the water and the rocks ended up jammed directly
+ * under the buttons, high up the screen. Shrinking the sea band was the wrong
+ * lever: it just squashed the scene without moving it down. Filling the
+ * viewport is what actually puts the horizon near the bottom, the way it sits
+ * on a desktop.
+ *
+ * svh, not vh: on iOS `vh` is the height with the browser chrome HIDDEN, so a
+ * 100vh hero is taller than what you can actually see until you scroll. svh is
+ * the chrome-visible height - the state the page is in when you land on it.
+ *
+ * The nav is in flow above this and its height changes as the links wrap
+ * (measured: 116px at 375px wide, 81px at 428px, 57px from 640px up), so the
+ * subtraction is per breakpoint. Erring large is safe - the hero just ends a
+ * little short and a sliver of About shows, which reads as an invitation to
+ * scroll rather than a mistake. */
+@media (max-width: 1199px) {
+  .inner {
+    min-height: calc(100vh - 57px); /* fallback for browsers without svh */
+    min-height: calc(100svh - 57px);
+  }
+}
+
+@media (max-width: 639px) {
+  .inner {
+    min-height: calc(100vh - 116px);
+    min-height: calc(100svh - 116px);
+  }
+}
+
 /* ── Desktop layout (≥1200px): a full-viewport cinematic hero ──────────────
  * Every size in here is fluid (clamp + vw) so the hero scales with the
  * monitor - the cap itself grows on wider screens. */
