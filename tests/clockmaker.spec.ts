@@ -52,8 +52,23 @@ async function clockOut(page: Page, backIn: string, worked: number, target = 8) 
 }
 
 test.describe("the Curse of Ra clock", () => {
+  /*
+   * Reduced motion, and not only for tidiness. This page runs a WebGL render
+   * loop, and on CI - one worker on a two-core runner, with the whole matrix
+   * queued behind it - a page pegging a core made Playwright's 30s
+   * actionability and text timeouts genuinely reachable. Three tests failed
+   * there while passing everywhere locally: #sub read as empty and
+   * selectOption sat waiting on a resolved <select>, both the signature of a
+   * page too busy to respond rather than a page that is wrong.
+   *
+   * With this the scene renders at 4fps instead of 60 (see the loop in
+   * clockmaker.html), which is what the preference should have meant all
+   * along. Measured: the page schedules 121 animation frames a second
+   * normally, and none at all under this.
+   */
   test.beforeEach(async ({ page, isMobile }) => {
     test.skip(isMobile, "desktop only - one platform is enough for the clock");
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("./clockmaker.html");
 
     /*

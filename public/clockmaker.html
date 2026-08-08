@@ -1381,7 +1381,14 @@ function approach(cur, target, k){
   return cur + d*k;
 }
 function loop(now){
-  requestAnimationFrame(loop);
+  /* Under reduced motion the scene is already still - the pendulum, the gears
+     and the crumble are all switched off below - yet this was still asking the
+     GPU for a fresh frame sixty times a second to redraw an unchanging picture.
+     Four times a second is plenty to carry the clock hands, which are the only
+     thing left moving, and it takes the page from pegging a core to idling.
+     The countdown is on its own setInterval, so it is unaffected either way. */
+  if(reduceMotion) setTimeout(() => loop(performance.now()), 250);
+  else requestAnimationFrame(loop);
   try{ loopBody(now); }
   catch(err){
     if(!loop._reported){ loop._reported = true; __showErr('Render loop: ' + (err && err.stack ? err.stack : err)); }
