@@ -318,21 +318,16 @@ main:focus {
      this, so they follow on their own. Desktop overrides it below. */
   --waves-height: clamp(110px, 20vh, 190px);
 
-  /* WHERE THE SOLID WATER STARTS, measured up from the hero's bottom edge.
+  /* HOW FAR THE SHORELINE IS RAISED off the hero's bottom edge, on top of each
+   * cluster's own offset. Zero here; the desktop block below raises it with
+   * the deeper sea band.
    *
-   * The shore anchors to this so the rocks stand IN the sea at every screen
-   * size instead of floating on it. Derived rather than guessed: the wave
-   * tiles use viewBox="0 0 1200 200" with preserveAspectRatio="none", so each
-   * crest sits at a FRACTION of the band's height, and the front (opaque)
-   * layer is drawn at y=152 of 200. Each tile is also anchored 28px below the
-   * band (the `bleed` in Waves.tsx, which stops the swell lifting a bottom
-   * edge into view), which is where the constant comes from:
-   *
-   *   height − (152 / 200) × (height + 28)  =  0.24 × height − 21.3
-   *
-   * Because it follows --waves-height, it tracks every breakpoint on its own.
-   */
-  --waterline: calc(var(--waves-height) * 0.24 - 21px);
+   * There was an attempt to anchor the clusters to a computed --waterline
+   * instead, so the front wave crossed each rock's foot. Geometrically it did
+   * exactly that, but it read far worse: the rocks looked half-sunk and the
+   * scene lost its shoreline, so the clusters sit back on top of the water
+   * where they were. */
+  --shore-lift: 0px;
 
   /* How big the shore is drawn. One length that every part of a cluster sizes
    * itself from, in em - the rocks, the lighthouse, and its beam together.
@@ -448,13 +443,11 @@ main:focus {
   :root {
     /* Container: 1240px on small desktops, growing to 1560px on 4K. */
     --content-width: clamp(1240px, 68vw, 1560px);
-    /* The sea deepens with the screen (240px → 330px on 4K). The shoreline
-       follows on its own now: --waterline is a fraction of this, and the
-       clusters anchor to --waterline. The old --shore-lift, which raised the
-       shore 1:1 with the sea band while the crests only rose a quarter as
-       fast, is gone - that mismatch is what lifted the rocks clear of the
-       water as the window widened. */
+    /* The sea deepens with the screen (240px → 330px on 4K). */
     --waves-height: clamp(240px, 14vw, 330px);
+
+    /* …and the shoreline lifts with it, so the rocks stay on the water. */
+    --shore-lift: calc(var(--waves-height) - 195px);
 
     /* Bigger rocks + lighthouse so the scene holds its own - fluid from the
        desktop breakpoint up, so it never snaps mid-drag. */

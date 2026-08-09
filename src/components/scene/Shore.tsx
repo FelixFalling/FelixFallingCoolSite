@@ -6,11 +6,11 @@
  * absolute pixels - on very wide screens they drifted apart and the
  * lighthouse floated in mid-air. The fix: each cluster is ONE SVG, and the
  * lighthouse is DRAWN ON its rock inside the same drawing, so they can never
- * separate. Clusters anchor to --waterline - the top of the solid water,
- * derived from the sea band's height in globals.css - at a percentage across
- * the scene, and size themselves in em from --shore-size. So the rocks stand
- * the same depth in the water at every screen width, and grow smoothly rather
- * than jumping at breakpoints. Nothing stretches.
+ * separate. Clusters sit a fixed height above the hero's bottom edge (plus
+ * --shore-lift on desktop, where the sea band is deeper) at a percentage
+ * across the scene, and size themselves in em from --shore-size. So positions
+ * scale and sizes grow smoothly rather than jumping at breakpoints. Nothing
+ * stretches.
  *
  *   • Headland (left ~16%): a broad crag with the lighthouse on its summit.
  *     In dark mode the lantern glows and a beam sweeps a slow full circle
@@ -22,19 +22,15 @@
  * Both main clusters share the sea stacks' parallax shift.
  */
 
-/* One reusable wrapper: anchors a cluster at `left`%, with `bottom` given as a
-   CSS length so each cluster can hang off --waterline (globals.css) - the top
-   of the solid water - rather than a raw pixel offset.
+/* One reusable wrapper: anchors a cluster `bottom` px above the hero's bottom
+   edge at `left`%, raised by --shore-lift (globals.css) on desktop, where the
+   sea band is deeper.
 
-   WHY THAT MATTERS. This used to be `bottom: Npx + --shore-lift`, where the
-   lift rose 1:1 with the sea band. But the band's crests are drawn at
-   FRACTIONS of its height (the wave tiles stretch, preserveAspectRatio="none"),
-   so the water surface only climbs about a quarter as fast as the lift did.
-   The rocks drew steadily clear of the sea as the window widened - roughly
-   37px of daylight under them at 1200px, 106px at 4K - which is why they
-   looked like they were floating, and why their proportions appeared to
-   change while a window was being dragged. Hanging them off --waterline makes
-   submersion identical at every width by construction.
+   These clusters were once hung off a computed --waterline instead, so the
+   front wave crossed each rock's foot at every width. It was correct about the
+   geometry and wrong about the picture - the rocks read as half-sunk and the
+   shoreline disappeared - so they sit back on the water at their original
+   offsets.
 
    `size` scales the whole cluster by setting the font size every part of it is
    drawn in, so the rock, the lighthouse and its beam grow together. That
@@ -48,7 +44,7 @@ function Cluster({
   blur = 0,
 }: {
   left: string;
-  bottom: string;
+  bottom: number;
   size?: number;
   children: React.ReactNode;
   opacity?: number;
@@ -59,7 +55,7 @@ function Cluster({
       style={{
         position: "absolute",
         left,
-        bottom,
+        bottom: `calc(${bottom}px + var(--shore-lift, 0px))`,
         fontSize: `calc(var(--shore-size, 16px) * ${size})`,
         transform:
           "translateX(-50%) translate(calc(var(--mx, 0) * 12px), calc(var(--my, 0) * 7px))",
@@ -80,9 +76,7 @@ export default function Shore() {
       {/* ── The headland with the lighthouse ──────────────────────────────
           Kept left of the hero text column and scaled down so the tower's tip
           stays below the text at any screen width. */}
-      {/* Tucked 0.8em under the solid water, so the front wave crosses the
-          crag's foot instead of the whole rock sitting on top of the sea. */}
-      <Cluster left="9%" bottom="calc(var(--waterline) - 0.8em)" size={0.75}>
+      <Cluster left="9%" bottom={50} size={0.75}>
         {/* The turning light, dark mode only (the wrapper's opacity is the
             theme gate, so the animations inside are free to fade the parts).
 
@@ -148,9 +142,7 @@ export default function Shore() {
       </Cluster>
 
       {/* ── A small distant stack, hazier, for depth ─────────────────────── */}
-      {/* Far out, so it sits high against the distant crests rather than at the
-          near waterline - height on screen is what reads as distance. */}
-      <Cluster left="42%" bottom="calc(var(--waves-height) * 0.45)" opacity={0.4} blur={1}>
+      <Cluster left="42%" bottom={92} opacity={0.4} blur={1}>
         <svg width="5.625em" height="4.5em" viewBox="0 0 90 72" style={{ display: "block" }}>
           <path
             d="M0 72 L8 34 C18 12 34 8 46 20 C58 30 70 26 80 42 L90 72 Z"
@@ -160,8 +152,7 @@ export default function Shore() {
       </Cluster>
 
       {/* ── The monolith (Haystack Rock) with a stout companion ──────────── */}
-      {/* Same treatment as the headland: its base goes under the solid water. */}
-      <Cluster left="63%" bottom="calc(var(--waterline) - 0.5em)" opacity={0.8}>
+      <Cluster left="63%" bottom={62} opacity={0.8}>
         <svg width="17.5em" height="13.75em" viewBox="0 0 280 220" style={{ display: "block" }}>
           <g style={{ fill: "var(--sea-stack)" }}>
             {/* the big dome */}
