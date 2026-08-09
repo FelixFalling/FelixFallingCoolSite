@@ -68,10 +68,17 @@ interface Layer {
 // crest and the sea, which was the last visible seam at the waterline.
 // Drift durations are one full 1200px loop - short enough that the motion is
 // unmistakable at a glance (the break layer travels ~110px every second).
+// EVERY LAYER IS OPAQUE. They used to be the raw --wave-* tokens at opacity
+// 0.5 / 0.65 / 0.85, which is where the haze came from - but transparent water
+// shows you what is behind it, and what is behind it is the sea stacks. You
+// could see the islands through the waves, and a crest crossing a rock looked
+// like a line drawn on the rock. The --wave-*-solid tokens (globals.css) are
+// those same colours pre-composited over the layer behind them, so the sea
+// looks the way it did and occludes the way water does.
 const LAYERS: Layer[] = [
-  { fill: "var(--wave-far)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 0.5, foam: false, bleed: "28px" },
-  { fill: "var(--wave-mid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, opacity: 0.65, foam: false, bleed: "28px" },
-  { fill: "var(--wave-break)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, opacity: 0.85, foam: true, bleed: "28px" },
+  { fill: "var(--wave-far-solid)", y: 70, amps: [18, 12, 22, 14], drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, opacity: 1, foam: false, bleed: "28px" },
+  { fill: "var(--wave-mid-solid)", y: 100, amps: [24, 16, 28, 18], drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, opacity: 1, foam: false, bleed: "28px" },
+  { fill: "var(--wave-break-solid)", y: 124, amps: [20, 26, 16, 24], drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, opacity: 1, foam: true, bleed: "28px" },
   { fill: "var(--waterline-fill)", y: 152, amps: [10, 14, 8, 12], drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, opacity: 1, foam: false, bleed: "28px" },
 ];
 

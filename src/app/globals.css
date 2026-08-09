@@ -74,6 +74,30 @@
   --wave-break: #3d716d; /* deepest, nearest crest */
   --wave-foam: #e9f0ee; /* soft off-white - misty spray, not stark white */
 
+  /* WHAT THE WAVES ARE ACTUALLY PAINTED WITH - the three colours above, each
+   * already composited over the one behind it, so every layer can be drawn
+   * OPAQUE.
+   *
+   * The layers used to be drawn with the raw tokens at opacity 0.5 / 0.65 /
+   * 0.85, which is how they got their hazy depth: each one tinted whatever was
+   * behind it. But water that tints what is behind it is water you can SEE
+   * THROUGH, and the sea stacks sit behind the sea - so the rocks showed
+   * straight through the crests, and a wave crossing an island read as a line
+   * drawn ON the island. That is the thing that does not happen in the world.
+   *
+   * Pre-mixing gives the same colour without the transparency. The chain works
+   * because the layers nest: each crest is drawn lower than the one behind it
+   * (y = 70 → 100 → 124 → 152 in Waves.tsx), so a layer is always entirely on
+   * top of its predecessor, never on bare sky. Only the backmost meets the
+   * sky, and at the bottom of the hero the sky gradient has arrived at
+   * --hero-to.
+   *
+   * Mixed in srgb, not oklab, on purpose: sRGB is what `opacity` compositing
+   * itself does, so these resolve to the colours the layers already had. */
+  --wave-far-solid: color-mix(in srgb, var(--hero-to), var(--wave-far) 50%);
+  --wave-mid-solid: color-mix(in srgb, var(--wave-far-solid), var(--wave-mid) 65%);
+  --wave-break-solid: color-mix(in srgb, var(--wave-mid-solid), var(--wave-break) 85%);
+
   /* Coastal scene extras (the hero diorama). */
   --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
   --mist: 255, 255, 255; /* fog color as R,G,B - layers set their own alpha */
