@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Stars from "./Stars";
 import Shore from "./Shore";
 import Waves from "./Waves";
@@ -9,81 +8,32 @@ import DuckRain from "./DuckRain";
 import { useCoastalWeather } from "./weather";
 
 /**
- * HeroScene - assembles the coastal diorama behind the hero text and, on desktop,
- * makes it react to the mouse.
+ * HeroScene - assembles the coastal diorama behind the hero text.
  *
  * Layering, back → front: stars (sky) → sea stacks → waves. Each layer positions
- * itself; this component just stacks them in order (later = painted on top) and
- * tracks the cursor.
+ * itself; this component just stacks them in order (later = painted on top).
  *
- * The cursor tracking writes the pointer's position onto this element's style as
- * two CSS variables, --mx and --my (each ~ -1..1 from the hero's center). The
- * parallax layers (sea stacks) read those vars in their own CSS and shift a few
- * pixels toward the cursor, which reads as depth. The `"use client"` line is
- * required because we use browser APIs
- * (matchMedia, pointer events); the rest of the scene is plain CSS/SVG.
+ * NO CURSOR PARALLAX. The scene used to track the pointer and shift the sea
+ * stacks a few pixels toward it, which was meant to read as depth. It read as
+ * the horizon swaying under the mouse instead - the scene moved every time you
+ * moved the cursor, on the one part of the page you look at longest. Parallax
+ * sells depth when the VIEWPOINT moves; a cursor is not a head, so all it
+ * produces is motion the visitor causes but did not ask for, against a fixed
+ * frame. That is a standard vestibular trigger, and gating it on
+ * prefers-reduced-motion was not enough - most people it affects have never
+ * set that flag. The ambient motion that remains (drift, swell, stars) is
+ * slow, continuous, and not coupled to anything the visitor does, which is
+ * the difference that matters.
  *
- * Touch devices and anyone who prefers reduced motion never get the listener -
- * they see the calm, ambient version, which needs no JavaScript at all.
+ * `"use client"` is still required - useCoastalWeather fetches on the client.
  */
 export default function HeroScene() {
-  const rootRef = useRef<HTMLDivElement>(null);
   // Live conditions at Newport, OR - wind speeds up the waves, and rain
   // switches the drizzle layer on. Defaults until loaded.
   const weather = useCoastalWeather();
 
-  useEffect(() => {
-    const root = rootRef.current;
-    const hero = root?.parentElement; // the <header class="hero"> around us
-    if (!root || !hero) return;
-
-    // Cursor parallax is a desktop nicety: only for fine pointers, and never when
-    // the visitor has asked for reduced motion.
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!finePointer || reducedMotion) return;
-
-    let frame = 0;
-    let pending: { x: number; y: number } | null = null;
-
-    // Do the (cheap) math once per animation frame, not per mouse event.
-    const apply = () => {
-      frame = 0;
-      if (!pending) return;
-      const rect = hero.getBoundingClientRect();
-      const mx = ((pending.x - rect.left) / rect.width) * 2 - 1;
-      const my = ((pending.y - rect.top) / rect.height) * 2 - 1;
-      root.style.setProperty("--mx", mx.toFixed(3));
-      root.style.setProperty("--my", my.toFixed(3));
-    };
-
-    const onMove = (e: PointerEvent) => {
-      pending = { x: e.clientX, y: e.clientY };
-      if (!frame) frame = requestAnimationFrame(apply);
-    };
-    const onLeave = () => {
-      pending = null;
-      if (frame) {
-        cancelAnimationFrame(frame);
-        frame = 0;
-      }
-      // Ease the scene back to center when the cursor leaves the hero.
-      root.style.setProperty("--mx", "0");
-      root.style.setProperty("--my", "0");
-    };
-
-    hero.addEventListener("pointermove", onMove);
-    hero.addEventListener("pointerleave", onLeave);
-    return () => {
-      hero.removeEventListener("pointermove", onMove);
-      hero.removeEventListener("pointerleave", onLeave);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, []);
-
   return (
     <div
-      ref={rootRef}
       aria-hidden="true"
       style={
         {

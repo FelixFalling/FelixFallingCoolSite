@@ -774,7 +774,9 @@ main:focus {
   /* The slow horizontal wave drift is the site's identity and is gentle
      enough to keep. Everything springier or attention-grabbing stops: the
      vertical swell bob, the lighthouse beam and flash, rain, and the scroll
-     cue (the duck easter egg and cursor parallax are skipped in JavaScript). */
+     cue (the duck easter egg is skipped in JavaScript). The cursor parallax
+     used to be listed here too; it is gone for everyone now, not just for
+     people who set this flag - see HeroScene.tsx. */
   .wave-swell,
   .beam-sweep,
   .lamp-flash,

@@ -19,7 +19,8 @@
  *     companion stack.
  *   • A small distant stack (~42%) for depth.
  *
- * Both main clusters share the sea stacks' parallax shift.
+ * The clusters are static. They used to drift toward the cursor; that is gone,
+ * and why is in HeroScene.tsx.
  */
 
 /* One reusable wrapper: anchors a cluster `bottom` px above the hero's bottom
@@ -57,10 +58,12 @@ function Cluster({
         left,
         bottom: `calc(${bottom}px + var(--shore-lift, 0px))`,
         fontSize: `calc(var(--shore-size, 16px) * ${size})`,
-        transform:
-          "translateX(-50%) translate(calc(var(--mx, 0) * 12px), calc(var(--my, 0) * 7px))",
+        // Centring only. This used to carry a cursor-parallax shift of up to
+        // 12px/7px toward the pointer; it made the horizon sway under the mouse
+        // and is gone - see the note in HeroScene.tsx. The transition went with
+        // it: there is nothing left to animate.
+        transform: "translateX(-50%)",
         transformOrigin: "50% 100%",
-        transition: "transform 0.3s ease-out",
         opacity,
         filter: blur ? `blur(${blur}px)` : undefined,
       }}
