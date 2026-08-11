@@ -86,11 +86,18 @@
    * drawn ON the island. That is the thing that does not happen in the world.
    *
    * Pre-mixing gives the same colour without the transparency. The chain works
-   * because the layers nest: each crest is drawn lower than the one behind it
-   * (y = 70 → 100 → 124 → 152 in Waves.tsx), so a layer is always entirely on
-   * top of its predecessor, never on bare sky. Only the backmost meets the
-   * sky, and at the bottom of the hero the sky gradient has arrived at
-   * --hero-to.
+   * because the layers are stacked: each baseline is lower than the one behind
+   * it (y = 76 → 99 → 123 → 152 in Waves.tsx), so a layer is nearly always on
+   * top of its predecessor, and only the backmost meets the sky - which at the
+   * bottom of the hero has arrived at --hero-to.
+   *
+   * "Nearly": a tall near crest is allowed to rise clear of the layer behind
+   * it, because a close swell occluding the far water is a depth cue worth
+   * having. Where that happens the backdrop is the wrong one and the colour is
+   * off by 0.175 x (--wave-far minus the sky) at worst - under 3/255 per
+   * channel in both themes, which is why it is fine. The pair where the error
+   * would be largest, far and mid, cannot overlap: Waves.tsx sizes them so
+   * mid's highest point stays below far's lowest.
    *
    * Mixed in srgb, not oklab, on purpose: sRGB is what `opacity` compositing
    * itself does, so these resolve to the colours the layers already had. */
