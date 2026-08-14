@@ -27,6 +27,18 @@
   --card-shadow: 0 2px 12px rgba(35, 55, 65, 0.06);
   --surface-2: rgba(58, 111, 107, 0.1); /* tags, ghost button */
 
+  /* Salvaged ship timber - the panels below the hero (see .salvage). The wood
+     is only a CAST over --card-bg, never a colour of its own: the panels have
+     to stay part of this cold, foggy palette, and a genuinely brown card in
+     the middle of it looks like it wandered in from another site. Seam and
+     grain are R,G,B so the panel can set its own alpha. */
+  --driftwood: #6b5540; /* the warm cast mixed into the card colour */
+  --timber-seam: 40, 64, 74; /* the dark line between planks */
+  --timber-grain: 40, 64, 74;
+  --timber-hi: 255, 255, 255; /* light on the chamfer below each board join */
+  --timber-hi-a: 0.55; /* its strength - see the dark override, which is far lower */
+  --rivet: 28, 48, 56; /* iron bolt heads at the corners */
+
   /* Text */
   --ink: #2a3743; /* default body text - cool charcoal */
   --navy: #1e3a42; /* headings + brand - deep slate-teal (NOT backgrounds) */
@@ -111,15 +123,6 @@
   --star: #e9f2f2; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
-  /* Fish, seen through the water they swim under. Each one is a DARKER SIBLING
-     of the wave layer it is painted in front of - never a new hue. That is what
-     makes it read as a shadow in water rather than a sticker on it, and it is
-     also why these are mixed from the same -solid tokens the waves use: change
-     the sea's palette and the fish follow it automatically. srgb to match the
-     rest of the sea (see the wave tokens above). */
-  --fish-far: color-mix(in srgb, var(--wave-far-solid), var(--wave-break) 55%);
-  --fish-mid: color-mix(in srgb, var(--wave-mid-solid), var(--wave-break) 60%);
-
   /* The colour of the water you sink into (scene/depth.ts drives --depth and
      --water; the dive is dark-mode only, so in light both stay 0).
 
@@ -165,6 +168,19 @@
   --card-border: rgba(255, 255, 255, 0.08);
   --card-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
   --surface-2: rgba(95, 180, 174, 0.14);
+
+  /* Wet timber at night. The seams and grain have to run LIGHTER than the
+     panel here - a dark line on a near-black card is invisible - so these are
+     a pale cold grey rather than the daylight ink. */
+  --driftwood: #4a3b2c;
+  --timber-seam: 190, 214, 216;
+  --timber-grain: 190, 214, 216;
+  --timber-hi: 150, 178, 182; /* only a suggestion of light at night */
+  /* A tenth of the daylight strength. At 0.55 - fine on a white card - these
+     chamfers became bright rules cutting straight across a near-black panel,
+     brighter than the headings on it. Dim light on wet wood, not a highlight. */
+  --timber-hi-a: 0.14;
+  --rivet: 205, 224, 226;
 
   --ink: #bcccce;
   --navy: #e6f0f0;
@@ -231,13 +247,6 @@
   --mist: 150, 180, 185; /* fog glows faintly cool at night */
   --star: #cfe2e0;
   --star-opacity: 1; /* stars appear in dark mode */
-
-  /* At night the water is darker than anything in it, so the silhouettes have
-     to run the other way: mixed toward the foam, they are faintly LIGHTER than
-     their layer. Kept well below --wave-foam's brightness so the crest line
-     stays the one lit thing in the sea. */
-  --fish-far: color-mix(in srgb, var(--wave-far-solid), var(--wave-foam) 30%);
-  --fish-mid: color-mix(in srgb, var(--wave-mid-solid), var(--wave-foam) 26%);
 
   /* Dusk in the dark theme is a deeper, redder band - the last of the light on
      the horizon rather than a lit sky. */
@@ -560,14 +569,144 @@ main:focus {
   }
 }
 
-/* Card used by Experience / Projects / Education. */
-.card {
-  background: var(--card-bg);
+/* ── Salvage panels ────────────────────────────────────────────────────────
+ * Every box that holds information is a piece of the wreck: a plank of ship
+ * timber pulled out of the water, bolted at the corners, floating there with
+ * your CV written on it.
+ *
+ * THE RULE THIS IS BUILT AROUND: the panel is scenery, the text on it is not.
+ * Everything here is deliberately just under the threshold where you would
+ * call it a texture - the grain is a couple of percent of alpha, the plank
+ * seams are single pixels, the edges are a few px of asymmetry. Up close it
+ * reads as salvaged wood; from reading distance it reads as a calm panel and
+ * gets out of the way of the words. Every knob below was turned down to that
+ * line on purpose, so if you strengthen one, check the body text still sits
+ * quietly on it.
+ *
+ * .card keeps its name because Card.tsx and three sections already emit it. */
+.card,
+.salvage {
+  position: relative;
+  /* Timber, in three layers over the card colour: plank seams across it, a
+     fine vertical grain, and a warm cast so it reads as wood rather than as
+     the page's own grey with lines drawn on it. */
+  /* THE BOARD EDGE. A dark line with a lit one directly under it - the shadow
+     in the join and the light catching the chamfer of the board below. One
+     hairline alone just looked ruled; it is the PAIR that reads as two pieces
+     of wood meeting. */
+  background: repeating-linear-gradient(
+      180deg,
+      transparent 0 46px,
+      rgba(var(--timber-seam), 0.22) 46px 47.2px,
+      rgba(var(--timber-hi), var(--timber-hi-a)) 47.2px 48.4px,
+      transparent 48.4px 49px
+    ),
+    /* GRAIN. Three passes at periods that share no factor (23 / 37 / 61px), so
+       the pattern never visibly repeats down a tall panel - the same trick the
+       stars use for their twinkles. Each band fades in and out over several
+       pixels rather than being a hairline: wood grain is a soft tonal streak,
+       and 1px lines at any alpha read as ruled paper, which is exactly what
+       the first two attempts at this looked like. Angles differ slightly so
+       the three passes drift in and out of phase across the width. */
+      repeating-linear-gradient(
+        0.4deg,
+        rgba(var(--timber-grain), 0) 0,
+        rgba(var(--timber-grain), 0.05) 3px,
+        rgba(var(--timber-grain), 0) 7px,
+        rgba(var(--timber-grain), 0) 23px
+      ),
+    repeating-linear-gradient(
+      -0.7deg,
+      rgba(var(--timber-grain), 0) 0,
+      rgba(var(--timber-grain), 0.035) 5px,
+      rgba(var(--timber-grain), 0) 11px,
+      rgba(var(--timber-grain), 0) 37px
+    ),
+    repeating-linear-gradient(
+      0.9deg,
+      rgba(var(--timber-grain), 0) 0,
+      rgba(var(--timber-grain), 0.045) 9px,
+      rgba(var(--timber-grain), 0) 19px,
+      rgba(var(--timber-grain), 0) 61px
+    ),
+    color-mix(in srgb, var(--card-bg), var(--driftwood) 13%);
   border: 1px solid var(--card-border);
-  border-radius: 10px;
+  /* Broken out of a hull, not cut to size: every corner a different radius, on
+     both axes, so no two edges agree. */
+  border-radius: 13px 5px 11px 6px / 6px 12px 5px 13px;
   box-shadow: var(--card-shadow);
   padding: 24px 26px;
   transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* The bolts that held it to the frame. Four heads, inset from the corners,
+   each with a dab of light on top so it sits proud of the wood. */
+.card::before,
+.salvage::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  pointer-events: none;
+  background-image: radial-gradient(
+      circle 3.1px at left top,
+      rgba(var(--rivet), 0.65) 55%,
+      rgba(var(--rivet), 0) 58%
+    ),
+    radial-gradient(circle 3.1px at right top, rgba(var(--rivet), 0.65) 55%, rgba(var(--rivet), 0) 58%),
+    radial-gradient(circle 3.1px at left bottom, rgba(var(--rivet), 0.65) 55%, rgba(var(--rivet), 0) 58%),
+    radial-gradient(
+      circle 3.1px at right bottom,
+      rgba(var(--rivet), 0.65) 55%,
+      rgba(var(--rivet), 0) 58%
+    );
+  background-repeat: no-repeat;
+}
+
+/* ── Adrift ────────────────────────────────────────────────────────────────
+ * The panels float. A slow rise and fall, a few pixels, each on its own
+ * rhythm - so the page reads as things afloat rather than one sheet hinging.
+ *
+ * TRANSLATE ONLY, no rotation. A tilt was the obvious way to sell "floating"
+ * and it is exactly what you cannot do here: rotating a box full of body text
+ * puts every glyph on a fractional pixel and the whole panel shimmers as it
+ * swings. The vertical drift is the part that reads as buoyancy anyway.
+ *
+ * Durations are set per panel (inline, or by the nth-child rules below) and
+ * share no common factor, the same trick the stars use - see Stars.tsx. */
+@keyframes adriftBob {
+  0%,
+  100% {
+    transform: translate3d(0, -3.5px, 0);
+  }
+  50% {
+    transform: translate3d(0, 3.5px, 0);
+  }
+}
+
+.adrift {
+  animation: adriftBob 11s ease-in-out infinite;
+  /* THE 3D HINT HAS TO LIVE HERE, NOT IN THE KEYFRAME. adriftBob is written
+     with translate3d, for the reason given above the wave keyframes - a 2D
+     transform animation can drop off the compositor on iOS Safari and repaint
+     every frame - but its x and z are zero, so the CSS minifier legally
+     rewrites it to translateY and the shipped build has no 3D form left. (Go
+     and look: grep the built chunk for adriftBob.) will-change pins the layer
+     from the rule instead, where nothing can optimise it away. A repaint per
+     frame on ten panels of body text is a far worse bargain than it was on
+     the waves. */
+  will-change: transform;
+}
+
+/* Cards sit in a grid as siblings, so they can be de-synced from the stylesheet
+   without any per-card markup. */
+.adrift:nth-child(3n + 2) {
+  animation-duration: 13.5s;
+  animation-delay: -4.2s;
+}
+
+.adrift:nth-child(3n + 3) {
+  animation-duration: 9.5s;
+  animation-delay: -7.1s;
 }
 
 /* Small pill tag used on projects. */
@@ -603,8 +742,21 @@ main:focus {
     font-size: 22px;
   }
 
-  .card {
+  .card,
+  .salvage {
     padding: 20px 18px;
+  }
+
+  /* No bobbing on phones. Each floating panel is a full-width composited layer
+     that never stops moving, and a column of them animating through a touch
+     scroll is exactly the thing that makes a page feel cheap on a mid-range
+     phone. The timber stays; only the motion goes. */
+  .adrift {
+    animation: none;
+    /* And drop the layer promotion with it. A still panel that is still
+       pinned to its own GPU layer is pure cost - it was only ever there to
+       keep the bob smooth. */
+    will-change: auto;
   }
 }
 
@@ -651,33 +803,6 @@ main:focus {
   }
   50% {
     transform: translate3d(0, 6px, 0);
-  }
-}
-
-/* Fish crossing the sea (scene/Fish.tsx supplies every from/to, duration and
- * delay inline). translate3d for the same reason the waves use it - this is
- * one more thing animating inside the water.
- *
- * The opacity belongs in here rather than on .fish, and that is deliberate: it
- * leaves a fish at opacity 0 whenever the animation is off, so the
- * reduced-motion rule below removes them by doing nothing more than stopping
- * the animation. Same trick as .meteor. A frozen fish would just be a smudge
- * parked in the water.
- *
- * The 2%/98% fades hide the loop's teleport back to the start. They are
- * generous because the fish is far off screen at both ends anyway. */
-@keyframes fishSwim {
-  0% {
-    transform: translate3d(var(--fish-from, -150vw), 0, 0);
-    opacity: 0;
-  }
-  2%,
-  98% {
-    opacity: 0.55;
-  }
-  100% {
-    transform: translate3d(var(--fish-to, 150vw), 0, 0);
-    opacity: 0;
   }
 }
 
@@ -761,18 +886,6 @@ main:focus {
   }
 }
 
-/* The fish hook. Sizing and placement are in scene/Fish.module.css; this is
-   only what the reduced-motion block needs to be able to switch off. */
-.fish {
-  opacity: 0;
-  animation-name: fishSwim;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
-  /* No backface-visibility or translateZ pinning here - it is what made the
-     wave rows snap back on iOS (see the note in Waves.tsx). */
-}
-
 @keyframes cueBob {
   0%,
   100% {
@@ -846,16 +959,14 @@ main:focus {
   .scroll-cue,
   .star,
   .meteor,
-  .fish {
+  .adrift {
     animation: none !important;
   }
 
   /* The stars stay - they just stop twinkling, holding the steady opacity
      their inline style gives them. The meteors go entirely: .meteor sits at
      opacity 0 with the animation off, and a streak flying across the sky is
-     exactly the kind of sudden movement this preference asks us not to make.
-     The fish leave for the same reason and by the same mechanism - fishSwim
-     holds their opacity, so switching it off is enough. */
+     exactly the kind of sudden movement this preference asks us not to make. */
 
   /* Sections appear immediately instead of fading up from below. This
      overrides the html.js rule above, so it holds whether or not Reveal has

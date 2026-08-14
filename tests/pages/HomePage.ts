@@ -18,8 +18,6 @@ export class HomePage extends BasePage {
   readonly waveDriftAll: Locator;
   readonly scrollCue: Locator;
   readonly ducks: Locator;
-  /** Every fish in the sea, across both depth bands. */
-  readonly fishAll: Locator;
 
   // ── Accessibility / structure ───────────────────────────────────────────
   readonly skipLink: Locator;
@@ -44,7 +42,6 @@ export class HomePage extends BasePage {
     this.waveDriftAll = page.locator(".wave-drift");
     this.scrollCue = page.locator(".scroll-cue");
     this.ducks = page.locator("[data-duck]");
-    this.fishAll = page.locator(".fish");
   }
 
   /** Text matching the hero's job title line. */

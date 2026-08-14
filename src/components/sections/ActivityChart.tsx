@@ -41,7 +41,13 @@ export default function ActivityChart({
   return (
     // tabIndex + role: the chart box scrolls sideways on small screens, so
     // keyboard users must be able to focus it and scroll with arrow keys.
-    <div className={styles.chartScroll} tabIndex={0} role="region" aria-label={label}>
+    <div
+      className={`salvage adrift ${styles.chartScroll}`}
+      style={{ animationDuration: "14.5s", animationDelay: "-9.2s" }}
+      tabIndex={0}
+      role="region"
+      aria-label={label}
+    >
       <img
         ref={imgRef}
         className={styles.chart}

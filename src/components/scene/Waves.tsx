@@ -25,7 +25,6 @@
  * All the animation timing is data below - tweak the numbers to taste.
  */
 
-import FishGroup from "./Fish";
 import styles from "./Waves.module.css";
 
 const TILE = 1200; // px - one wave period; fixed so crests never flatten
@@ -282,18 +281,9 @@ function WaveLayer({ layer }: { layer: Layer }) {
 export default function Waves() {
   return (
     <div style={{ position: "absolute", inset: 0 }} aria-hidden="true">
-      {/* Back to front. The fish are interleaved rather than stacked on top,
-          and that is the entire depth mechanism: a group is covered by every
-          layer rendered after it, so it can only be seen in the band between
-          the crest behind it and the crest in front. No z-index - same
-          contract as the golden-hour wash (globals.css). Move a crest's y in
-          LAYERS and the bands in Fish.tsx have to move with it. */}
-      <WaveLayer layer={LAYERS[0]} />
-      <FishGroup band="far" />
-      <WaveLayer layer={LAYERS[1]} />
-      <FishGroup band="mid" />
-      <WaveLayer layer={LAYERS[2]} />
-      <WaveLayer layer={LAYERS[3]} />
+      {LAYERS.map((layer) => (
+        <WaveLayer key={layer.fill + layer.y} layer={layer} />
+      ))}
     </div>
   );
 }

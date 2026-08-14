@@ -1,13 +1,12 @@
 /* The contribution chart is ~720px wide - on phones it scrolls sideways inside
    its own box instead of stretching the page. */
+/* The box itself is a salvage panel now - the timber, edges, bolts and float
+   all come from the global .salvage/.adrift classes that Activity.tsx adds
+   (globals.css). What stays here is only what is specific to this box: it has
+   to scroll sideways on a phone, and it wants tighter padding than a card. */
 .chartScroll {
   overflow-x: auto;
   padding: 18px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
-  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .chart {
