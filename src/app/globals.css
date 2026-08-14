@@ -111,6 +111,15 @@
   --star: #e9f2f2; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
 
+  /* Fish, seen through the water they swim under. Each one is a DARKER SIBLING
+     of the wave layer it is painted in front of - never a new hue. That is what
+     makes it read as a shadow in water rather than a sticker on it, and it is
+     also why these are mixed from the same -solid tokens the waves use: change
+     the sea's palette and the fish follow it automatically. srgb to match the
+     rest of the sea (see the wave tokens above). */
+  --fish-far: color-mix(in srgb, var(--wave-far-solid), var(--wave-break) 55%);
+  --fish-mid: color-mix(in srgb, var(--wave-mid-solid), var(--wave-break) 60%);
+
   /* The colour of the water you sink into (scene/depth.ts drives --depth and
      --water; the dive is dark-mode only, so in light both stay 0).
 
@@ -222,6 +231,13 @@
   --mist: 150, 180, 185; /* fog glows faintly cool at night */
   --star: #cfe2e0;
   --star-opacity: 1; /* stars appear in dark mode */
+
+  /* At night the water is darker than anything in it, so the silhouettes have
+     to run the other way: mixed toward the foam, they are faintly LIGHTER than
+     their layer. Kept well below --wave-foam's brightness so the crest line
+     stays the one lit thing in the sea. */
+  --fish-far: color-mix(in srgb, var(--wave-far-solid), var(--wave-foam) 30%);
+  --fish-mid: color-mix(in srgb, var(--wave-mid-solid), var(--wave-foam) 26%);
 
   /* Dusk in the dark theme is a deeper, redder band - the last of the light on
      the horizon rather than a lit sky. */
@@ -638,6 +654,33 @@ main:focus {
   }
 }
 
+/* Fish crossing the sea (scene/Fish.tsx supplies every from/to, duration and
+ * delay inline). translate3d for the same reason the waves use it - this is
+ * one more thing animating inside the water.
+ *
+ * The opacity belongs in here rather than on .fish, and that is deliberate: it
+ * leaves a fish at opacity 0 whenever the animation is off, so the
+ * reduced-motion rule below removes them by doing nothing more than stopping
+ * the animation. Same trick as .meteor. A frozen fish would just be a smudge
+ * parked in the water.
+ *
+ * The 2%/98% fades hide the loop's teleport back to the start. They are
+ * generous because the fish is far off screen at both ends anyway. */
+@keyframes fishSwim {
+  0% {
+    transform: translate3d(var(--fish-from, -150vw), 0, 0);
+    opacity: 0;
+  }
+  2%,
+  98% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(var(--fish-to, 150vw), 0, 0);
+    opacity: 0;
+  }
+}
+
 /* ── Scene-magic keyframes (lighthouse, rain, ducks) ─────────────────────── */
 /* The lighthouse's single beam: stretched over the sea, it swings in and
  * shrinks as the lamp turns toward you, vanishes at the moment it points your
@@ -718,6 +761,18 @@ main:focus {
   }
 }
 
+/* The fish hook. Sizing and placement are in scene/Fish.module.css; this is
+   only what the reduced-motion block needs to be able to switch off. */
+.fish {
+  opacity: 0;
+  animation-name: fishSwim;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+  /* No backface-visibility or translateZ pinning here - it is what made the
+     wave rows snap back on iOS (see the note in Waves.tsx). */
+}
+
 @keyframes cueBob {
   0%,
   100% {
@@ -790,14 +845,17 @@ main:focus {
   .rain-fall,
   .scroll-cue,
   .star,
-  .meteor {
+  .meteor,
+  .fish {
     animation: none !important;
   }
 
   /* The stars stay - they just stop twinkling, holding the steady opacity
      their inline style gives them. The meteors go entirely: .meteor sits at
      opacity 0 with the animation off, and a streak flying across the sky is
-     exactly the kind of sudden movement this preference asks us not to make. */
+     exactly the kind of sudden movement this preference asks us not to make.
+     The fish leave for the same reason and by the same mechanism - fishSwim
+     holds their opacity, so switching it off is enough. */
 
   /* Sections appear immediately instead of fading up from below. This
      overrides the html.js rule above, so it holds whether or not Reveal has
