@@ -41,14 +41,12 @@ function Cluster({
   bottom,
   size = 1,
   children,
-  opacity = 0.85,
   blur = 0,
 }: {
   left: string;
   bottom: number;
   size?: number;
   children: React.ReactNode;
-  opacity?: number;
   blur?: number;
 }) {
   return (
@@ -64,7 +62,12 @@ function Cluster({
         // it: there is nothing left to animate.
         transform: "translateX(-50%)",
         transformOrigin: "50% 100%",
-        opacity,
+        // NO opacity here. Every cluster used to be translucent (0.85 / 0.8 /
+        // 0.4) to fake distance, and translucent rock is rock you can see
+        // through - the lighthouse beam and the far stack showed straight
+        // through the headland. Distance now lives in the --sea-stack-*
+        // colours (globals.css), which are those same tints pre-mixed against
+        // the sky, so the rocks look as they did and occlude as rock does.
         filter: blur ? `blur(${blur}px)` : undefined,
       }}
     >
@@ -124,7 +127,7 @@ export default function Shore() {
           />
         </div>
         <svg width="22.5em" height="15em" viewBox="0 0 360 240" style={{ display: "block" }}>
-          <g style={{ fill: "var(--sea-stack)" }}>
+          <g style={{ fill: "var(--sea-stack-near)" }}>
             {/* The crag: broad and heavy, with a flat summit under the tower. */}
             <path
               d={
@@ -145,19 +148,19 @@ export default function Shore() {
       </Cluster>
 
       {/* ── A small distant stack, hazier, for depth ─────────────────────── */}
-      <Cluster left="42%" bottom={92} opacity={0.4} blur={1}>
+      <Cluster left="42%" bottom={92} blur={1}>
         <svg width="5.625em" height="4.5em" viewBox="0 0 90 72" style={{ display: "block" }}>
           <path
             d="M0 72 L8 34 C18 12 34 8 46 20 C58 30 70 26 80 42 L90 72 Z"
-            style={{ fill: "var(--sea-stack)" }}
+            style={{ fill: "var(--sea-stack-far)" }}
           />
         </svg>
       </Cluster>
 
       {/* ── The monolith (Haystack Rock) with a stout companion ──────────── */}
-      <Cluster left="63%" bottom={62} opacity={0.8}>
+      <Cluster left="63%" bottom={62}>
         <svg width="17.5em" height="13.75em" viewBox="0 0 280 220" style={{ display: "block" }}>
-          <g style={{ fill: "var(--sea-stack)" }}>
+          <g style={{ fill: "var(--sea-stack-mid)" }}>
             {/* the big dome */}
             <path d="M14 220 C20 128 42 66 94 38 C122 22 152 22 174 46 C212 82 236 142 248 220 Z" />
             {/* stout companion stack */}

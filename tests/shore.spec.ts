@@ -57,3 +57,27 @@ test.describe("the shoreline", () => {
     }
   });
 });
+
+test.describe("the rocks are solid", () => {
+  test("nothing shows through them", async ({ homePage, page }) => {
+    /*
+     * The sea stacks used to fake distance with opacity (0.85 / 0.8 / 0.4), and
+     * a translucent rock is a rock you can see through - the lighthouse beam
+     * and the far stack showed straight through the headland. It is barely
+     * visible in light fog and obvious against the dark sky, which is where it
+     * was caught. Distance is a colour now (--sea-stack-* in globals.css), so
+     * any opacity back on these wrappers is the bug returning.
+     */
+    await homePage.goto("./", "dark");
+
+    const alphas = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('[aria-hidden="true"] svg')]
+        .map((svg) => svg.parentElement!)
+        .filter((el) => el.style.left) // the Cluster wrappers position by left
+        .map((el) => getComputedStyle(el).opacity),
+    );
+
+    expect(alphas.length).toBeGreaterThan(0);
+    expect(alphas.every((a) => a === "1")).toBe(true);
+  });
+});

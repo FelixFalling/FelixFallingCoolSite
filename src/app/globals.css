@@ -117,6 +117,24 @@
 
   /* Coastal scene extras (the hero diorama). */
   --sea-stack: #7f9a9c; /* offshore rock silhouette - hazy grey-blue in fog */
+
+  /* THE ROCKS, PRE-MIXED SO THEY CAN BE DRAWN OPAQUE.
+   *
+   * They used to be one colour at opacity 0.85 / 0.8 / 0.4, with distance read
+   * as transparency. That is the same mistake the waves made and it fails the
+   * same way: a translucent rock is a rock you can SEE THROUGH, so the
+   * lighthouse beam and the stack behind it showed straight through the
+   * headland. In light fog you barely notice; against the dark sky it reads as
+   * a rendering fault, which is where it was spotted.
+   *
+   * Distance is a colour, not an alpha. Each token is the rock already blended
+   * toward the sky by the amount its old opacity implied, so they look as they
+   * did and occlude as rock does. Mixed toward --hero-to because the clusters
+   * sit low in the hero, where the sky gradient has arrived at that stop.
+   * srgb to match the wave tokens, for the same reason given there. */
+  --sea-stack-near: color-mix(in srgb, var(--hero-to), var(--sea-stack) 85%);
+  --sea-stack-mid: color-mix(in srgb, var(--hero-to), var(--sea-stack) 80%);
+  --sea-stack-far: color-mix(in srgb, var(--hero-to), var(--sea-stack) 40%);
   --mist: 255, 255, 255; /* fog color as R,G,B - layers set their own alpha */
   --star: #e9f2f2; /* faint stars (dark only) */
   --star-opacity: 0; /* stars hidden in light; the dark theme flips to 1 */
@@ -151,6 +169,7 @@
      sky. Overcast daylight, so the amber is soft rather than tropical. */
   --golden-high: 255, 190, 120; /* R,G,B - the layer sets its own alpha */
   --golden-low: 255, 140, 90;
+  --golden-strength: 0.55; /* how strong the wash gets at full --golden */
 
   --content-width: 960px;
 }
@@ -242,6 +261,13 @@
      the horizon rather than a lit sky. */
   --golden-high: 190, 105, 70;
   --golden-low: 150, 60, 55;
+  /* OFF IN DARK MODE. The wash is a warm `screen` blend, which is a good
+     description of low sun on an overcast coast and a poor one of a night
+     sky - at dusk colours it lifted the horizon into a muddy orange band
+     that read as a rendering fault rather than as light. It stays in light
+     mode, where it does what it was built to do. The colours above are kept
+     rather than deleted so this is one number away from coming back. */
+  --golden-strength: 0;
 }
 
 * {
@@ -458,7 +484,7 @@ main:focus {
      the light on the sky and the rocks but not on the water. Giving this a
      z-index lifts it over the waves instead, which drains the teal out of
      them and reads as a washed-out grey sea. */
-  opacity: calc(var(--golden, 0) * 0.55);
+  opacity: calc(var(--golden, 0) * var(--golden-strength, 0));
   mix-blend-mode: screen;
   background: linear-gradient(
     to top,

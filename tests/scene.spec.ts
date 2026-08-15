@@ -70,6 +70,32 @@ test.describe("golden hour", () => {
     await expect(page.locator(".golden-hour")).toHaveCSS("opacity", "0");
   });
 
+  test("the wash is light-mode only", async ({ homePage, page }) => {
+    /*
+     * A warm `screen` blend is a fair description of low sun on an overcast
+     * coast and a poor one of a night sky - in dark mode it lifted the horizon
+     * into a muddy orange band that read as a rendering fault. So it is off
+     * there, and --golden-strength is the one number that does it.
+     *
+     * Note --golden itself still moves in dark mode: the weather layer is
+     * unchanged and knows nothing about themes. Only the wash's strength is
+     * themed, which is why this asserts on the rendered opacity rather than on
+     * the value.
+     */
+    await withForecast(page, forecast("2026-08-01T19:30", "2026-08-01T06:05", "2026-08-01T19:42"));
+
+    await homePage.goto("./", "dark");
+    await expect.poll(() => goldenValue(page)).toBeGreaterThan(0.5); // the sun is setting
+    await expect(page.locator(".golden-hour")).toHaveCSS("opacity", "0"); // and nothing shows
+
+    await homePage.goto("./", "light");
+    await expect
+      .poll(async () =>
+        Number(await page.locator(".golden-hour").evaluate((el) => getComputedStyle(el).opacity)),
+      )
+      .toBeGreaterThan(0);
+  });
+
   test("the scene survives the weather request failing", async ({ homePage, page }) => {
     // The important one. Offline, ad-blocked, or Open-Meteo down: the hero
     // must still render and simply keep its defaults - no error, no gap.
