@@ -93,20 +93,35 @@ export default function Shore() {
             beamTurn drives the beam's scaleX, lampFlash brightens the lantern
             at the same instant (both 8s, matched in globals.css). */}
         <div style={{ opacity: "var(--star-opacity)", transition: "opacity 0.25s ease" }}>
-          {/* The light cone, anchored at the lantern (x=214, y=216 from
-              bottom), reaching out over the open sea to the right. */}
+          {/* The light cone, reaching out over the open sea.
+
+              Its mouth is MEASURED OFF THE LAMP WINDOW - the <rect> at the
+              bottom of this file, x 209-219, y 21-34 of the drawing. Light
+              leaves an opening the size of the opening, so:
+
+                • the box is centred on the window's middle (y=27.5), which is
+                  also where transformOrigin puts the pivot, so the cone turns
+                  about the lamp rather than about a point above it;
+                • the clip's near edges (41%/59% of 72) span 13 units - the
+                  window's exact height - so the cone leaves the lantern at
+                  full size instead of as a hairline;
+                • it opens to the full 72 down its length.
+
+              It used to be a 42-tall box centred on y=24: a 4-unit sliver
+              coming out of a 13-unit window, three and a half units above it.
+              Any change to the window's rect has to be echoed here. */}
           <div
             className="beam-sweep"
             style={{
               position: "absolute",
-              left: "13.375em", // 214 of the 360-wide drawing
-              bottom: "12.1875em", // 195
+              left: "13.375em", // 214 - the lamp window's centre line
+              bottom: "11.03125em", // 176.5, putting the box's middle on y=27.5
               width: "29.375em", // 470
-              height: "2.625em", // 42
+              height: "4.5em", // 72
               transformOrigin: "0 50%",
               background:
                 "linear-gradient(90deg, rgba(233, 242, 242, 0.42), rgba(233, 242, 242, 0) 88%)",
-              clipPath: "polygon(0 45%, 100% 0, 100% 100%, 0 55%)",
+              clipPath: "polygon(0 41%, 100% 0, 100% 100%, 0 59%)",
               animation: "beamTurn 8s linear infinite",
               willChange: "transform, opacity",
             }}
