@@ -18,6 +18,9 @@ export class HomePage extends BasePage {
   readonly waveDriftAll: Locator;
   readonly scrollCue: Locator;
   readonly ducks: Locator;
+  /** The floating information panels and the waterline each one carries. */
+  readonly panels: Locator;
+  readonly waterlines: Locator;
 
   // ── Accessibility / structure ───────────────────────────────────────────
   readonly skipLink: Locator;
@@ -42,6 +45,8 @@ export class HomePage extends BasePage {
     this.waveDriftAll = page.locator(".wave-drift");
     this.scrollCue = page.locator(".scroll-cue");
     this.ducks = page.locator("[data-duck]");
+    this.panels = page.locator(".card, .salvage");
+    this.waterlines = page.locator(".waterline");
   }
 
   /** Text matching the hero's job title line. */

@@ -1,5 +1,6 @@
 import { resume } from "@/data/resume";
 import Section from "@/components/ui/Section";
+import Waterline from "@/components/ui/Waterline";
 import styles from "./Skills.module.css";
 
 export default function Skills() {
@@ -15,6 +16,7 @@ export default function Skills() {
             </div>
           ))}
         </div>
+        <Waterline />
       </div>
     </Section>
   );

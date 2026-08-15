@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Waterline from "@/components/ui/Waterline";
 import styles from "./Activity.module.css";
 
 /**
@@ -39,29 +40,39 @@ export default function ActivityChart({
   if (failed) return null;
 
   return (
-    // tabIndex + role: the chart box scrolls sideways on small screens, so
-    // keyboard users must be able to focus it and scroll with arrow keys.
+    /* Two elements, and the split matters: the PANEL floats and carries the
+       waterline, while the inner box is the one that scrolls sideways. Both on
+       one element would hang the waterline inside an `overflow-x: auto`
+       container, and it would slide out from under the panel whenever the
+       chart is scrolled on a phone.
+       tabIndex + role go on the scrolling box so keyboard users can focus it
+       and scroll with arrow keys. */
     <div
-      className={`salvage adrift ${styles.chartScroll}`}
+      className="salvage adrift"
       style={{ animationDuration: "14.5s", animationDelay: "-9.2s" }}
-      tabIndex={0}
-      role="region"
-      aria-label={label}
     >
-      <img
-        ref={imgRef}
-        className={styles.chart}
-        src={src}
-        alt={alt}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        // Intrinsic size of the ghchart SVG. With height:auto in CSS these
-        // give the browser the aspect ratio up front, so it reserves the row
-        // instead of shoving the caption down when the remote chart arrives
-        // (cumulative layout shift).
-        width={663}
-        height={104}
-      />
+      <div
+        className={styles.chartScroll}
+        tabIndex={0}
+        role="region"
+        aria-label={label}
+      >
+        <img
+          ref={imgRef}
+          className={styles.chart}
+          src={src}
+          alt={alt}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          // Intrinsic size of the ghchart SVG. With height:auto in CSS these
+          // give the browser the aspect ratio up front, so it reserves the row
+          // instead of shoving the caption down when the remote chart arrives
+          // (cumulative layout shift).
+          width={663}
+          height={104}
+        />
+      </div>
+      <Waterline />
     </div>
   );
 }
