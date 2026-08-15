@@ -52,11 +52,11 @@ const PUBLIC_DIR = resolve(import.meta.dirname, "..", "public", "projects");
  * animation on the page is set to exactly this time and paused, so the frame
  * is a pure function of this number.
  *
- * Chosen against the beamTurn keyframes: the beam is fully extended at 0%,
- * collapses to nothing by 50% as the lamp turns to face you, then swings back
- * out. 800ms into the 8s cycle is still reaching over the water with the
- * faintest taper - the pose the lighthouse is recognisably in. 2600ms was
- * tried and caught it mid-retraction, as a stub.
+ * Chosen against the beamTurn keyframes, which carry the lamp through a full
+ * 360deg turn every 8s: 800ms is 36deg into it, so the beam is still reaching
+ * out to the right over the water at about three quarters of its length, with
+ * the faintest taper - the pose the lighthouse is recognisably in. Anywhere
+ * near 2000ms (90deg) catches it edge-on and the beam is simply absent.
  */
 const FREEZE_AT_MS = 800;
 

@@ -793,26 +793,56 @@ main:focus {
 }
 
 /* ── Scene-magic keyframes (lighthouse, rain, ducks) ─────────────────────── */
-/* The lighthouse's single beam: stretched over the sea, it swings in and
- * shrinks as the lamp turns toward you, vanishes at the moment it points your
- * way, then sweeps back out. One cycle every 8s. */
+/* The lighthouse's single beam, turning a TRUE full circle once every 8s.
+ *
+ * We see the lamp from the side, so the beam's apparent length is the cosine
+ * of where it is in its turn: full out to the right at 0deg, edge-on and
+ * invisible when it points at you (90deg), full out to the LEFT at 180deg -
+ * which is scaleX going NEGATIVE, flipping the cone about the lantern - then
+ * edge-on again at 270deg as it points away, and back round.
+ *
+ * The percentages below are the turn in 45deg steps (12.5% = 45deg). The far
+ * half of the circle (180-360deg) sweeps BEHIND the tower, so it is carried
+ * at a much lower opacity: you see the light on the water, not the beam.
+ * Rotation is constant, so this must be timed linear, never eased. */
 @keyframes beamTurn {
+  /* 0deg - pointing right, out over the open sea, nearest the viewer */
   0%,
   100% {
     transform: scaleX(1);
     opacity: 0.85;
   }
-  42% {
-    transform: scaleX(0.1);
-    opacity: 0.3;
+  12.5% {
+    transform: scaleX(0.71);
+    opacity: 0.75;
   }
-  50% {
+  /* 90deg - pointing straight at you: edge-on, gone, and the lamp flashes */
+  25% {
     transform: scaleX(0.02);
     opacity: 0;
   }
-  58% {
-    transform: scaleX(0.1);
-    opacity: 0.3;
+  37.5% {
+    transform: scaleX(-0.71);
+    opacity: 0.75;
+  }
+  /* 180deg - pointing left, out over the sea on the other side */
+  50% {
+    transform: scaleX(-1);
+    opacity: 0.85;
+  }
+  /* past 180deg the beam swings away behind the headland and dims right down */
+  62.5% {
+    transform: scaleX(-0.71);
+    opacity: 0.28;
+  }
+  /* 270deg - pointing away from you: edge-on and gone again, but no flash */
+  75% {
+    transform: scaleX(0.02);
+    opacity: 0;
+  }
+  87.5% {
+    transform: scaleX(0.71);
+    opacity: 0.28;
   }
 }
 /* The desktop scroll cue bobs gently above the waves. */
@@ -884,14 +914,22 @@ main:focus {
   }
 }
 /* The lantern flashes brightest exactly when the beam points at the viewer -
- * the 50% mark of beamTurn, where the cone has vanished. */
+ * the 25% mark of beamTurn, where the cone has vanished. Half a turn later
+ * (75%) the lamp is pointing away, so that is its darkest moment. Same 8s
+ * cycle and the same linear timing as the beam, or the two drift apart. */
 @keyframes lampFlash {
   0%,
   100% {
     opacity: 0.4;
   }
-  50% {
+  25% {
     opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  75% {
+    opacity: 0.16;
   }
 }
 /* Rain: the double-height streak pattern slides down its own height. */

@@ -107,7 +107,7 @@ export default function Shore() {
               background:
                 "linear-gradient(90deg, rgba(233, 242, 242, 0.42), rgba(233, 242, 242, 0) 88%)",
               clipPath: "polygon(0 45%, 100% 0, 100% 100%, 0 55%)",
-              animation: "beamTurn 8s ease-in-out infinite",
+              animation: "beamTurn 8s linear infinite",
               willChange: "transform, opacity",
             }}
           />
@@ -122,7 +122,7 @@ export default function Shore() {
               height: "1.75em",
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(233, 242, 242, 0.9), rgba(233, 242, 242, 0) 70%)",
-              animation: "lampFlash 8s ease-in-out infinite",
+              animation: "lampFlash 8s linear infinite",
             }}
           />
         </div>
