@@ -96,6 +96,33 @@ test.describe("golden hour", () => {
       .toBeGreaterThan(0);
   });
 
+  test("nothing in the scene blends with its backdrop", async ({ homePage, page }) => {
+    /*
+     * The wash used to be `mix-blend-mode: screen`, which looked good and cost
+     * a great deal. A blended element forces its whole stacking context to be
+     * kept as a rasterized backdrop group, and this one shares its context
+     * with the four animating wave rows - so on iOS the rows lost their
+     * independent GPU layers and re-rasterized, which reads as the water
+     * flickering. Constant, for the ~40 minutes either side of the coast's
+     * sunrise and sunset when the wash is on.
+     *
+     * So: no blend modes anywhere in the hero scene. The colours are
+     * pre-lightened to land where the blend landed instead.
+     */
+    await homePage.goto();
+
+    const blended = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>("header *")]
+        .filter((el) => {
+          const m = getComputedStyle(el).mixBlendMode;
+          return m && m !== "normal";
+        })
+        .map((el) => `${el.tagName.toLowerCase()}.${el.className || "(no class)"}`),
+    );
+
+    expect(blended).toEqual([]);
+  });
+
   test("the scene survives the weather request failing", async ({ homePage, page }) => {
     // The important one. Offline, ad-blocked, or Open-Meteo down: the hero
     // must still render and simply keep its defaults - no error, no gap.

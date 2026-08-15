@@ -167,9 +167,16 @@
   /* Golden hour - the warm wash at the coast's real sunrise/sunset. Two stops:
      the low sun near the horizon, fading out before it reaches the top of the
      sky. Overcast daylight, so the amber is soft rather than tropical. */
-  --golden-high: 255, 190, 120; /* R,G,B - the layer sets its own alpha */
-  --golden-low: 255, 140, 90;
-  --golden-strength: 0.55; /* how strong the wash gets at full --golden */
+  /* R,G,B - the layer sets its own alpha. These are the colours the old
+     `screen` blend RESOLVED to over this sky, not the colours it was fed:
+     screening (255,140,90) onto the hero's teal lands near a pale warm sand,
+     so that is what a plain layer has to be painted with to match it. */
+  --golden-high: 255, 222, 176;
+  --golden-low: 255, 193, 130;
+  /* How strong the wash gets at full --golden. Raised from 0.55 when the
+     `screen` blend came off: screening lifted the sky hard at low alpha, and
+     a plain layer has to carry more opacity to reach the same warmth. */
+  --golden-strength: 0.85;
 
   --content-width: 960px;
 }
@@ -485,7 +492,20 @@ main:focus {
      z-index lifts it over the waves instead, which drains the teal out of
      them and reads as a washed-out grey sea. */
   opacity: calc(var(--golden, 0) * var(--golden-strength, 0));
-  mix-blend-mode: screen;
+  /* NO mix-blend-mode. It used to be `screen`, which lifted the sky's colours
+     rather than muddying them - and it cost far more than it looked like.
+     A blended element forces its whole stacking context to be kept as a
+     rasterized backdrop group, and this layer's context also contains the
+     four animating wave rows. On iOS the rows lose their independent GPU
+     layers and re-rasterize, which is visible as the WATER FLICKERING. It is
+     constant while the wash is on, and it is on for about forty minutes
+     either side of the coast's sunrise and sunset.
+     It went unnoticed until the wash was switched off in dark mode, which
+     left the flicker in light mode only and made it look theme-specific.
+     The colours below are pre-lightened to land where the screen blend
+     landed, so the wash looks the same and composites like an ordinary
+     layer. Do not put a blend mode back on anything that shares a stacking
+     context with the sea. */
   background: linear-gradient(
     to top,
     rgba(var(--golden-low), 0.85) 0%,
