@@ -63,6 +63,14 @@ export default defineConfig({
    * Unlike the Chrome projects, WebKit is a browser Playwright downloads:
    * `npx playwright install webkit` locally, and a step in the CI workflow.
    */
+  /*
+   * Two browser projects, not four. The matrix used to be
+   * desktop/mobile Chrome x desktop/mobile Safari, which is four runs of every
+   * spec to cover two engines and two form factors - the two middle cells are
+   * duplicates of a combination already covered. What is left is one cell per
+   * engine AND per form factor: desktop Chrome, and an iPhone in WebKit, the
+   * exact combination the wave bug lived in.
+   */
   projects: [
     {
       name: "desktop",
@@ -70,18 +78,7 @@ export default defineConfig({
       testIgnore: /export\.spec\.ts/,
     },
     {
-      name: "mobile",
-      use: { ...devices["Pixel 7"], channel: "chrome" },
-      testIgnore: /export\.spec\.ts/,
-    },
-    {
-      name: "desktop-safari",
-      use: { ...devices["Desktop Safari"] },
-      testIgnore: /export\.spec\.ts/,
-    },
-    {
-      // A real iPhone viewport in the real iOS engine - the combination the
-      // wave bug lived in.
+      // A real iPhone viewport in the real iOS engine.
       name: "mobile-safari",
       use: { ...devices["iPhone 14"] },
       testIgnore: /export\.spec\.ts/,

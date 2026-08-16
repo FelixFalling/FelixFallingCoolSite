@@ -82,7 +82,7 @@ test.describe("the Curse of Ra clock", () => {
      * thing you check before going home, and it should be fixed by wiring the
      * panel independently of the scene. Until then, skipping honestly here
      * beats a green suite that quietly stops covering an engine: headless
-     * WebKit on CI has no WebGL, which is what turned the desktop-safari
+     * WebKit on CI has no WebGL, which is what turned the WebKit
      * project red rather than anything about the arithmetic.
      */
     const has3D = await page.evaluate(

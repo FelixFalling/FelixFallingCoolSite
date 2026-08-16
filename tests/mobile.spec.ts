@@ -2,7 +2,7 @@ import { test, expect } from "./fixtures";
 
 /**
  * Phone-specific checks. The whole test suite already runs on a phone-sized
- * browser (the "mobile" project in playwright.config.ts) - these tests are for
+ * browser (the "mobile-safari" project in playwright.config.ts) - these tests are for
  * things that only matter, or only go wrong, on small screens.
  *
  * They're skipped on the desktop project via the isMobile check.
@@ -74,8 +74,7 @@ test.describe("phone layout", () => {
      *
      * Measured at the time of writing:
      *
-     *   desktop / desktop-safari  3.13    (1280x720, DPR 1 and 2)
-     *   mobile (Pixel 7)          5.28    (412x839,  DPR 2.625)
+     *   desktop (1280x720)        3.13
      *   mobile-safari (iPhone 14) 7.04    (390x664,  DPR 3)
      *
      * The iPhone is the worst case and not only because of DPR: the drift
