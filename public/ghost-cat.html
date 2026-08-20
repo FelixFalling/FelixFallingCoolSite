@@ -129,8 +129,33 @@
   .menu-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   button.primary{ background:rgba(142,240,221,.92); color:#14251f; }
   button.primary:hover{ background:rgba(170,248,232,1); }
-  .heart{ color:#ff6b81; font-size:12px; }
-  .heart.off{ color:rgba(242,232,213,.22); }
+  /* Nine lives have to read at a glance or they may as well not be there.
+     Spent lives used to be the same glyph tinted to 22% alpha at 12px, which
+     in play was indistinguishable from a full one - the counter looked broken
+     because you could not see it move. Spent lives now switch to a HOLLOW
+     heart, so the difference is a shape and not a shade. */
+  .heart{
+    /* inline-block so the pop/beat transforms below actually apply */
+    display:inline-block; color:#ff6b81; font-size:17px; line-height:1;
+    margin-right:1px; text-shadow:0 0 6px rgba(255,80,100,.55);
+  }
+  .heart.off{ color:rgba(242,232,213,.4); text-shadow:none; }
+  /* the heart you just lost bursts on its way out */
+  .heart.lost{ animation:heartPop .45s ease; }
+  /* the last life goes gold and beats, so a near-death is impossible to miss */
+  .heart.last{
+    color:#ffd66b; text-shadow:0 0 10px rgba(255,214,107,.75);
+    animation:heartBeat 1s ease-in-out infinite;
+  }
+  @keyframes heartPop{
+    0%{ transform:scale(1.6); color:#fff2f2; text-shadow:0 0 14px #ff5050; }
+    60%{ transform:scale(.85); }
+    100%{ transform:scale(1); }
+  }
+  @keyframes heartBeat{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.22); }
+  }
 
   /* the lives chip flinches red when she takes a hit */
   @keyframes chipHurt{
@@ -138,7 +163,7 @@
     30%{ transform:scale(1.14); box-shadow:0 0 24px 4px rgba(255,80,90,.8); }
     100%{ transform:scale(1); box-shadow:0 4px 18px rgba(10,6,24,.5); }
   }
-  .chip.hurt{ animation:chipHurt .4s ease; }
+  .chip.hurt{ animation:chipHurt .45s ease; }
 
   /* the combo chain chip - appears while a kill-chain is alive, glows gold */
   .chip.combo{ border-color:rgba(255,214,107,.6); transition:opacity .15s ease; }
@@ -250,11 +275,11 @@
 <div class="hud">
   <div class="eyebrow">An interactive climb</div>
   <h1>The Wizard&rsquo;s Tower</h1>
-  <div class="hint">Point the laser dot &mdash; she&rsquo;ll chase it, climb, and bat everything off. Height is points. Librarian ghosts reshelve; the warden owl bites. Pounce them both.</div>
+  <div class="hint">Your cursor is a laser pointer &mdash; move it and she chases the dot, climbs, and bats everything off. Height is points. Librarian ghosts reshelve; the warden owl bites. Pounce them both.</div>
 </div>
 
 <div class="panel">
-  <div class="chip" id="livesChip"></div>
+  <div class="chip" id="livesChip" role="status" aria-live="polite"></div>
   <div class="chip">&#9650; <b id="ht">0</b> m climbed</div>
   <div class="chip"><b id="count">0</b> knocked</div>
   <div class="chip combo" id="comboChip" hidden><b id="comboM">&times;2</b> chain</div>
@@ -2561,16 +2586,59 @@ function drawEnemies(){
   }
 }
 
+/* The thing you are holding is a laser pointer, and the game hides the system
+   cursor - so if this doesn't LOOK like a laser, nothing on screen tells you
+   what you're doing. A bare red dot didn't; it read as a UI marker. What sells
+   it is the beam: a streak thrown from just off the bottom-right corner - the
+   hand that would be holding the thing - landing in a pool of red light with a
+   white-hot core. Drawn in world space, hence the camY on every y. */
 function drawLaser(){
   if (!pointer.seen || gameState !== 'playing') return;
-  const py = pointer.y + camY;
+  const px = pointer.x, py = pointer.y + camY;
   const pu = 1 + Math.sin(time*9)*.12;
-  ctx.fillStyle = 'rgba(255,72,72,.95)';
-  ctx.shadowColor = C.laser; ctx.shadowBlur = 16*S;
-  ctx.beginPath(); ctx.arc(pointer.x,py,3.8*S*pu,0,Math.PI*2); ctx.fill();
+  const ex = W + 70*S, ey = camY + H + 100*S;   // the emitter, just off-screen
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+
+  // the beam, faint at the emitter and brightest where it lands
+  const beam = ctx.createLinearGradient(ex, ey, px, py);
+  beam.addColorStop(0,   'rgba(255,60,60,0)');
+  beam.addColorStop(.55, 'rgba(255,60,60,.10)');
+  beam.addColorStop(1,   'rgba(255,95,95,.40)');
+  ctx.strokeStyle = beam; ctx.lineWidth = 3.4*S;
+  ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(px,py); ctx.stroke();
+
+  // a hotter hairline inside it
+  const core = ctx.createLinearGradient(ex, ey, px, py);
+  core.addColorStop(0,  'rgba(255,180,180,0)');
+  core.addColorStop(1,  'rgba(255,200,200,.5)');
+  ctx.strokeStyle = core; ctx.lineWidth = 1.1*S;
+  ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(px,py); ctx.stroke();
+
+  // the pool of light on whatever it's pointed at
+  const r = 26*S*pu;
+  const pool = ctx.createRadialGradient(px,py,0,px,py,r);
+  pool.addColorStop(0,'rgba(255,70,70,.5)');
+  pool.addColorStop(1,'rgba(255,70,70,0)');
+  ctx.fillStyle = pool;
+  ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // the dot itself, with a white-hot centre
+  ctx.save();
+  ctx.shadowColor = C.laser; ctx.shadowBlur = 18*S;
+  ctx.fillStyle = 'rgba(255,72,72,.98)';
+  ctx.beginPath(); ctx.arc(px,py,4.6*S*pu,0,Math.PI*2); ctx.fill();
   ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(255,72,72,.3)'; ctx.lineWidth = 1.5*S;
-  ctx.beginPath(); ctx.arc(pointer.x,py,9*S*pu,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,242,242,.95)';
+  ctx.beginPath(); ctx.arc(px,py,1.9*S*pu,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // a reticle ring, so the dot never gets lost against a lit shelf
+  ctx.strokeStyle = 'rgba(255,72,72,.34)'; ctx.lineWidth = 1.5*S;
+  ctx.beginPath(); ctx.arc(px,py,11*S*pu,0,Math.PI*2); ctx.stroke();
 }
 
 /* ---------- main loop ---------- */
@@ -2732,10 +2800,23 @@ const livesChip = document.getElementById('livesChip');
 const statH = document.getElementById('statH');
 const statK = document.getElementById('statK');
 
+/* Filled heart for a life she still has, hollow for one she has spent, plus
+   the number - three ways to read the same thing, because this is the only
+   thing on screen that tells you how close the run is to over. */
+let livesShown = 9;
 function renderLives(){
   let s2 = '';
-  for (let i=0;i<9;i++) s2 += '<span class="heart'+(i<lives?'':' off')+'">&#10084;</span>';
-  livesChip.innerHTML = s2;
+  for (let i=0;i<9;i++){
+    const spent = i >= lives;
+    const cls = 'heart'
+      + (spent ? ' off' : '')
+      + (spent && i < livesShown ? ' lost' : '')   // the one just lost bursts
+      + (!spent && lives === 1 ? ' last' : '');    // her last life beats gold
+    s2 += '<span class="'+cls+'">'+(spent ? '&#9825;' : '&#10084;')+'</span>';
+  }
+  livesChip.innerHTML = s2 + ' <b>' + lives + '</b>';
+  livesChip.setAttribute('aria-label', lives + ' of 9 lives left');
+  livesShown = lives;
 }
 function skinLocked(sk){
   if (sk.secret) return !bingusUnlocked;
