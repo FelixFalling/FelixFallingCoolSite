@@ -797,9 +797,17 @@ main:focus {
  *
  * We see the lamp from the side, so the beam's apparent length is the cosine
  * of where it is in its turn: full out to the right at 0deg, edge-on and
- * invisible when it points at you (90deg), full out to the LEFT at 180deg -
- * which is scaleX going NEGATIVE, flipping the cone about the lantern - then
+ * invisible when it points at you (90deg), full out to the LEFT at 180deg,
  * edge-on again at 270deg as it points away, and back round.
+ *
+ * The turn is written as rotateY, NOT as scaleX(cos). It used to be scaleX,
+ * which meant scaleX(-1) for the left half of the circle - and a negative
+ * scale is not something a browser animates as a scale. It decomposes the
+ * matrix, and scaleX(-0.71) comes back out as a POSITIVE 0.71 scale plus a
+ * 180deg rotation, so WebKit and Chrome interpolated the flip as a spin: the
+ * cone swung right off the tower and wheeled around its pivot. With no
+ * perspective on the element, rotateY(t) projects to exactly scaleX(cos t) -
+ * the same picture we wanted - and interpolates as the rotation it is.
  *
  * The percentages below are the turn in 45deg steps (12.5% = 45deg). The far
  * half of the circle (180-360deg) sweeps BEHIND the tower, so it is carried
@@ -809,39 +817,39 @@ main:focus {
   /* 0deg - pointing right, out over the open sea, nearest the viewer */
   0%,
   100% {
-    transform: scaleX(1);
+    transform: rotateY(0deg);
     opacity: 0.85;
   }
   12.5% {
-    transform: scaleX(0.71);
+    transform: rotateY(45deg);
     opacity: 0.75;
   }
   /* 90deg - pointing straight at you: edge-on, gone, and the lamp flashes */
   25% {
-    transform: scaleX(0.02);
+    transform: rotateY(90deg);
     opacity: 0;
   }
   37.5% {
-    transform: scaleX(-0.71);
+    transform: rotateY(135deg);
     opacity: 0.75;
   }
   /* 180deg - pointing left, out over the sea on the other side */
   50% {
-    transform: scaleX(-1);
+    transform: rotateY(180deg);
     opacity: 0.85;
   }
   /* past 180deg the beam swings away behind the headland and dims right down */
   62.5% {
-    transform: scaleX(-0.71);
+    transform: rotateY(225deg);
     opacity: 0.28;
   }
   /* 270deg - pointing away from you: edge-on and gone again, but no flash */
   75% {
-    transform: scaleX(0.02);
+    transform: rotateY(270deg);
     opacity: 0;
   }
   87.5% {
-    transform: scaleX(0.71);
+    transform: rotateY(315deg);
     opacity: 0.28;
   }
 }

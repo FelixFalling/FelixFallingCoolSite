@@ -90,8 +90,10 @@ export default function Shore() {
             plane: it stretches out over the sea, swings in and shrinks as the
             lamp turns toward you - and at the moment it points your way the
             beam vanishes and the lantern FLASHES - then it swings back out.
-            beamTurn drives the beam's scaleX, lampFlash brightens the lantern
-            at the same instant (both 8s, matched in globals.css). */}
+            beamTurn turns the beam with rotateY (which projects to the
+            cosine foreshortening, and does NOT get decomposed into a spin the
+            way a negative scaleX did - see globals.css), lampFlash brightens
+            the lantern at the same instant (both 8s, matched there). */}
         <div style={{ opacity: "var(--star-opacity)", transition: "opacity 0.25s ease" }}>
           {/* The light cone, reaching out over the open sea.
 
