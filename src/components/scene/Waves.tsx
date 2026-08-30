@@ -25,7 +25,7 @@
  * All the animation timing is data below - tweak the numbers to taste.
  */
 
-import { crestCaps, crestPath, TILE, type Harmonic, type Shape } from "./crest";
+import { crestPath, TILE, type Harmonic } from "./crest";
 import styles from "./Waves.module.css";
 
 const TILES = 6; // the most we ever draw (only on a ~6000px-wide monitor)
@@ -39,11 +39,6 @@ interface Layer {
       and ribbon-like. Nearer water gets more of it: that asymmetry is only
       visible when the wave is big enough to show it. */
   sharpen: number;
-  /** Trochoidal crest sharpening, and how far the crests tip over. See Shape
-      in crest.ts - `steep` is what turns these from hills into waves, and the
-      lean is signed to match the direction this layer drifts. */
-  steep: number;
-  lean: number;
   drift: "waveDrift" | "waveDrift2";
   driftDur: number; // seconds for one full loop
   swell: "waveSwell" | "waveSwell2";
@@ -57,17 +52,6 @@ interface Layer {
       thicker - a depth cue in their own right. 1 reproduces exactly the foam
       the breaking layer has always had. */
   crest: number;
-  /** White water, 0 to 1. Not the same thing as `crest` above: that is
-      scattered light along the whole silhouette, this is foam, and it is gated
-      on height so only the waves tall enough to break go white. Which ones
-      those are changes as the harmonics beat against each other, so the train
-      breaks unevenly the way a real one does. */
-  breaks: number;
-  /** How far down the face the white water runs, measured from the tallest
-      crest toward the baseline. Past 1 it goes below the mean line, which is
-      what the shallow wash wants: a beach waterline is foamy along most of its
-      length, not only at the tips. */
-  breakReach: number;
   // How far the drawing bleeds below its row, so the swell bobbing a layer
   // upward can never lift its bottom edge into view. The front (sand) layer
   // has to cover the whole beach as well, since its fill IS the beach.
@@ -83,23 +67,10 @@ interface Layer {
 // slow swells. The four layers are built to that rule, and it is where the
 // depth comes from now that they are no longer one shape at four sizes.
 //
-//   far    baseline 60, k = 4/6/9, fine chop that barely rises
-//   mid    baseline 101, k = 4/5/7
-//   break  baseline 128, k = 3/4/7 - the tall one, and the one that breaks
-//   front  baseline 152, k = 2/3/5 - the shallow wash that meets the page
-//
-// The rule is right but it used to be pushed too far: the near layers were led
-// by k = 1, one crest per 1200px, and a wave a whole screen wide does not read
-// as a wave at all. It reads as terrain. So the whole set moved up a few
-// cycles, keeping the ordering (the far band is still the finest chop, the
-// wash still the longest roll) but putting a TRAIN of waves in every band
-// rather than a single hump.
-//
-// SHAPE comes from `steep` and `lean` on top of that, and they are what make
-// these crests read as water rather than as a nicely drawn ribbon: `steep`
-// displaces the surface sideways so crests come to a point over long flat
-// troughs, and `lean` tips each one over the way it drifts. Both are explained
-// at Shape in crest.ts. Sharpen is kept low now that steep does that job.
+//   far    baseline 70, ~7px of rise, fine chop (k = 3, 5, 8)
+//   mid    baseline 99, ~16px, a mix (k = 2, 3, 7)
+//   break  baseline 124, ~28px led by ONE slow swell (k = 1, 2, 5)
+//   front  baseline 152, ~12px - the shallow wash that meets the page
 //
 // The near crests can rise ABOVE the layers behind them, and should - a close
 // swell occluding the far water is a depth cue, and forbidding it is what made
@@ -126,20 +97,15 @@ interface Layer {
 // Drift durations are one full 1200px loop, and they ramp with depth too: the
 // far water crawls, the breaking layer travels ~110px every second.
 const LAYERS: Layer[] = [
-  { fill: "var(--wave-far-solid)", y: 60, harmonics: [[4, 1.8, 4.1], [6, 7.0, 0.0], [9, 3.6, 2.3]], sharpen: 0.08, steep: 0.5, lean: -0.25, drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, swellOffset: 0, crest: 0.3, breaks: 0, breakReach: 0, bleed: "28px" },
-  { fill: "var(--wave-mid-solid)", y: 101, harmonics: [[4, 13, 1.4], [5, 6.0, 3.7], [7, 2.2, 0.5]], sharpen: 0.12, steep: 0.58, lean: 0.3, drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, swellOffset: -2.1, crest: 0.4, breaks: 0.5, breakReach: 0.5, bleed: "28px" },
-  { fill: "var(--wave-break-solid)", y: 128, harmonics: [[3, 19, 2.7], [4, 9.0, 5.1], [7, 3.4, 1.2]], sharpen: 0.15, steep: 0.62, lean: -0.3, drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, swellOffset: -1.3, crest: 0.7, breaks: 1, breakReach: 0.55, bleed: "28px" },
-  { fill: "var(--waterline-fill)", y: 152, harmonics: [[2, 9.0, 4.6], [3, 4.5, 1.9], [5, 2.2, 3.0]], sharpen: 0.1, steep: 0.5, lean: 0.28, drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, swellOffset: -3.4, crest: 0, breaks: 0.7, breakReach: 1.25, bleed: "28px" },
+  { fill: "var(--wave-far-solid)", y: 70, harmonics: [[3, 5.5, 0.0], [5, 3.4, 2.3], [8, 1.8, 4.1]], sharpen: 0.15, drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, swellOffset: 0, crest: 0.3, bleed: "28px" },
+  { fill: "var(--wave-mid-solid)", y: 99, harmonics: [[2, 10, 1.4], [3, 5.5, 3.7], [7, 2.2, 0.5]], sharpen: 0.3, drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, swellOffset: -2.1, crest: 0.55, bleed: "28px" },
+  { fill: "var(--wave-break-solid)", y: 124, harmonics: [[1, 15, 2.7], [2, 8.5, 5.1], [5, 3.4, 1.2]], sharpen: 0.4, drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, swellOffset: -1.3, crest: 1, bleed: "28px" },
+  { fill: "var(--waterline-fill)", y: 152, harmonics: [[1, 7.5, 4.6], [3, 4.2, 1.9], [4, 2.1, 3.0]], sharpen: 0.25, drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, swellOffset: -3.4, crest: 0, bleed: "28px" },
 ];
 
 function WaveLayer({ layer }: { layer: Layer }) {
-  const shape: Shape = { steep: layer.steep, lean: layer.lean };
-  const crest = crestPath(layer.y, layer.harmonics, layer.sharpen, shape);
+  const crest = crestPath(layer.y, layer.harmonics, layer.sharpen);
   const body = `${crest} L${TILE} 200 L0 200 Z`; // crest, then down and back to fill the water
-  // The white water. One path, stroked twice at different widths below - the
-  // long faint scattered light along the whole crest is already being drawn,
-  // so this only has to supply the foam that sits on top of it.
-  const caps = layer.breaks > 0 ? crestCaps(layer.y, layer.harmonics, layer.sharpen, shape, layer.breakReach) : "";
 
   return (
     <div
@@ -213,16 +179,6 @@ function WaveLayer({ layer }: { layer: Layer }) {
               <>
                 <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5.5 * layer.crest} strokeLinecap="round" opacity={0.16 * layer.crest} />
                 <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={2.5 * layer.crest} strokeLinecap="round" opacity={0.42 * layer.crest} />
-              </>
-            )}
-            {caps && (
-              // The white water itself, sitting on top of the scattered light:
-              // the same two-stroke stack, so it stays soft-edged without a
-              // blur filter. Both strokes are the same `d`, which costs almost
-              // nothing once the page is compressed.
-              <>
-                <path d={caps} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5.6 * layer.breaks} strokeLinecap="round" opacity={0.2 * layer.breaks} />
-                <path d={caps} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={2.6 * layer.breaks} strokeLinecap="round" opacity={0.42 * layer.breaks} />
               </>
             )}
           </svg>
