@@ -63,17 +63,11 @@
 }
 
 .title {
-  margin: 0 0 8px;
+  /* The last line before the buttons, so it carries the gap down to them. */
+  margin: 0 0 28px;
   font-size: 21px;
   color: var(--text-title);
   font-weight: 600;
-}
-
-.specialties {
-  margin: 0 0 28px;
-  font-size: 16px;
-  color: var(--text-subtle);
-  max-width: 520px;
 }
 
 /* The buttons themselves are the shared ui/Button component. */
@@ -167,11 +161,6 @@
     font-size: clamp(24px, 1.4vw, 32px);
   }
 
-  .specialties {
-    font-size: clamp(17px, 1vw, 22px);
-    max-width: clamp(560px, 38vw, 760px);
-  }
-
   .actions {
     gap: clamp(12px, 1vw, 20px);
   }
@@ -208,10 +197,6 @@
 
   .title {
     font-size: 19px;
-  }
-
-  .specialties {
-    font-size: 15px;
     margin-bottom: 22px;
   }
 

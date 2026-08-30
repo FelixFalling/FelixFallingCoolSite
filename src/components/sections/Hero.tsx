@@ -22,7 +22,6 @@ export default function Hero() {
           )}
           <h1 className={styles.name}>{resume.name}</h1>
           <p className={styles.title}>{resume.jobTitle}</p>
-          <p className={styles.specialties}>{resume.specialties}</p>
 
           <div className={styles.actions}>
             <Button href={links.github} external>

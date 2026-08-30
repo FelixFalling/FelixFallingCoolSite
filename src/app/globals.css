@@ -43,7 +43,7 @@
   --slate: #384b53; /* paragraph text */
   --muted: #5c6d75; /* secondary / meta text (4.7:1 on --sand - WCAG AA) */
   --text-title: #2f5560; /* hero job title - deep teal */
-  --text-subtle: #45585f; /* hero specialties, honors line */
+  --text-subtle: #45585f; /* honors line, small print */
 
   /* Accents */
   --teal: #3a6f6b; /* deep spruce-teal */

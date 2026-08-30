@@ -62,7 +62,6 @@ export interface Resume {
    * the name moves up to take the space.
    */
   location?: string;
-  specialties: string; // one line, e.g. "Backend · Distributed systems · Go"
   about: string;
   showPhoto: boolean;
   // Your profile image: put the file in /public (e.g. public/me.jpg) and set
@@ -100,7 +99,6 @@ export const resume: Resume = {
   name: "Nick",
   jobTitle: "Software Developer",
   //location: "Somewhere along a foggy coast",
-  specialties: "Test automation · Embedded systems · DevOps",
   about:
     "I build software with a tester's mindset - automation, validation, and " +
     "documentation-driven development, from embedded firmware up to web " +
