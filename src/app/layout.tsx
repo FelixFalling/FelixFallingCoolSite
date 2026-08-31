@@ -85,9 +85,45 @@ export const metadata: Metadata = {
  * Done here rather than via Next's viewport export because that can only react
  * to the OS preference, not the saved/toggled override this script honors. The
  * nav's ThemeToggle keeps the meta in sync when you flip the theme.
+ *
+ * It also carries the frame-breaker described below. Both live in one inline
+ * script because both need to run before the first paint, and one script means
+ * one hash for the Content-Security-Policy to name.
  */
 const themeInitScript = `
 (function () {
+  /*
+   * CLICKJACKING, as far as it can be handled on this host.
+   *
+   * The real control is the CSP directive frame-ancestors, and it is NOT
+   * available here: GitHub Pages cannot send response headers, so the policy
+   * ships in a <meta> tag, and frame-ancestors is one of the three directives
+   * a meta policy is required to ignore. (Pages sends no X-Frame-Options
+   * either - checked.) So this is the fallback: if the page finds itself in a
+   * frame, it navigates the top window to itself, replacing the attacker's
+   * page with the real one.
+   *
+   * BE CLEAR ABOUT THE LIMIT. An <iframe sandbox> without
+   * allow-top-navigation blocks that navigation, and the assignment throws;
+   * there is nothing more JavaScript can do from inside such a frame. The
+   * stronger trick - hiding the whole document by default and revealing it
+   * only when unframed - is deliberately NOT used, because it makes the site
+   * a blank page for anyone without JavaScript, and this one is built to work
+   * without it.
+   *
+   * That trade is easy here: the site takes no click that would matter if it
+   * were hijacked - no forms, no accounts, no state changes, nothing but
+   * navigation and a theme toggle. THE PROPER FIX, if this ever hosts anything
+   * that does, is a host or proxy that can set headers (a custom domain behind
+   * Cloudflare will do it for free), then frame-ancestors 'none' as a real
+   * header.
+   */
+  try {
+    if (self !== top) top.location = self.location;
+  } catch (e) {
+    /* sandboxed frame - top navigation is blocked, nothing further to try */
+  }
+
   try {
     var t = localStorage.getItem('theme');
     if (t !== 'light' && t !== 'dark') {
@@ -111,28 +147,6 @@ const themeInitScript = `
 })();
 `;
 
-/**
- * Privacy-friendly visit counts via GoatCounter - no cookies, no personal
- * data, GDPR-safe. The dashboard lives at https://felixfalling.goatcounter.com
- * (create the free account with that exact code to claim it). Until it IS
- * claimed the endpoint rejects every hit with a 400, which shows up in the
- * console on the deployed site - harmless, nothing is recorded, and the page
- * is unaffected, but it is not silent.
- *
- * THIS IS THE ONLY THIRD-PARTY JAVASCRIPT ON THE SITE, so it is also the only
- * code here that someone else could change without touching this repo. The
- * attributes on the tag below are what make that a bounded risk rather than an
- * open door - see the comment on the tag itself.
- *
- * The URL and its integrity hash are NOT written here. They come from
- * thirdParty.mjs, the single inventory of every outside service, because the
- * Content-Security-Policy and the tests are generated from that same file - and
- * a hash written down twice is a hash that will eventually disagree with
- * itself. To re-pin, or to remove analytics entirely, go there.
- */
-const ANALYTICS = THIRD_PARTY.analyticsScript;
-const ANALYTICS_ENDPOINT = THIRD_PARTY.analyticsEndpoint.url;
-
 export default function RootLayout({
   children,
 }: {
@@ -145,15 +159,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         {/*
-          Warm up the two third-party origins the page pulls from, so the DNS
+          Warm up the one third-party origin the page pulls from, so the DNS
           lookup + TLS handshake happen while the HTML is still parsing instead
-          of when the request is made. React hoists these into <head>.
+          of when the request is made. React hoists this into <head>.
 
-          ghchart is the GitHub contribution graph in the Activity section (an
-          image far down the page); gc.zgo.at is the GoatCounter script below.
+          ghchart is the GitHub contribution graph in the Activity section - an
+          image far down the page, and the only thing this site now loads from
+          anyone else's server. (The weather API in scene/weather.ts is fetched
+          from script, so it gets no preconnect.)
         */}
         <link rel="preconnect" href={THIRD_PARTY.contributionChart.origin} />
-        <link rel="preconnect" href={ANALYTICS.origin} crossOrigin="anonymous" />
         {/*
           The only inline script on the site. It is a build-time constant - no
           value from the URL, storage, or the network is ever interpolated into
@@ -168,24 +183,6 @@ export default function RootLayout({
         */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
-        {/*
-          Analytics, pinned. See the constants above for what each attribute is
-          doing and how to re-pin it:
-            integrity   - refuse to run the file if its bytes ever change
-            crossOrigin - REQUIRED for integrity to be checked at all; without
-                          it the browser blocks the script instead of verifying
-                          it (gc.zgo.at sends access-control-allow-origin: *)
-            referrerPolicy - do not tell the analytics CDN which page you are on
-                          beyond the origin; the count itself is sent separately
-        */}
-        <script
-          data-goatcounter={ANALYTICS_ENDPOINT}
-          async
-          src={ANALYTICS.url}
-          integrity={ANALYTICS.integrity}
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
       </body>
     </html>
   );

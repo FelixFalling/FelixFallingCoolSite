@@ -49,33 +49,24 @@
 /** @type {Record<string, ThirdParty>} */
 export const THIRD_PARTY = {
   /*
-   * Privacy-friendly visit counts - no cookies, no personal data. The script
-   * is pinned to a released version and hash-checked; see the long note in
-   * src/app/layout.tsx for what each attribute does and how to re-pin it.
+   * NO ANALYTICS. There used to be a GoatCounter tag here. It was removed
+   * because the account it reported to was never claimed - every hit came back
+   * 400, so nothing was ever recorded - and an unclaimed code is one anybody
+   * else can register, at which point this site's visitors would have been
+   * reporting to a stranger.
    *
-   * The script and the endpoint that receives the count are DIFFERENT origins,
-   * and they get different CSP roles: gc.zgo.at may serve a script, the
-   * goatcounter.com endpoint may only be sent a hit. Neither can do the
-   * other's job.
+   * Removing it took the site to ZERO third-party JavaScript, which is worth
+   * more than the visit counts were: the Content-Security-Policy generated from
+   * this file no longer needs to allow any outside script origin on the main
+   * site at all.
+   *
+   * TO BRING ANALYTICS BACK: claim the code at https://www.goatcounter.com
+   * first, then re-add an entry here (script origin under "script-src", the
+   * reporting endpoint under "connect-src" AND "img-src" - GoatCounter uses
+   * sendBeacon with an image fallback) and the tag in src/app/layout.tsx. Pin
+   * the script to a versioned URL with an integrity hash, as everything else
+   * here is.
    */
-  analyticsScript: {
-    origin: "https://gc.zgo.at",
-    url: "https://gc.zgo.at/count.v4.js",
-    // Re-pin with:
-    //   curl -s https://gc.zgo.at/count.v4.js \
-    //     | openssl dgst -sha384 -binary | openssl base64 -A
-    integrity: "sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+",
-    why: "GoatCounter analytics script (cookieless visit counts)",
-    csp: ["script-src"],
-    pages: ["next"],
-  },
-  analyticsEndpoint: {
-    origin: "https://felixfalling.goatcounter.com",
-    url: "https://felixfalling.goatcounter.com/count",
-    why: "Where the visit count is sent. GoatCounter uses navigator.sendBeacon (connect-src) and falls back to an image beacon (img-src), so it needs both.",
-    csp: ["connect-src", "img-src"],
-    pages: ["next"],
-  },
 
   /*
    * Live conditions at Newport, Oregon - the wind speeds the waves up and the

@@ -142,12 +142,9 @@ test.describe("content security policy", () => {
        * policy blocks never reaches route interception at all. A stub can
        * therefore only be consulted for a request the policy already allowed.
        *
-       * The analytics script is aborted rather than stubbed, because it is
-       * pinned with an integrity hash - a stub body would fail that hash and
-       * be blocked, which is the SRI working correctly but would muddy what
-       * this test is reading.
+       * Note there is nothing to stub for analytics: the site loads no
+       * third-party JavaScript at all any more, which the test above holds.
        */
-      await page.route("**gc.zgo.at**", (route) => route.abort());
       await page.route("**open-meteo**", (route) =>
         route.fulfill({ status: 200, contentType: "application/json", body: "{}" }),
       );
@@ -305,6 +302,72 @@ test.describe("third-party code", () => {
         ).toBe(service.integrity);
       }
     }
+  });
+
+  test("the main site loads no third-party JavaScript at all", async ({ page }) => {
+    /*
+     * The property removing GoatCounter bought, held so it cannot be given
+     * back by accident. With no outside script origin in the policy, the
+     * strongest class of supply-chain risk - somebody else's code executing on
+     * this page - is not mitigated here, it is absent.
+     *
+     * The clock page is exempt and says so in the inventory: it loads three.js,
+     * pinned. This asserts the Next-built pages carry nothing.
+     */
+    for (const { path, name, kind } of PAGES) {
+      if (kind !== "next") continue;
+
+      const policy = parsePolicy(await rawHtml(page, path));
+      const external = (policy.get("script-src") ?? []).filter((source) =>
+        source.startsWith("http"),
+      );
+      expect(
+        external,
+        `${name}: script-src allows an outside origin. If that is deliberate, ` +
+          `declare it in thirdParty.mjs with an integrity-pinned URL.`,
+      ).toEqual([]);
+
+      const html = await rawHtml(page, path);
+      const remoteScripts = [...html.matchAll(/<script\b[^>]*\ssrc=["'](https?:\/\/[^"']+)["']/gi)];
+      expect(
+        remoteScripts.map((m) => m[1]),
+        `${name} loads a remote script`,
+      ).toEqual([]);
+    }
+  });
+
+  test("a framed page navigates back out of the frame", async ({ page }) => {
+    /*
+     * The clickjacking fallback in layout.tsx's pre-paint script, tested
+     * because it is the kind of thing that silently stops working - it lives
+     * inside a string, so neither the compiler nor the linter reads it.
+     *
+     * frame-ancestors would be the real control, and a <meta> policy is
+     * required to ignore it (see the long note in the script). This checks the
+     * fallback that is available: framed, the page replaces the framing
+     * document with itself.
+     *
+     * The outer page is synthesised on the same origin via route interception,
+     * so this is a genuine same-origin frame rather than an about:blank one.
+     */
+    await page.route("**/frame-bait", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: `<!doctype html><title>bait</title><iframe src="./" width="800" height="600"></iframe>`,
+      }),
+    );
+
+    await page.goto("./frame-bait");
+    // The frame-breaker navigates the TOP window, so the bait page is replaced.
+    await page.waitForURL((url) => !url.pathname.endsWith("frame-bait"), { timeout: 10_000 });
+
+    expect(
+      page.url(),
+      "the page stayed inside the frame - the frame-breaker did not fire",
+    ).not.toContain("frame-bait");
+    // And it is the real site that ended up on top, not something else.
+    await expect(page.locator("h1").first()).toBeVisible();
   });
 
   test("the shipped pages contact nothing outside the inventory", async ({ page }) => {

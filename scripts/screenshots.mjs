@@ -17,13 +17,11 @@
  * ships - minified CSS, built chunks and all.
  *
  * DETERMINISM. These files are committed, so a rerun that changes pixels for no
- * reason means a noisy diff and a pointless commit. Three sources of drift are
+ * reason means a noisy diff and a pointless commit. Two sources of drift are
  * pinned:
  *
  *   • the live weather request is blocked, so the sea is always at its default
  *     speed with no rain layer and no golden-hour wash;
- *   • the analytics script is blocked (it changes nothing visually, but it is
- *     one less network race);
  *   • every CSS animation is paused at a fixed point in its cycle (see
  *     FREEZE_AT), so the waves, the lighthouse beam and the scroll cue land
  *     identically every time.
@@ -77,7 +75,6 @@ async function main() {
       // Determinism, and courtesy - a screenshot run shouldn't ping anyone's
       // API or register as a page view.
       await page.route("**open-meteo**", (route) => route.abort());
-      await page.route("**gc.zgo.at**", (route) => route.abort());
 
       await page.goto(`${server.url}?theme=${theme}`, { waitUntil: "load" });
       await page.locator("h1").waitFor({ state: "visible" });

@@ -147,14 +147,10 @@ test.describe("the static export", () => {
      * it had caused itself. Empty successful responses keep the page quiet
      * without pretending the services responded with anything.
      *
-     * THE ANALYTICS SCRIPT IS THE EXCEPTION, and it cannot be stubbed at all
-     * any more: it ships with an integrity hash, so a stub body is exactly
-     * what the browser is now supposed to refuse. Aborting it is the honest
-     * option, and the noise that produces is filtered below rather than
-     * papered over - which is also why the filter is written against the
-     * third-party inventory instead of against a hard-coded hostname.
+     * The filter at the bottom is written against the third-party inventory
+     * rather than a hard-coded hostname, so removing a service (as the
+     * analytics tag was) leaves nothing stale here to trip over.
      */
-    await page.route("**gc.zgo.at**", (route) => route.abort());
     await page.route("**open-meteo**", (route) =>
       route.fulfill({ status: 200, contentType: "application/json", body: "{}" }),
     );
