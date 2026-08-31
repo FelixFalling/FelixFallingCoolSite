@@ -8,9 +8,15 @@
  * and would then quietly drift out of sympathy with it.
  */
 
-/** One full wave period, in px. Fixed so crests never flatten - see TILE's note
- *  in Waves.tsx and the row widths in Waves.module.css, which both depend on it. */
-export const TILE = 1200;
+import { TILE } from "./tuning";
+
+/**
+ * One full wave period, in px. The value and the reasoning behind it live in
+ * tuning.ts with the rest of the dials; it is re-exported here because it is
+ * part of this module's contract - every path this file produces is exactly
+ * TILE wide, and callers need the number to lay the tiles out.
+ */
+export { TILE } from "./tuning";
 
 /**
  * One sine component of a crest: `k` whole cycles across the tile, `a` px of

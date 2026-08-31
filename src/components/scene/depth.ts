@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { DIVE } from "./tuning";
+
 /**
  * How deep you have scrolled, published to CSS.
  *
@@ -33,26 +35,10 @@ import { useEffect } from "react";
  * the component tree at 60fps for a value only CSS consumes. Setting a custom
  * property on <html> costs one style recalculation and skips React entirely -
  * the same reasoning as the scroll spy in ui/NavLinks.tsx.
- */
-
-/**
- * How quickly the water reaches full opacity, as a multiple of --depth.
  *
- * Deliberately fast, and the reason is continuity rather than speed. The
- * water sits BEHIND the hero (z-index -1), and the hero paints its own opaque
- * sky, so while the hero still covers the screen the water filling in is
- * invisible. Getting it to full opacity in that window means that by the time
- * the waves scroll off the top there is already sea behind them, in the wave's
- * own colour.
- *
- * Easing it in slowly instead - which is what this did first - left a stretch
- * where the page background showed through between the crest and the water.
- * The page background is near-black in the dark theme and the crest is a
- * bright teal, so that read as the colour jumping at the waterline. The
- * descent is carried by the gradient darkening with --depth; the opacity is
- * only there to keep the water out of the light theme.
+ * Both numbers this hook is tuned by - how fast the water fills in, and how
+ * far above the hero's edge the dive starts - are in tuning.ts under DIVE.
  */
-const WATER_RAMP = 12;
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -64,7 +50,7 @@ const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 function waterlineTop(): number {
   const hero = document.querySelector("header");
   const heroBottom = hero ? hero.getBoundingClientRect().height : window.innerHeight;
-  return Math.max(0, heroBottom - window.innerHeight * 0.6);
+  return Math.max(0, heroBottom - window.innerHeight * DIVE.startOffset);
 }
 
 export function useDepth(): void {
@@ -88,7 +74,7 @@ export function useDepth(): void {
       const depth = span > 0 ? clamp01((window.scrollY - start) / span) : 0;
 
       root.style.setProperty("--depth", depth.toFixed(4));
-      root.style.setProperty("--water", clamp01(depth * WATER_RAMP).toFixed(4));
+      root.style.setProperty("--water", clamp01(depth * DIVE.waterRamp).toFixed(4));
     }
 
     // Sampled once per frame rather than once per scroll event: flicking down
