@@ -246,11 +246,21 @@ content - they check structure and behavior, not hardcoded strings.
 
 The site is static, has no forms, no accounts, no cookies and no server, so most
 web vulnerabilities simply have nowhere to live here. What is left is the risk of
-*other people's code* - the two scripts loaded from a CDN - and the ordinary
-hygiene that stops a small mistake becoming a large one. All of it is enforced by
-tests in [`tests/security.spec.ts`](tests/security.spec.ts), which run against the
-built `./out` rather than the dev server, because that is where these things
-either exist or do not.
+*other people's code*, and the ordinary hygiene that stops a small mistake
+becoming a large one. All of it is enforced by tests in
+[`tests/security.spec.ts`](tests/security.spec.ts), which run against the built
+`./out` rather than the dev server, because that is where these things either
+exist or do not.
+
+**The main site loads no third-party JavaScript.** There was a GoatCounter
+analytics tag; it is gone. The account it reported to had never been claimed, so
+every hit came back 400 and nothing was ever recorded - and an unclaimed code is
+one that anybody else can register, which would have pointed this site's
+visitors at a stranger. Removing it means `script-src` on the home and 404 pages
+is now `'self'` plus per-build hashes and nothing else: the largest class of
+supply-chain risk is not mitigated here, it is absent. A test holds that line.
+(The clock page still loads three.js, pinned - see below. To bring analytics
+back, claim the code first, then follow the note in `thirdParty.mjs`.)
 
 **Every outside service is declared in one place.**
 [`thirdParty.mjs`](thirdParty.mjs) lists each one with what it is for and which
@@ -259,12 +269,12 @@ generated from it, and a test scans the built HTML and fails if it finds a
 request to any origin the file does not list. You cannot add a third party
 without declaring it.
 
-**Third-party scripts are pinned.** Both the three.js on the clock page and the
-analytics script carry a Subresource Integrity hash: the browser hashes what it
-downloaded and refuses to run it if the bytes changed. If a CDN is ever
-compromised, the page shows an error instead of executing someone else's code.
-One test checks the hash in the markup matches the inventory; another fetches the
-live files and checks the pins have not gone stale.
+**The one remaining third-party script is pinned.** three.js on the clock page
+carries a Subresource Integrity hash: the browser hashes what it downloaded and
+refuses to run it if the bytes changed. If cdnjs is ever compromised, the clock
+shows its error banner instead of executing someone else's code. One test checks
+the hash in the markup matches the inventory; another fetches the live file and
+checks the pin has not gone stale.
 
 **Every page ships a Content-Security-Policy.** Written by
 [`scripts/csp.mjs`](scripts/csp.mjs) as the second half of `npm run build`. It
@@ -275,11 +285,22 @@ policy cannot go stale when you edit the theme script. `object-src`,
 page in a real browser and fails on any violation, which is what makes the
 policy safe to tighten.
 
-> **One known gap.** GitHub Pages cannot send HTTP headers, so the policy is
-> delivered in a `<meta>` tag - and `frame-ancestors` is ignored there. The site
-> can therefore still be embedded in a frame by another origin. Nothing here
-> takes a click that would matter if it were hijacked (no forms, no auth, no
-> state changes), but closing it properly needs a host that can set headers.
+**Clickjacking, as far as this host allows.** `frame-ancestors` is the real
+control and it is unavailable: GitHub Pages cannot send HTTP headers, so the
+policy rides in a `<meta>` tag, and that is one of three directives a meta
+policy must ignore. (Pages sends no `X-Frame-Options` either - checked.) The
+fallback is a frame-breaker in the pre-paint script: framed, the page navigates
+the top window to itself.
+
+> **Know the limit.** An `<iframe sandbox>` without `allow-top-navigation`
+> blocks that, and nothing more can be done from script inside such a frame.
+> The stronger trick - hiding the document by default and revealing it only
+> when unframed - is deliberately not used, because it turns the site into a
+> blank page without JavaScript. That trade is easy here: nothing on this site
+> takes a click that would matter if it were hijacked. **The proper fix**, if
+> it ever hosts something that does, is a host or proxy that can set headers -
+> a custom domain behind Cloudflare does it free - then `frame-ancestors
+> 'none'` as a real header.
 
 **Supply chain.** Workflow actions are pinned to full commit SHAs rather than to
 movable tags like `@v4`, and [`dependabot.yml`](.github/dependabot.yml) opens a
