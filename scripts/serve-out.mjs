@@ -16,7 +16,7 @@
  */
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize, resolve } from "node:path";
+import { extname, join, normalize, resolve, sep } from "node:path";
 import { BASE_PATH } from "../basePath.mjs";
 
 const OUT_DIR = resolve(import.meta.dirname, "..", "out");
@@ -50,9 +50,23 @@ async function readCandidate(urlPath) {
 
   if (relative.endsWith("/")) relative += "index.html";
 
-  // normalize() collapses any ../ before it can climb out of ./out.
+  /*
+   * Two independent guards, because one of them is easy to get subtly wrong.
+   *
+   * normalize() collapses any ../ segments before they can climb out of ./out.
+   * That alone is already enough here (every path reaching this point starts
+   * with "/", and normalize drops leading ../ from an absolute path), but the
+   * check below does not rely on that reasoning staying true.
+   *
+   * The containment check compares against OUT_DIR **plus a separator**, not
+   * against OUT_DIR alone. A bare startsWith(OUT_DIR) is the classic version
+   * of this bug: with OUT_DIR = "/repo/out" it also accepts "/repo/outside",
+   * because that string does start with "/repo/out". Nothing can currently
+   * reach that case, which is exactly why it would survive unnoticed if the
+   * code above it were ever rearranged.
+   */
   const base = join(OUT_DIR, normalize(relative));
-  if (!base.startsWith(OUT_DIR)) return null;
+  if (base !== OUT_DIR && !base.startsWith(OUT_DIR + sep)) return null;
 
   const candidates = extname(base) ? [base] : [`${base}.html`, join(base, "index.html"), base];
   for (const candidate of candidates) {
@@ -72,8 +86,37 @@ async function readCandidate(urlPath) {
  */
 export async function serveOut(port = 0) {
   const server = createServer(async (req, res) => {
-    const urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-    const found = await readCandidate(urlPath);
+    /*
+     * WHY THIS IS WRAPPED. decodeURIComponent throws URIError on a malformed
+     * percent-escape - "%E0%A4%A" is enough - and this handler is async, so
+     * the throw became a rejected promise that node:http never sees. On Node
+     * 15+ an unhandled rejection terminates the process, so a single bad URL
+     * took the whole server down mid-run and the suite failed with a
+     * connection error that pointed nowhere near the cause.
+     *
+     * The catch is deliberately around the ENTIRE handler rather than just the
+     * decode: a static file server that can be killed by a request is the bug,
+     * and fixing only the one call that happens to throw today leaves that
+     * property in place.
+     */
+    let urlPath;
+    try {
+      urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
+    } catch {
+      res.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Bad request URI");
+      return;
+    }
+
+    let found;
+    try {
+      found = await readCandidate(urlPath);
+    } catch (error) {
+      res.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Internal error");
+      console.error(`serve-out: failed to serve ${urlPath}:`, error);
+      return;
+    }
 
     if (!found) {
       // The export writes a real 404.html; serve it so the not-found page can
