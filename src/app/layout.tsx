@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { resume } from "@/data/resume";
+import { THIRD_PARTY } from "../../thirdParty.mjs";
 import "./globals.css";
 
 /**
@@ -39,6 +40,20 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: ["og.png"],
   },
+  /*
+   * What this page tells OTHER sites about where you came from.
+   *
+   * `strict-origin-when-cross-origin` sends the full URL only within this
+   * site, sends bare "https://felixfalling.github.io" to a third party, and
+   * sends nothing at all when leaving HTTPS for HTTP. It is the modern browser
+   * default, and it is stated explicitly here for two reasons: older engines
+   * still default to the leakier `no-referrer-when-downgrade`, and a policy
+   * this site relies on should be visible in the source rather than inherited.
+   *
+   * The outbound links in the page go further and send no referrer at all -
+   * see ExternalLink.tsx.
+   */
+  referrer: "strict-origin-when-cross-origin",
   // The AI opt-out that actually works on this host (see robots.ts for why the
   // robots.txt alone doesn't, on a Pages project path). It's server-rendered
   // into the static HTML, so scrapers that don't run JS still see it. Only the
@@ -102,10 +117,21 @@ const themeInitScript = `
  * (create the free account with that exact code to claim it). Until it IS
  * claimed the endpoint rejects every hit with a 400, which shows up in the
  * console on the deployed site - harmless, nothing is recorded, and the page
- * is unaffected, but it is not silent. To remove analytics entirely, delete
- * the <script> tag below.
+ * is unaffected, but it is not silent.
+ *
+ * THIS IS THE ONLY THIRD-PARTY JAVASCRIPT ON THE SITE, so it is also the only
+ * code here that someone else could change without touching this repo. The
+ * attributes on the tag below are what make that a bounded risk rather than an
+ * open door - see the comment on the tag itself.
+ *
+ * The URL and its integrity hash are NOT written here. They come from
+ * thirdParty.mjs, the single inventory of every outside service, because the
+ * Content-Security-Policy and the tests are generated from that same file - and
+ * a hash written down twice is a hash that will eventually disagree with
+ * itself. To re-pin, or to remove analytics entirely, go there.
  */
-const GOATCOUNTER_URL = "https://felixfalling.goatcounter.com/count";
+const ANALYTICS = THIRD_PARTY.analyticsScript;
+const ANALYTICS_ENDPOINT = THIRD_PARTY.analyticsEndpoint.url;
 
 export default function RootLayout({
   children,
@@ -126,11 +152,40 @@ export default function RootLayout({
           ghchart is the GitHub contribution graph in the Activity section (an
           image far down the page); gc.zgo.at is the GoatCounter script below.
         */}
-        <link rel="preconnect" href="https://ghchart.rshah.org" />
-        <link rel="preconnect" href="https://gc.zgo.at" />
+        <link rel="preconnect" href={THIRD_PARTY.contributionChart.origin} />
+        <link rel="preconnect" href={ANALYTICS.origin} crossOrigin="anonymous" />
+        {/*
+          The only inline script on the site. It is a build-time constant - no
+          value from the URL, storage, or the network is ever interpolated into
+          it - so there is nothing here for anyone to inject into. The one
+          external input it reads (?theme=) is compared against two literals
+          and otherwise ignored.
+
+          scripts/csp.mjs hashes this exact text after the build and names the
+          hash in the page's Content-Security-Policy, which is what allows it
+          to run while every OTHER inline script stays blocked. Edit it freely:
+          the hash is recomputed on every build, never hand-maintained.
+        */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
-        <script data-goatcounter={GOATCOUNTER_URL} async src="https://gc.zgo.at/count.js" />
+        {/*
+          Analytics, pinned. See the constants above for what each attribute is
+          doing and how to re-pin it:
+            integrity   - refuse to run the file if its bytes ever change
+            crossOrigin - REQUIRED for integrity to be checked at all; without
+                          it the browser blocks the script instead of verifying
+                          it (gc.zgo.at sends access-control-allow-origin: *)
+            referrerPolicy - do not tell the analytics CDN which page you are on
+                          beyond the origin; the count itself is sent separately
+        */}
+        <script
+          data-goatcounter={ANALYTICS_ENDPOINT}
+          async
+          src={ANALYTICS.url}
+          integrity={ANALYTICS.integrity}
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
       </body>
     </html>
   );

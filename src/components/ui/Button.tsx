@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EXTERNAL_REL } from "./ExternalLink";
 import styles from "./Button.module.css";
 
 /**
@@ -30,7 +31,7 @@ export default function Button({
 
   if (external) {
     return (
-      <a className={className} href={href} target="_blank" rel="noopener">
+      <a className={className} href={href} target="_blank" rel={EXTERNAL_REL}>
         {children}
       </a>
     );

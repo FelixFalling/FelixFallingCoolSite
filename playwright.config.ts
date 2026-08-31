@@ -15,6 +15,20 @@ import { defineConfig, devices } from "@playwright/test";
  *   npm run test:ui          interactive mode - watch tests run, time-travel
  *   npx playwright codegen   record clicks into test code (great for learning)
  */
+/**
+ * The specs that assert on the BUILT export rather than on a running dev
+ * server. They run only in the "export" project (see the note on it below) and
+ * are skipped everywhere else, so this pattern is defined once and used in
+ * three places instead of being written out three times.
+ *
+ *   export.spec.ts    - the build produced what we think it did
+ *   security.spec.ts  - the shipped artifact is locked down (CSP, SRI, rel=…)
+ *
+ * Both are meaningless against `next dev`: it serves no CSP, does not minify,
+ * and does not run scripts/csp.mjs at all.
+ */
+const EXPORT_ONLY = /(export|security)\.spec\.ts/;
+
 export default defineConfig({
   testDir: "./tests",
 
@@ -75,13 +89,13 @@ export default defineConfig({
     {
       name: "desktop",
       use: { ...devices["Desktop Chrome"], channel: "chrome" },
-      testIgnore: /export\.spec\.ts/,
+      testIgnore: EXPORT_ONLY,
     },
     {
       // A real iPhone viewport in the real iOS engine.
       name: "mobile-safari",
       use: { ...devices["iPhone 14"] },
-      testIgnore: /export\.spec\.ts/,
+      testIgnore: EXPORT_ONLY,
     },
     {
       /*
@@ -98,7 +112,7 @@ export default defineConfig({
        * an engine renders it.
        */
       name: "export",
-      testMatch: /export\.spec\.ts/,
+      testMatch: EXPORT_ONLY,
       use: {
         ...devices["Desktop Chrome"],
         channel: "chrome",

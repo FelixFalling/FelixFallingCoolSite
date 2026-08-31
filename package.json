@@ -5,11 +5,11 @@
   "description": "Personal portfolio / resume site, built with Next.js + TypeScript.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/csp.mjs",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "screenshots": "next build && node scripts/screenshots.mjs",
+    "screenshots": "npm run build && node scripts/screenshots.mjs",
     "test": "playwright test",
     "test:ui": "playwright test --ui"
   },
