@@ -33,9 +33,19 @@ because of it.
 
 ## The one-file rule: editing your content
 
-**All the site's text lives in [`src/data/resume.ts`](src/data/resume.ts)** -
-name, jobs, projects, education, skills, links. Edit that file and every section
-updates. You never need to touch layout code to change what the site *says*.
+There are three files you edit to change the site, and between them they cover
+almost everything you would want to change:
+
+| To change… | Edit | Notes |
+|---|---|---|
+| the **words** | [`src/data/resume.ts`](src/data/resume.ts) | name, projects, skills, links |
+| the **colours** | [`src/app/globals.css`](src/app/globals.css) | one token block, both themes |
+| the **scene** | [`src/components/scene/tuning.ts`](src/components/scene/tuning.ts) | wave speeds, stars, the dive, live weather |
+
+You never need to touch layout code to change what the site *says* or how the
+coast *behaves*. A fourth file, [`thirdParty.mjs`](thirdParty.mjs), lists every
+outside service the site talks to - see [Security](#security) for why that one
+is not just documentation.
 
 ## Project map
 
@@ -58,13 +68,19 @@ src/
                         leaves them out while the site stays pseudonymous,
                         and their arrays in resume.ts are empty
     scene/              the animated coastal diorama behind the hero
-      HeroScene.tsx     assembles the layers + mouse parallax (the only file
-                        here with JavaScript logic)
-      Waves.tsx         4 drifting wave layers, tiled at a fixed width so
-                        they flow on any screen size  ← numbers to tweak
+      tuning.ts         ← EVERY NUMBER THE SCENE USES. Wave speeds, star
+                        positions, how fast the page sinks, where the live
+                        weather is read from. Start here to retune anything.
+      HeroScene.tsx     stacks the layers (no cursor parallax - see the note
+                        in the file for why it was removed)
+      Waves.tsx         draws the 4 wave layers described in tuning.ts, tiled
+                        at a fixed width so they flow on any screen size
+      crest.ts          the sum-of-sines crest generator the sea and the
+                        panel waterlines share
       Shore.tsx         the rocks + lighthouse (drawn together so the
                         lighthouse always stands on its rock)
       Stars.tsx         faint stars (dark mode only)
+      depth.ts          publishes how deep you have scrolled, as CSS vars
       weather.ts  Rain.tsx  DuckRain.tsx (live weather + the easter egg)
     ui/                 shared building blocks used across pages
       Button.tsx        THE button (primary/ghost) - hero + 404 use it
@@ -78,6 +94,13 @@ src/
       Slides.tsx        the project screenshot slideshow
   data/
     resume.ts           ← YOUR CONTENT
+basePath.mjs            the GitHub Pages path, defined once
+thirdParty.mjs          ← EVERY OUTSIDE SERVICE, defined once. The CSP is
+                        generated from this and the tests enforce it.
+scripts/
+  csp.mjs               writes the Content-Security-Policy into ./out
+  serve-out.mjs         serves ./out the way Pages does (tests + screenshots)
+  screenshots.mjs       regenerates the site's own project screenshots
 tests/                  Playwright tests - Page Object Model (see below)
   fixtures.ts           wires page objects into every test
   pages/                one class per page (HomePage, NotFoundPage, BasePage)
@@ -111,14 +134,24 @@ Tip while designing: force a theme from the URL with `?theme=dark` or
 ## How the coast scene works
 
 `HeroScene.tsx` stacks the layers back-to-front: stars → shore (rocks +
-lighthouse) → waves → rain. Each layer is a small
-file where the interesting parts are **plain data arrays** - positions, sizes,
-speeds, opacities - with comments explaining each number. Want a fifth wave?
-Add a line to `LAYERS` in `Waves.tsx`.
+lighthouse) → waves → rain. Each layer is a small file that only *draws*; every
+number it draws with is a plain data array in
+[`scene/tuning.ts`](src/components/scene/tuning.ts), with a comment explaining
+what it does. Want a fifth wave? Add a line to `WATER.layers` there.
 
-On desktop the scene drifts toward your cursor (parallax). Phones get the
-ambient version, and visitors with "reduce motion" set in their OS get a still
-scene - that's handled by the `prefers-reduced-motion` block in `globals.css`.
+A handful of those numbers are marked ⚠ - they are load-bearing, and the note
+next to each says what breaks. (Short version: the 1200px tile and the
+whole-number harmonics are what make the water loop seamlessly, and the `far`
+and `mid` amplitudes are what stop the waves' pre-mixed colours going wrong.
+`tests/waves.spec.ts` guards both.)
+
+**There is deliberately no cursor parallax.** The scene used to shift toward the
+pointer; it read as the horizon swaying under the mouse, which is a standard
+vestibular trigger, and gating it behind `prefers-reduced-motion` was not enough
+because most people it affects have never set that flag. The motion that remains
+- drift, swell, stars - is slow and not coupled to anything you do. Visitors who
+*have* set "reduce motion" get a still scene via the `prefers-reduced-motion`
+block in `globals.css`.
 
 The scene is also **alive**: at night the lighthouse light turns like the real
 thing - its beam sweeping and flashing as it points your way (`Shore.tsx`) -
@@ -209,6 +242,56 @@ only ever needs changing in one place. The specs to copy from:
 Tests import `resume.ts` directly, so they keep passing when you edit your
 content - they check structure and behavior, not hardcoded strings.
 
+## Security
+
+The site is static, has no forms, no accounts, no cookies and no server, so most
+web vulnerabilities simply have nowhere to live here. What is left is the risk of
+*other people's code* - the two scripts loaded from a CDN - and the ordinary
+hygiene that stops a small mistake becoming a large one. All of it is enforced by
+tests in [`tests/security.spec.ts`](tests/security.spec.ts), which run against the
+built `./out` rather than the dev server, because that is where these things
+either exist or do not.
+
+**Every outside service is declared in one place.**
+[`thirdParty.mjs`](thirdParty.mjs) lists each one with what it is for and which
+CSP directives it belongs in. That file is not documentation - the policy is
+generated from it, and a test scans the built HTML and fails if it finds a
+request to any origin the file does not list. You cannot add a third party
+without declaring it.
+
+**Third-party scripts are pinned.** Both the three.js on the clock page and the
+analytics script carry a Subresource Integrity hash: the browser hashes what it
+downloaded and refuses to run it if the bytes changed. If a CDN is ever
+compromised, the page shows an error instead of executing someone else's code.
+One test checks the hash in the markup matches the inventory; another fetches the
+live files and checks the pins have not gone stale.
+
+**Every page ships a Content-Security-Policy.** Written by
+[`scripts/csp.mjs`](scripts/csp.mjs) as the second half of `npm run build`. It
+allows no `unsafe-inline` and no `unsafe-eval` in `script-src` - inline scripts
+are permitted by *hash*, computed per build from the bytes that shipped, so the
+policy cannot go stale when you edit the theme script. `object-src`,
+`form-action`, `frame-src` and `worker-src` are all `none`. A test loads each
+page in a real browser and fails on any violation, which is what makes the
+policy safe to tighten.
+
+> **One known gap.** GitHub Pages cannot send HTTP headers, so the policy is
+> delivered in a `<meta>` tag - and `frame-ancestors` is ignored there. The site
+> can therefore still be embedded in a frame by another origin. Nothing here
+> takes a click that would matter if it were hijacked (no forms, no auth, no
+> state changes), but closing it properly needs a host that can set headers.
+
+**Supply chain.** Workflow actions are pinned to full commit SHAs rather than to
+movable tags like `@v4`, and [`dependabot.yml`](.github/dependabot.yml) opens a
+weekly PR to keep both the SHAs and the npm packages current. The deploy
+workflow's write permissions belong to the *deploy* job only - the `build` job,
+which is the one that executes hundreds of npm packages, is read-only.
+
+**If you change any of this,** run `npm test`. To convince yourself the tests
+actually work, break something on purpose - delete an `integrity=` attribute
+from `public/clockmaker.html`, or add `'unsafe-inline'` to the policy in
+`scripts/csp.mjs` - and watch which test goes red.
+
 ## CI and deploying
 
 Two GitHub Actions workflows run on every push to `main`:
@@ -223,6 +306,9 @@ Two GitHub Actions workflows run on every push to `main`:
 They're independent: a failed test never blocks a deploy. If you want failing
 tests to block deploys later, add branch protection on `main` that requires the
 "Tests" check.
+
+Both workflows pin their actions to commit SHAs and request the narrowest token
+they can - see [Security](#security).
 
 **Worth knowing:** because they're independent, a commit that breaks the build
 still triggers a deploy - which then fails, leaving the previous version live.
@@ -283,8 +369,12 @@ this trap - it just hasn't been done yet.)
 | Change a color                   | tokens at the top of `src/app/globals.css`     |
 | Reorder / remove a page section  | `src/app/page.tsx`                             |
 | Restyle one section              | `src/components/sections/<Name>.module.css`    |
-| Tune the waves / rocks / fog     | data arrays in `src/components/scene/*.tsx`    |
+| Tune the waves / stars / rain    | `src/components/scene/tuning.ts`               |
+| Move the rocks / lighthouse      | the `<Cluster>` props in `src/components/scene/Shore.tsx` |
+| Add / remove a third-party service | `thirdParty.mjs` (the CSP and the tests follow it) |
+| Change the security policy       | `POLICY` in `scripts/csp.mjs`                  |
+| Re-pin a CDN script after an update | the hash in `thirdParty.mjs`; `npm test` tells you when one goes stale |
 | Add a test                       | copy a spec in `tests/`                        |
 | Show my job history / education  | fill the empty arrays in `src/data/resume.ts`, then add the sections back to `src/app/page.tsx` |
 | Bring back the hero photo        | `showPhoto: true` in `src/data/resume.ts`      |
-| Check a change before pushing    | `npm run lint && npm run typecheck && npm run build` |
+| Check a change before pushing    | `npm run lint && npm run typecheck && npm test` |
