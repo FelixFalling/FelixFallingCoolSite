@@ -545,6 +545,35 @@ test.describe("the export leaks nothing", () => {
     }
   });
 
+  test("no personal photo is published", async ({ page }) => {
+    /*
+     * public/ is copied into the build wholesale - every file in it is served,
+     * whether or not a page links to it. So `showPhoto: false` in resume.ts
+     * takes the photo off the page and does nothing at all about the file,
+     * which went on being fetchable at a guessable URL. That is the gap this
+     * test exists for, and it was a live one: me.jpg was returning 200 from the
+     * deployed site the whole time the hero was rendering without it.
+     *
+     * It matters more here than it would elsewhere. The site deliberately
+     * carries no last name, no employer, no school and no LinkedIn (see the
+     * PRIVACY NOTE in data/resume.ts); a face undoes all of that at once, since
+     * reverse image search links it to every other account using the same
+     * picture.
+     *
+     * Checked by fetching, not by reading resume.ts, because the whole failure
+     * mode is a file that ships while the config says it is not in use.
+     */
+    for (const file of ["me.jpg", "me.png", "me.webp", "photo.jpg", "avatar.jpg", "headshot.jpg"]) {
+      const response = await page.request.get(`./${file}`);
+      expect(
+        response.status(),
+        `${file} is being served. Anything in public/ is published whether the ` +
+          `page links it or not - if a photo is wanted, that is a deliberate ` +
+          `identity decision, so make it in resume.ts and update this list.`,
+      ).toBe(404);
+    }
+  });
+
   test("the site stays pseudonymous", async ({ page }) => {
     /*
      * data/resume.ts carries a PRIVACY NOTE: the public site deliberately
