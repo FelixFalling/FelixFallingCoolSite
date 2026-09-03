@@ -174,6 +174,57 @@ test.describe("the Curse of Ra clock", () => {
     await expect(page.locator("#sub")).toContainText("decimal your timeclock shows");
   });
 
+  test("every whole 8-hour day is offered, 8 through 80", async ({ page }) => {
+    /*
+     * The list is a ladder of full shifts, and it used to have rungs missing:
+     * 8 → 24 → 40 → 72 → 80. Two days, four days, six, seven and eight were all
+     * absent, so anyone working one of those patterns had to open Custom and
+     * type a number the dropdown should simply have had.
+     *
+     * Asserted as the exact expected set rather than "at least these", so a
+     * future edit cannot quietly drop a rung back out again.
+     */
+    const values = await page
+      .locator("#targetSel option")
+      .evaluateAll((opts) => opts.map((o) => (o as HTMLOptionElement).value));
+
+    const eightHourDays = Array.from({ length: 10 }, (_, i) => String((i + 1) * 8));
+    expect(values, "the ladder of full 8-hour days has a rung missing").toEqual([
+      ...eightHourDays,
+      "custom",
+    ]);
+  });
+
+  test("each 8-hour rung actually drives the answer", async ({ page }) => {
+    /*
+     * Adding <option>s to the markup would satisfy the test above while the
+     * value behind a new one went nowhere, so this walks the whole ladder
+     * through the REAL control: pick the option, read what the panel says.
+     *
+     * That path matters and is easy to miss. The clockOut() helper used by the
+     * other tests in this file calls window.__clock.clockOutMath() directly
+     * with a number, which skips the selector, targetHours() and the render
+     * entirely - so a dropdown wired to nothing would sail past it. (Checked:
+     * an earlier version of this test used that helper and did not notice a
+     * deliberately broken option value.)
+     *
+     * Back at 12:00 with (target - 8) hours banked leaves exactly one 8-hour
+     * shift on every rung, so the answer is 8:00 PM every time. One expected
+     * value across ten targets makes a wrong one obvious instead of arithmetic
+     * to re-check per row.
+     */
+    await page.locator("#backIn").fill("12:00");
+
+    for (let hours = 8; hours <= 80; hours += 8) {
+      await page.locator("#worked").fill(String(hours - 8));
+      await page.locator("#targetSel").selectOption(String(hours));
+      await expect(
+        page.locator("#out"),
+        `the ${hours} h option should leave one 8-hour shift from 12:00`,
+      ).toHaveText("8:00 PM");
+    }
+  });
+
   test("the target selector changes the answer", async ({ page }) => {
     await page.locator("#backIn").fill("12:00");
     await page.locator("#worked").fill("20");
