@@ -22,7 +22,7 @@
     "@axe-core/playwright": "^4.12.1",
     "@eslint/eslintrc": "^3.3.6",
     "@playwright/test": "^1.61.1",
-    "@types/node": "22.10.7",
+    "@types/node": "26.4.0",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
     "eslint": "^9.39.5",
