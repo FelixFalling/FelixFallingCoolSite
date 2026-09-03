@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { allOrigins } from "../thirdParty.mjs";
 
 /**
  * Assertions about the STATIC EXPORT - the ./out directory that GitHub Pages
@@ -123,7 +124,16 @@ test.describe("the static export", () => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(String(error)));
     page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
+      if (message.type() !== "error") return;
+      /*
+       * The URL is recorded alongside the text because a blocked subresource
+       * logs only "Failed to load resource: net::ERR_FAILED" - a message that
+       * on its own cannot be attributed to whoever caused it. It lives in the
+       * message's location, not in its text, so the filter at the bottom of
+       * this test would never see it otherwise.
+       */
+      const url = message.location()?.url ?? "";
+      errors.push(url ? `${message.text()}  [${url}]` : message.text());
     });
 
     /*
@@ -136,10 +146,11 @@ test.describe("the static export", () => {
      * console error, so the first version of this test failed on four errors
      * it had caused itself. Empty successful responses keep the page quiet
      * without pretending the services responded with anything.
+     *
+     * The filter at the bottom is written against the third-party inventory
+     * rather than a hard-coded hostname, so removing a service (as the
+     * analytics tag was) leaves nothing stale here to trip over.
      */
-    await page.route("**gc.zgo.at**", (route) =>
-      route.fulfill({ status: 200, contentType: "text/javascript", body: "" }),
-    );
     await page.route("**open-meteo**", (route) =>
       route.fulfill({ status: 200, contentType: "application/json", body: "{}" }),
     );
@@ -155,6 +166,13 @@ test.describe("the static export", () => {
     await page.goto("./", { waitUntil: "load" });
     await page.waitForTimeout(1200);
 
-    expect(errors).toEqual([]);
+    /*
+     * Only errors this site is responsible for. A message naming a third-party
+     * origin is about a service that was deliberately stubbed or blocked
+     * above, and says nothing about whether OUR bundle runs cleanly - which is
+     * the single thing this test exists to answer.
+     */
+    const ours = errors.filter((error) => !allOrigins().some((origin) => error.includes(origin)));
+    expect(ours).toEqual([]);
   });
 });

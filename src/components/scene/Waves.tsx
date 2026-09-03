@@ -14,96 +14,23 @@
  * makes it read as water rather than a sliding image. Live wind data speeds
  * everything up via --wave-speed (see weather.ts).
  *
- * TILES below is the MAXIMUM number of tiles; how many are actually drawn (and
- * how wide the row is) comes from Waves.module.css, which steps it up with the
- * viewport. That is load-bearing, not an optimization - see the note there.
+ * WATER.maxTiles is the MAXIMUM number of tiles; how many are actually drawn
+ * (and how wide the row is) comes from Waves.module.css, which steps it up with
+ * the viewport. That is load-bearing, not an optimization - see the note there.
  *
  * WHERE THE WATER SITS: these rows fill the whole .waves-strip from the
  * bottom up. The front (sand) layer is filled with --sand, the page
  * background, so the sea always looks like it washes onto the page itself.
  *
- * All the animation timing is data below - tweak the numbers to taste.
+ * EVERY NUMBER IN THIS COMPONENT LIVES IN tuning.ts - the four layers, their
+ * timings, the foam. This file is only the drawing; go there to tune the sea.
  */
 
-import { crestPath, TILE, type Harmonic } from "./crest";
+import { crestPath, TILE } from "./crest";
+import { WATER, type WaveLayerSpec } from "./tuning";
 import styles from "./Waves.module.css";
 
-const TILES = 6; // the most we ever draw (only on a ~6000px-wide monitor)
-
-interface Layer {
-  fill: string;
-  y: number; // the crest's baseline, in the 0-200 viewBox
-  harmonics: readonly Harmonic[];
-  /** How much the crests peak and the troughs flatten, as the fraction by
-      which a full-height crest grows. 0 is a plain sum of sines, symmetric
-      and ribbon-like. Nearer water gets more of it: that asymmetry is only
-      visible when the wave is big enough to show it. */
-  sharpen: number;
-  drift: "waveDrift" | "waveDrift2";
-  driftDur: number; // seconds for one full loop
-  swell: "waveSwell" | "waveSwell2";
-  swellDur: number;
-  /** Seconds of head start on the swell. Without it all four layers bob in
-      unison for the first seconds after load, which reads as one sheet of
-      water hinging rather than four depths of it. */
-  swellOffset: number;
-  /** How brightly light catches this crest, 0 (none) to 1. Scales the width
-      AND the opacity of the highlight, so nearer crests are brighter and
-      thicker - a depth cue in their own right. 1 reproduces exactly the foam
-      the breaking layer has always had. */
-  crest: number;
-  // How far the drawing bleeds below its row, so the swell bobbing a layer
-  // upward can never lift its bottom edge into view. The front (sand) layer
-  // has to cover the whole beach as well, since its fill IS the beach.
-  bleed: string;
-}
-
-// Back-to-front: faint far swell → deeper teal → breaking wave with foam → the
-// shallow wash that meets the page. Fills are theme tokens (globals.css) so the
-// waves recolor in dark mode.
-//
-// THE SEA IN PERSPECTIVE. Distance compresses waves: far off you see a lot of
-// small, fast ripples packed into very little height, and up close a few tall,
-// slow swells. The four layers are built to that rule, and it is where the
-// depth comes from now that they are no longer one shape at four sizes.
-//
-//   far    baseline 70, ~7px of rise, fine chop (k = 3, 5, 8)
-//   mid    baseline 99, ~16px, a mix (k = 2, 3, 7)
-//   break  baseline 124, ~28px led by ONE slow swell (k = 1, 2, 5)
-//   front  baseline 152, ~12px - the shallow wash that meets the page
-//
-// The near crests can rise ABOVE the layers behind them, and should - a close
-// swell occluding the far water is a depth cue, and forbidding it is what made
-// the old sea look like stage flats. It costs a little colour accuracy, since
-// each fill is pre-mixed assuming the layer behind it is what shows through
-// (see --wave-*-solid in globals.css). The error is under 3/255 per channel in
-// both themes. The one pair where it would be worst - and where it would land
-// on the sea's top edge against the sky, the easiest place to see it - is far
-// and mid, and those two are sized so it cannot happen at all.
-// tests/waves.spec.ts holds that line.
-//
-// EVERY LAYER IS OPAQUE. They used to be the raw --wave-* tokens at opacity
-// 0.5 / 0.65 / 0.85, which is where the haze came from - but transparent water
-// shows you what is behind it, and what is behind it is the sea stacks. You
-// could see the islands through the waves, and a crest crossing a rock looked
-// like a line drawn on the rock.
-//
-// The front layer uses --waterline-fill so the waves always look like they
-// wash onto whatever is actually behind them: the page background at the top,
-// and - once you start scrolling down in dark mode - the water you are sinking
-// into. Filling it with plain --sand left a dark band between the crest and
-// the sea, which was the last visible seam at the waterline.
-//
-// Drift durations are one full 1200px loop, and they ramp with depth too: the
-// far water crawls, the breaking layer travels ~110px every second.
-const LAYERS: Layer[] = [
-  { fill: "var(--wave-far-solid)", y: 70, harmonics: [[3, 5.5, 0.0], [5, 3.4, 2.3], [8, 1.8, 4.1]], sharpen: 0.15, drift: "waveDrift", driftDur: 26, swell: "waveSwell2", swellDur: 8, swellOffset: 0, crest: 0.3, bleed: "28px" },
-  { fill: "var(--wave-mid-solid)", y: 99, harmonics: [[2, 10, 1.4], [3, 5.5, 3.7], [7, 2.2, 0.5]], sharpen: 0.3, drift: "waveDrift2", driftDur: 17, swell: "waveSwell", swellDur: 6.5, swellOffset: -2.1, crest: 0.55, bleed: "28px" },
-  { fill: "var(--wave-break-solid)", y: 124, harmonics: [[1, 15, 2.7], [2, 8.5, 5.1], [5, 3.4, 1.2]], sharpen: 0.4, drift: "waveDrift", driftDur: 11, swell: "waveSwell2", swellDur: 5, swellOffset: -1.3, crest: 1, bleed: "28px" },
-  { fill: "var(--waterline-fill)", y: 152, harmonics: [[1, 7.5, 4.6], [3, 4.2, 1.9], [4, 2.1, 3.0]], sharpen: 0.25, drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell", swellDur: 4.5, swellOffset: -3.4, crest: 0, bleed: "28px" },
-];
-
-function WaveLayer({ layer }: { layer: Layer }) {
+function WaveLayer({ layer }: { layer: WaveLayerSpec }) {
   const crest = crestPath(layer.y, layer.harmonics, layer.sharpen);
   const body = `${crest} L${TILE} 200 L0 200 Z`; // crest, then down and back to fill the water
 
@@ -141,7 +68,7 @@ function WaveLayer({ layer }: { layer: Layer }) {
           willChange: "transform", // no backface-visibility here either - see the row note
         }}
       >
-        {Array.from({ length: TILES }, (_, i) => (
+        {Array.from({ length: WATER.maxTiles }, (_, i) => (
           <svg
             key={i}
             className={styles.tile}
@@ -177,8 +104,8 @@ function WaveLayer({ layer }: { layer: Layer }) {
               // reading as water: a real one is covered in scattered light,
               // and a band with no highlight at all looks like paper.
               <>
-                <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={5.5 * layer.crest} strokeLinecap="round" opacity={0.16 * layer.crest} />
-                <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={2.5 * layer.crest} strokeLinecap="round" opacity={0.42 * layer.crest} />
+                <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={WATER.foam.haloWidth * layer.crest} strokeLinecap="round" opacity={WATER.foam.haloOpacity * layer.crest} />
+                <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={WATER.foam.coreWidth * layer.crest} strokeLinecap="round" opacity={WATER.foam.coreOpacity * layer.crest} />
               </>
             )}
           </svg>
@@ -191,7 +118,7 @@ function WaveLayer({ layer }: { layer: Layer }) {
 export default function Waves() {
   return (
     <div style={{ position: "absolute", inset: 0 }} aria-hidden="true">
-      {LAYERS.map((layer) => (
+      {WATER.layers.map((layer) => (
         <WaveLayer key={layer.fill + layer.y} layer={layer} />
       ))}
     </div>

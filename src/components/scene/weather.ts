@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import { THIRD_PARTY } from "../../../thirdParty.mjs";
+import { WEATHER } from "./tuning";
+
 /**
  * Live coastal weather for the hero scene.
+ *
+ * Where it looks, how wide the golden hour is, and how wind maps to wave speed
+ * are all in tuning.ts under WEATHER.
  *
  * On page load this asks Open-Meteo (a free, no-API-key weather service) for
  * the CURRENT conditions at Newport, on the real Oregon coast - and the scene
@@ -18,14 +24,16 @@ import { useEffect, useState } from "react";
  * defaults - the scene never depends on the network.
  */
 
-// Newport, Oregon - the stretch of coast the scene is modeled on.
-const LAT = 44.63;
-const LON = -124.05;
 // `timezone=auto` matters: it makes every time in the response - including
 // `current.time` - come back in the COAST's local clock, so the sunrise and
 // sunset times can be compared against "now there" without any timezone maths.
+//
+// The coordinates come from tuning.ts, and the origin from thirdParty.mjs -
+// the single inventory of every outside service, which is also what the
+// Content-Security-Policy is generated from. Building the URL from that
+// constant means the page can never end up calling a host the policy blocks.
 const API =
-  `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+  `${THIRD_PARTY.weatherApi.url}?latitude=${WEATHER.lat}&longitude=${WEATHER.lon}` +
   `&current=weather_code,wind_speed_10m,cloud_cover&wind_speed_unit=kmh` +
   `&daily=sunrise,sunset&timezone=auto`;
 
@@ -41,9 +49,6 @@ export interface CoastalWeather {
 }
 
 const DEFAULTS: CoastalWeather = { waveSpeed: 1, raining: false, golden: 0 };
-
-/** How long before/after the sun crosses the horizon the sky stays warm. */
-const GOLDEN_WINDOW_MINUTES = 40;
 
 /**
  * Minutes since midnight for an Open-Meteo local time string
@@ -72,17 +77,17 @@ function goldenAmount(now: number | null, sunrise: number | null, sunset: number
     .map((t) => Math.abs(now - t));
   if (gaps.length === 0) return 0;
   const nearest = Math.min(...gaps);
-  return Math.max(0, 1 - nearest / GOLDEN_WINDOW_MINUTES);
+  return Math.max(0, 1 - nearest / WEATHER.goldenWindowMinutes);
 }
 
 /** Translate a WMO weather code + wind into scene settings. */
 function interpret(code: number, windKmh: number, golden: number): CoastalWeather {
   // Any drizzle/rain/shower/thunder code turns the rain layer on.
-  const raining =
-    (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
+  const raining = WEATHER.rainCodes.some(([low, high]) => code >= low && code <= high);
 
   // Wind speeds up the water - clamped so the scene stays calm-ish.
-  const waveSpeed = Math.min(1.7, Math.max(0.85, 0.85 + windKmh / 45));
+  const { base, divisor, min, max } = WEATHER.wind;
+  const waveSpeed = Math.min(max, Math.max(min, base + windKmh / divisor));
 
   return { waveSpeed, raining, golden };
 }

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { ProjectImage } from "@/data/resume";
+import { EXTERNAL_REL } from "./ExternalLink";
 import styles from "./Slides.module.css";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -70,7 +71,7 @@ export default function Slides({
               className={styles.slideLink}
               href={href}
               target="_blank"
-              rel="noopener"
+              rel={EXTERNAL_REL}
               aria-label={`Open project: ${title}`}
             >
               <img className={styles.slideImg} src={`${BASE_PATH}/${img.src}`} alt={img.alt} loading="lazy" />

@@ -21,41 +21,26 @@
  * and pinned to the left edge: wider than any panel, so each one shows a
  * different stretch of the same sea at its true shape, and the panel's own
  * `overflow: hidden` does the cropping.
+ *
+ * The band height, the crest's harmonics and the foam strokes are all in
+ * scene/tuning.ts under WATERLINE.
  */
 
-import { crestPath, TILE, type Harmonic } from "@/components/scene/crest";
-
-/** How tall the water band is. Mirrors --waterline-band in globals.css, which
- *  is what reserves the room in the panel's padding - keep the two in step. */
-const BAND = 34;
-
-/**
- * Fine chop, not ocean swell: this is a little water in a box, so the crest is
- * built from fast harmonics at small amplitude, in the spirit of the hero's
- * `far` layer. Whole-number k, as always - see the note in crest.ts.
- */
-const HARMONICS: readonly Harmonic[] = [
-  [4, 4.6, 0.6],
-  [7, 2.7, 2.9],
-  [11, 1.5, 4.7],
-];
-
-/** Where the crest sits inside the band, leaving room for the tallest peak.
- *  The peak reaches sharpen-boosted (4.6 + 2.7 + 1.5) x 1.25 ~ 11px above this,
- *  so 13 keeps the tallest crest just inside the top of the band. */
-const BASE_Y = 13;
+import { crestPath, TILE } from "@/components/scene/crest";
+import { WATERLINE } from "@/components/scene/tuning";
 
 export default function Waterline() {
-  const crest = crestPath(BASE_Y, HARMONICS, 0.25);
-  const body = `${crest} L${TILE} ${BAND} L0 ${BAND} Z`; // crest, then down to fill
+  const { band, baseY, harmonics, sharpen, foam } = WATERLINE;
+  const crest = crestPath(baseY, harmonics, sharpen);
+  const body = `${crest} L${TILE} ${band} L0 ${band} Z`; // crest, then down to fill
 
   return (
     <svg
       className="waterline"
       aria-hidden="true"
       width={TILE}
-      height={BAND}
-      viewBox={`0 0 ${TILE} ${BAND}`}
+      height={band}
+      viewBox={`0 0 ${TILE} ${band}`}
       /* No preserveAspectRatio override on purpose - see the note above. */
       style={{
         position: "absolute",
@@ -73,17 +58,17 @@ export default function Waterline() {
         d={crest}
         fill="none"
         style={{ stroke: "var(--panel-foam)" }}
-        strokeWidth={3}
+        strokeWidth={foam.haloWidth}
         strokeLinecap="round"
-        opacity={0.18}
+        opacity={foam.haloOpacity}
       />
       <path
         d={crest}
         fill="none"
         style={{ stroke: "var(--panel-foam)" }}
-        strokeWidth={1.25}
+        strokeWidth={foam.coreWidth}
         strokeLinecap="round"
-        opacity={0.45}
+        opacity={foam.coreOpacity}
       />
     </svg>
   );

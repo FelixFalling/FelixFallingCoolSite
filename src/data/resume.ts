@@ -104,11 +104,29 @@ export const resume: Resume = {
     "documentation-driven development, from embedded firmware up to web " +
     "interfaces. This site is one of my projects: everything on it, from the " +
     "waves to the CI pipeline, is hand-built and open source.",
-  // The hero photo circle is off for now - flip this back to true to bring it
-  // back. `photo` is kept so that's a one-word change; with showPhoto false
-  // nothing in the hero reads it, and public/me.jpg just goes unused.
+  /*
+   * The hero photo circle is off, and the photo FILE is gone with it.
+   *
+   * Turning showPhoto off used to be the whole of it, and that was not enough:
+   * everything in public/ is copied into the build whether the page links it
+   * or not, so public/me.jpg went on being served at a guessable URL - a face,
+   * on a site whose entire point is to carry no last name, no employer and no
+   * LinkedIn. Hiding it from the page did not hide it from the web, and a
+   * photo is the strongest identifier here by some distance.
+   *
+   * (It is still in this repo's git history, which is public. Removing the
+   * file stops it being served and indexed - where crawlers and reverse image
+   * search actually look - but does not erase it. Erasing it would mean
+   * rewriting published history.)
+   *
+   * TO BRING A PHOTO BACK: put an image in public/, set `photo` to its
+   * filename, and flip showPhoto to true. Weigh the identity trade-off first -
+   * see the PRIVACY NOTE at the top of this file. tests/security.spec.ts fails
+   * if a personal photo ships, so it will remind you to make that call
+   * deliberately.
+   */
   showPhoto: false,
-  photo: "me.jpg",
+  // photo: "me.jpg",   <- file deliberately removed; see above
 
   links: {
     github: "https://github.com/FelixFalling",

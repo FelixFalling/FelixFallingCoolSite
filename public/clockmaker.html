@@ -324,12 +324,24 @@
 
   <div class="wkRow" id="targetRow">
     <label for="targetSel">Aiming for</label>
+    <!-- Every multiple of a full 8-hour day, 8 through 80 (one shift up to a
+         two-week pay period). It used to jump 8 → 24 → 40 → 72 → 80, which
+         skipped half the shift patterns people actually work: two days, four
+         days, six days, and the 7- and 8-day stretches. Anyone on one of those
+         had to reach for Custom to type a number the list should have offered.
+         The day count is spelled out because "56 h" on its own does not read
+         as a week of shifts at a glance. -->
     <select id="targetSel">
       <option value="8" selected>8 h day</option>
-      <option value="24">24 h period</option>
+      <option value="16">16 h · 2 days</option>
+      <option value="24">24 h · 3 days</option>
+      <option value="32">32 h · 4 days</option>
       <option value="40">40 h week</option>
-      <option value="72">72 h period</option>
-      <option value="80">80 h period</option>
+      <option value="48">48 h · 6 days</option>
+      <option value="56">56 h · 7 days</option>
+      <option value="64">64 h · 8 days</option>
+      <option value="72">72 h · 9 days</option>
+      <option value="80">80 h · two weeks</option>
       <option value="custom">Custom…</option>
     </select>
     <input type="number" id="targetCustom" min="0" step="0.01" inputmode="decimal" placeholder="hrs" hidden aria-label="Custom target in hours">
@@ -358,13 +370,22 @@
       &ldquo;Use graphics acceleration when available,&rdquo; then reload.
     </p>
     <p data-detail style="margin:0 0 18px;font-family:monospace;font-size:11px;opacity:.5"></p>
-    <button onclick="location.reload()" style="background:#e6bd45;color:#241a12;border:0;
+    <button id="errReload" type="button" style="background:#e6bd45;color:#241a12;border:0;
       padding:10px 22px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">
       Try again
     </button>
   </div>
 </div>
 <script>
+  /* Wired here rather than as an inline onclick="" attribute. Inline event
+     handlers are the one thing a Content-Security-Policy cannot allow without
+     'unsafe-hashes', and keeping the page free of them is what lets
+     scripts/csp.mjs ship a policy with no unsafe token in script-src at all. */
+  (function(){
+    var r = document.getElementById('errReload');
+    if(r) r.addEventListener('click', function(){ location.reload(); });
+  })();
+
   window.__showErr = function(msg){
     var b = document.getElementById('errBanner');
     if(b){ b.style.display='block'; b.textContent = (b.textContent? b.textContent+'\n':'') + msg; }
@@ -376,11 +397,35 @@
     __showErr('Promise: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
   });
 </script>
+<!-- THIRD-PARTY CODE, PINNED. `integrity` is the important attribute here: the
+     browser hashes the downloaded file and refuses to run it unless it matches,
+     so a compromised or swapped-out CDN file cannot execute on this page. The
+     hash is the one cdnjs publishes for this exact release (verified against
+     https://api.cdnjs.com/libraries/three.js/r128?fields=sri).
+
+     `crossorigin="anonymous"` is REQUIRED, not decoration: integrity checks are
+     only performed on CORS-enabled responses, and without it the browser blocks
+     the script outright. cdnjs sends `access-control-allow-origin: *`, so this
+     works - but if you ever change CDN, check that header first.
+
+     IF YOU CHANGE THE VERSION you MUST change the hash with it, or the script
+     silently stops loading (you'll get the __showErr banner below). To get the
+     new one:
+       curl -s <the new url> | openssl dgst -sha512 -binary | openssl base64 -A
+     tests/security.spec.ts fails the build if this attribute ever goes missing. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
-  onerror="__showErr('Three.js failed to load from CDN - check your network/allowlist.')"></script>
+  integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"></script>
 <script>
+/* The only check needed for the script above, and it catches every way that
+   load can fail: blocked by the network, 404 from the CDN, or - the case the
+   integrity attribute exists for - downloaded but REFUSED because its bytes
+   did not match the pinned hash. A browser reports all three the same way:
+   THREE never gets defined. (This replaced an onerror="" attribute on the tag,
+   which reported strictly less and cost the CSP an unsafe token.) */
 if(typeof THREE === 'undefined'){
-  __showErr('THREE is undefined - the 3D library did not load, so the scene cannot start.');
+  __showErr('Three.js did not load - it was blocked, unreachable, or failed its integrity check, so the scene cannot start.');
   throw new Error('THREE not loaded');
 }
 

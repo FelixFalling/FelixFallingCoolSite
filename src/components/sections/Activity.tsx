@@ -1,4 +1,5 @@
 import { resume } from "@/data/resume";
+import { THIRD_PARTY } from "../../../thirdParty.mjs";
 import Section from "@/components/ui/Section";
 import ExternalLink from "@/components/ui/ExternalLink";
 import ActivityChart from "./ActivityChart";
@@ -16,7 +17,10 @@ import styles from "./Activity.module.css";
  */
 
 const GITHUB_USER = "FelixFalling";
-const CHART_URL = `https://ghchart.rshah.org/3a6f6b/${GITHUB_USER}`;
+// The origin comes from thirdParty.mjs so this image can never point somewhere
+// the Content-Security-Policy (generated from that same file) would block.
+// The hex in the path is the colour ramp.
+const CHART_URL = `${THIRD_PARTY.contributionChart.origin}/3a6f6b/${GITHUB_USER}`;
 
 export default function Activity() {
   return (

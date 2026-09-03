@@ -34,8 +34,25 @@ export class ProjectCard {
     return this.slideImage(alt).evaluate((el) => (el as HTMLImageElement).naturalWidth > 0);
   }
 
-  /** Scroll this card into view (triggers lazy-loading of its slides). */
+  /**
+   * Scroll this card into view (triggers lazy-loading of its slides).
+   *
+   * WHY NOT scrollIntoViewIfNeeded(). That is an *actionability* call: before
+   * scrolling, Playwright waits for the element to be "stable", meaning its
+   * bounding box is unchanged across two consecutive animation frames. These
+   * cards carry `.adrift` (globals.css), which bobs them up and down on an
+   * `infinite` animation - so they are never stable, and the wait can only
+   * succeed if it happens to sample the animation at a turning point where the
+   * movement rounds to zero pixels. That made this the flakiest test in the
+   * suite: it passed or timed out after 30s depending on machine speed and
+   * luck, with the unhelpful message "element is not stable".
+   *
+   * A plain DOM scrollIntoView has no actionability wait, and nothing here
+   * needs one - the test is not clicking the card, only bringing it into the
+   * viewport so the browser starts fetching its lazy images. The assertions
+   * that follow do the real waiting.
+   */
   async scrollTo(): Promise<void> {
-    await this.root.scrollIntoViewIfNeeded();
+    await this.root.evaluate((el) => el.scrollIntoView({ block: "center" }));
   }
 }
