@@ -1,11 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import type { ProjectImage } from "@/data/resume";
 import { EXTERNAL_REL } from "./ExternalLink";
 import styles from "./Slides.module.css";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+const subscribeMotion = (notify: () => void) => {
+  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+  query.addEventListener("change", notify);
+  return () => query.removeEventListener("change", notify);
+};
+const getMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const serverMotion = () => true;
 
 /**
  * A small swipeable screenshot slideshow, used on project cards.
@@ -33,6 +41,11 @@ export default function Slides({
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reducedMotion = useSyncExternalStore(subscribeMotion, getMotion, serverMotion);
+  const still = paused || reducedMotion;
+  const imageSource = (img: ProjectImage, index: number) =>
+    `${BASE_PATH}/${img.poster && (still || index !== active) ? img.poster : img.src}`;
 
   // Which slide is in view = scroll position ÷ slide width, rounded.
   function handleScroll() {
@@ -64,7 +77,7 @@ export default function Slides({
         role={single ? undefined : "region"}
         aria-label={single ? undefined : `${title} screenshots (scrolls horizontally)`}
       >
-        {images.map((img) =>
+        {images.map((img, index) =>
           href ? (
             <a
               key={img.src}
@@ -74,19 +87,30 @@ export default function Slides({
               rel={EXTERNAL_REL}
               aria-label={`Open project: ${title}`}
             >
-              <img className={styles.slideImg} src={`${BASE_PATH}/${img.src}`} alt={img.alt} loading="lazy" />
+              <img className={styles.slideImg} src={imageSource(img, index)} alt={img.alt} loading="lazy" />
             </a>
           ) : (
             <img
               key={img.src}
               className={styles.slide}
-              src={`${BASE_PATH}/${img.src}`}
+              src={imageSource(img, index)}
               alt={img.alt}
               loading="lazy"
             />
           ),
         )}
       </div>
+
+      {images[active]?.poster && !reducedMotion && (
+        <button
+          type="button"
+          className={styles.motion}
+          onClick={() => setPaused(!paused)}
+          aria-label={`${paused ? "Play" : "Pause"} animated preview for ${title}`}
+        >
+          {paused ? "▶ Play" : "Ⅱ Pause"}
+        </button>
+      )}
 
       {!single && (
         <>

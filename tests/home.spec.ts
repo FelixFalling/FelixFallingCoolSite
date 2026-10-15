@@ -57,9 +57,11 @@ test.describe("home page", () => {
     }
   });
 
-  test("each project card shows its screenshots and link", async ({ homePage }) => {
+  test("each project card shows its screenshots and link", async ({ homePage, page }) => {
     await homePage.goto();
     await homePage.scrollToSection("projects");
+    // Continuous decorative bobbing prevents Playwright stability checks.
+    await page.addStyleTag({ content: ".adrift { animation: none !important; }" });
     // Projects and Games render through the same ProjectCards component, so
     // one loop covers every card in both sections.
     for (const project of [...resume.projects, ...resume.games]) {
