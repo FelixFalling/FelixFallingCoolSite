@@ -30,6 +30,8 @@ export interface Job {
 export interface ProjectImage {
   src: string; // path under /public, e.g. "projects/clock-1.webp"
   alt: string; // describes the image for screen readers
+  lightSrc?: string; // optional light-theme version
+  lightPoster?: string; // matching still frame
   poster?: string; // still frame for animated previews and reduced motion
 }
 
@@ -156,7 +158,7 @@ export const resume: Resume = {
         { label: "View the code →", href: "https://github.com/FelixFalling/Rubber-Duckie-Terminator" },
       ],
       images: [
-        { src: "projects/animated/duck.gif", poster: "projects/animated/duck.webp", alt: "Illustrated duck detection loop with a tracking box and laser turret" },
+        { src: "projects/animated/duck.gif", poster: "projects/animated/duck.webp", lightSrc: "projects/animated/duck-light.gif", lightPoster: "projects/animated/duck-light.webp", alt: "Illustrated duck detection loop with a tracking box and laser turret" },
         { src: "projects/ducky-1.webp", alt: "Live detection feed - RGB view with a duck bounding box beside the depth view" },
       ],
       tags: ["Python", "YOLOv8", "OpenCV", "Arduino", "Synthetic data"],
@@ -173,7 +175,7 @@ export const resume: Resume = {
         "server behind the live site.",
       links: [{ label: "Visit the live site →", href: "https://wdt.cecs.pdx.edu/" }],
       images: [
-        { src: "projects/animated/wildfire.gif", poster: "projects/animated/wildfire.webp", alt: "Illustrated fire forecast spreading across terrain contours" },
+        { src: "projects/animated/wildfire.gif", poster: "projects/animated/wildfire.webp", lightSrc: "projects/animated/wildfire-light.gif", lightPoster: "projects/animated/wildfire-light.webp", alt: "Illustrated fire forecast spreading across terrain contours" },
         { src: "projects/wildfire-1.webp", alt: "The wildfire forecast dashboard - a WRF-SFIRE fire-spread simulation over a map" },
       ],
       tags: ["Python", "Deep learning", "HPC / SLURM", "Docker", "Geospatial"],
@@ -192,7 +194,7 @@ export const resume: Resume = {
         "from ~81% to ~95%.",
       links: [{ label: "View the code →", href: "https://github.com/FelixFalling/Tic-Tac-Toe-Agent" }],
       images: [
-        { src: "projects/animated/tictactoe.gif", poster: "projects/animated/tictactoe.webp", alt: "Animated self-play sequence ending in a diagonal win" },
+        { src: "projects/animated/tictactoe.gif", poster: "projects/animated/tictactoe.webp", lightSrc: "projects/animated/tictactoe-light.gif", lightPoster: "projects/animated/tictactoe-light.webp", alt: "Animated self-play sequence ending in a diagonal win" },
         { src: "projects/tictactoe-1.svg", alt: "A tic-tac-toe board mid-game, with X about to complete the top-left-to-bottom-right diagonal for the win" },
       ],
       tags: ["Python", "Reinforcement learning", "Q-learning", "NumPy", "Matplotlib"],
@@ -211,7 +213,7 @@ export const resume: Resume = {
         { label: "Transfer-learning CNN →", href: "https://github.com/FelixFalling/Transfer-Learning" },
       ],
       images: [
-        { src: "projects/animated/queens.gif", poster: "projects/animated/queens.webp", alt: "Illustrated genetic search arranging eight non-attacking queens" },
+        { src: "projects/animated/queens.gif", poster: "projects/animated/queens.webp", lightSrc: "projects/animated/queens-light.gif", lightPoster: "projects/animated/queens-light.webp", alt: "Illustrated genetic search arranging eight non-attacking queens" },
         { src: "projects/queens-board.webp", alt: "Chessboard showing one valid 8-queens solution, with a queen chess piece emblem" },
         { src: "projects/queens-1.webp", alt: "Fitness-over-generations plot from the genetic 8-queens solver, population size 1000" },
       ],
@@ -227,7 +229,7 @@ export const resume: Resume = {
         "GitHub Pages by CI on every push.",
       links: [{ label: "View the code →", href: "https://github.com/FelixFalling/FelixFallingCoolSite" }],
       images: [
-        { src: "projects/animated/coast.gif", poster: "projects/animated/coast.webp", alt: "Animated moonlit coastal waves and sea stacks" },
+        { src: "projects/animated/coast.gif", poster: "projects/animated/coast.webp", lightSrc: "projects/animated/coast-light.gif", lightPoster: "projects/animated/coast-light.webp", alt: "Animated moonlit coastal waves and sea stacks" },
         { src: "projects/site-light.webp", alt: "The portfolio homepage in light mode - fog and sea stacks under the hero" },
         { src: "projects/site-dark.webp", alt: "The portfolio homepage in dark mode - moonlit waves and stars" },
       ],
@@ -250,7 +252,7 @@ export const resume: Resume = {
         "one self-contained HTML file.",
       links: [{ label: "Open the clock →", href: `${BASE_PATH}/clockmaker.html` }],
       images: [
-        { src: "projects/animated/clock.gif", poster: "projects/animated/clock.webp", alt: "Animated golden clock inside an Egyptian tomb" },
+        { src: "projects/animated/clock.gif", poster: "projects/animated/clock.webp", lightSrc: "projects/animated/clock-light.gif", lightPoster: "projects/animated/clock-light.webp", alt: "Animated golden clock inside an Egyptian tomb" },
         { src: "projects/clock-1.webp", alt: "The Curse of Ra clock at night - a moonlit Egyptian tomb with a golden clock" },
         { src: "projects/clock-2.webp", alt: "The Curse of Ra clock by day - sunbeams lighting the tomb in gold" },
       ],
@@ -267,7 +269,7 @@ export const resume: Resume = {
         "Vibe-coded: AI-paired, human-directed, one dependency-free HTML file.",
       links: [{ label: "Play it →", href: `${BASE_PATH}/ghost-cat.html` }],
       images: [
-        { src: "projects/animated/wizard.gif", poster: "projects/animated/wizard.webp", alt: "Animated cat chasing a laser past shelves in a magical tower" },
+        { src: "projects/animated/wizard.gif", poster: "projects/animated/wizard.webp", lightSrc: "projects/animated/wizard-light.gif", lightPoster: "projects/animated/wizard-light.webp", alt: "Animated cat chasing a laser past shelves in a magical tower" },
         { src: "projects/wizard-2.webp", alt: "The Wizard's Tower gameplay - a cat chasing a laser dot up shelves, dodging ghost librarians" },
         { src: "projects/wizard-1.webp", alt: "The Wizard's Tower title screen with unlockable cat skins" },
       ],

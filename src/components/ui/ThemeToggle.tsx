@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { subscribeTheme, getTheme, getServerTheme } from "./themeStore";
 import styles from "./ThemeToggle.module.css";
 
 /**
@@ -20,37 +21,8 @@ import styles from "./ThemeToggle.module.css";
  * data-theme from anywhere and the icon follows.
  */
 
-/** Reflects the attribute the pre-paint script and `toggle` below both write. */
-function getTheme(): "light" | "dark" {
-  return document.documentElement.getAttribute("data-theme") === "dark"
-    ? "dark"
-    : "light";
-}
-
-/**
- * Watches <html> for changes to data-theme. useSyncExternalStore calls this
- * with a callback to run whenever the value might have changed, and expects an
- * unsubscribe function back.
- */
-function subscribe(onChange: () => void): () => void {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
-  return () => observer.disconnect();
-}
-
-/**
- * During server rendering and the first hydration pass there is no DOM to
- * read, so both sides agree on "light" and React re-renders with the real
- * value immediately after. Same visible behaviour as before, minus the
- * setState-in-an-effect.
- */
-const getServerTheme = (): "light" | "dark" => "light";
-
 export default function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, getTheme, getServerTheme);
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, getServerTheme);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";

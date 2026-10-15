@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures';
 
 test('animated project preview can pause, resume, and reveal the original screenshot', async ({ homePage, page }) => {
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.emulateMedia({ reducedMotion: 'no-preference', colorScheme: 'dark' });
   await homePage.goto();
   // Stabilize the decorative floating panel without disabling GIF playback.
   await page.addStyleTag({ content: ".adrift { animation: none !important; }" });
@@ -25,3 +25,24 @@ test('reduced motion uses still posters for every project preview', async ({ hom
   await expect(page.locator('img[src$=".gif"]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Pause animated/ })).toHaveCount(0);
 });
+
+for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+  test(`previews follow the theme and saved preference with motion: ${reducedMotion}`, async ({ homePage, page }) => {
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion });
+    await homePage.goto();
+    const extension = reducedMotion === 'reduce' ? 'webp' : 'gif';
+    const previews = page.locator('img[src*="animated/"]');
+    await expect(previews).toHaveCount(7);
+    for (const preview of await previews.all()) {
+      await expect(preview).toHaveAttribute('src', new RegExp(`-light\\.${extension}$`));
+    }
+    await homePage.nav.toggleTheme();
+    for (const preview of await previews.all()) {
+      await expect(preview).not.toHaveAttribute('src', /-light/);
+    }
+    await page.reload();
+    await expect(previews.first()).toHaveAttribute('src', new RegExp(`/duck\\.${extension}$`));
+    await homePage.nav.toggleTheme();
+    await expect(previews.first()).toHaveAttribute('src', new RegExp(`/duck-light\\.${extension}$`));
+  });
+}

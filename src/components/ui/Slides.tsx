@@ -3,6 +3,7 @@
 import { useRef, useState, useSyncExternalStore } from "react";
 import type { ProjectImage } from "@/data/resume";
 import { EXTERNAL_REL } from "./ExternalLink";
+import { subscribeTheme, getTheme, getServerTheme } from "./themeStore";
 import styles from "./Slides.module.css";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -43,9 +44,13 @@ export default function Slides({
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const reducedMotion = useSyncExternalStore(subscribeMotion, getMotion, serverMotion);
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, getServerTheme);
   const still = paused || reducedMotion;
-  const imageSource = (img: ProjectImage, index: number) =>
-    `${BASE_PATH}/${img.poster && (still || index !== active) ? img.poster : img.src}`;
+  const imageSource = (img: ProjectImage, index: number) => {
+    const src = theme === "light" ? img.lightSrc ?? img.src : img.src;
+    const poster = theme === "light" ? img.lightPoster ?? img.poster : img.poster;
+    return `${BASE_PATH}/${poster && (still || index !== active) ? poster : src}`;
+  };
 
   // Which slide is in view = scroll position ÷ slide width, rounded.
   function handleScroll() {

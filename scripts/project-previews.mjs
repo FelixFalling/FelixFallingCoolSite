@@ -82,16 +82,39 @@ function scene(kind,t) {
  }
  return s;
 }
+// Recolor the source geometry before rasterizing so both palettes stay crisp.
+const lightPalette = {
+ '#102333': '#f3f7f5', '#0c1d2b': '#e1ece8',
+ '#edf5f8': '#233f49', '#e7f4fa': '#233f49', '#829aaf': '#526a75',
+ '#67e8d0': '#087b70', '#ffd47c': '#e6ac38', '#faf0c5': '#b47818',
+ '#183648': '#dce7e3', '#173b43': '#d7eae3', '#142837': '#233f49',
+ '#c2d6e0': '#65818b', '#284957': '#a4bdb4', '#35566a': '#a0b8b8',
+ '#284454': '#c3d7d0', '#162f40': '#e3ece5', '#b6d5df': '#496974',
+ '#355466': '#718d8b', '#264d62': '#9ac5c4', '#2d6375': '#80b7bd',
+ '#347c8a': '#65a4b0', '#46999d': '#4b939e', '#76bab5': '#39818a',
+ '#f5dfad': '#e9b94f', '#374451': '#ded4b9', '#817354': '#aa8c59',
+ '#172b3c': '#fff9e9', '#716548': '#c4a96d', '#b59864': '#927241',
+ '#d3dce7': '#677185', '#e5eaf1': '#818c9d', '#c5b1df': '#725389',
+};
+function lightArtwork(svg) {
+ return svg.replace(/#[0-9a-f]{6}(?![0-9a-f])/gi, color => lightPalette[color] ?? color)
+   .replace(/(<text[^>]*fill=")#e6ac38/g, '$1#916016');
+}
+const themes = process.argv.includes('--light-only') ? ['light'] : ['dark', 'light'];
+for(const theme of themes) {
 for(const [kind,[title,subtitle]] of Object.entries(titles)) {
+ const filename = `${kind}${theme === 'light' ? '-light' : ''}`;
  const temp=await mkdtemp(join(tmpdir(),'project-preview-'));
  try {
   for(let i=0;i<48;i++) {
    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400"><rect width="640" height="400" fill="#102333"/>${text(30,35,title,teal,12)}${text(30,64,subtitle,'#edf5f8',18)}${scene(kind,i/48)}${rect(0,363,640,37,'#0c1d2b',0)}${text(30,386,'PROJECT SKETCH / '+kind.toUpperCase(),muted,10)}${text(514,386,'● IN MOTION',teal,10)}</svg>`;
-   const frame=await sharp(Buffer.from(svg)).png().toBuffer();
+   const frame=await sharp(Buffer.from(theme === 'light' ? lightArtwork(svg) : svg)).png().toBuffer();
    await sharp(frame).toFile(join(temp,`${String(i).padStart(3,'0')}.png`));
-   if(i===30)await sharp(frame).webp({quality:85}).toFile(`${out}/${kind}.webp`);
+   if(i===30)await sharp(frame).webp({quality:85}).toFile(`${out}/${filename}.webp`);
   }
-  execFileSync('ffmpeg',['-v','error','-framerate','12','-i',join(temp,'%03d.png'),'-filter_complex','[0:v]split[a][b];[a]palettegen=max_colors=96:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4','-loop','0','-y',`${out}/${kind}.gif`]);
-  console.log(`Created ${kind}.gif and reduced-motion poster`);
+  execFileSync('ffmpeg',['-v','error','-framerate','12','-i',join(temp,'%03d.png'),'-filter_complex','[0:v]split[a][b];[a]palettegen=max_colors=96:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4','-loop','0','-y',`${out}/${filename}.gif`]);
+  console.log(`Created ${filename}.gif and reduced-motion poster`);
  } finally {await rm(temp,{recursive:true,force:true});}
+}
+
 }
