@@ -124,8 +124,6 @@ export default function Shore() {
               background:
                 "linear-gradient(90deg, rgba(233, 242, 242, 0.42), rgba(233, 242, 242, 0) 88%)",
               clipPath: "polygon(0 41%, 100% 0, 100% 100%, 0 59%)",
-              WebkitMaskImage: "linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)",
-              maskImage: "linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%)",
               animation: "beamTurn 8s linear infinite",
               willChange: "transform, opacity",
             }}

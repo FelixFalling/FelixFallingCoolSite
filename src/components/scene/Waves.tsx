@@ -26,14 +26,13 @@
  * timings, the foam. This file is only the drawing; go there to tune the sea.
  */
 
-import { crestPath, foamCrestPath, foamSprayPath, TILE } from "./crest";
+import { crestPath, foamCrestPath, TILE } from "./crest";
 import { WATER, type WaveLayerSpec } from "./tuning";
 import styles from "./Waves.module.css";
 
 function WaveLayer({ layer }: { layer: WaveLayerSpec }) {
   const crest = crestPath(layer.y, layer.harmonics, layer.sharpen, 0.22);
   const foam = foamCrestPath(layer.y, layer.harmonics, layer.sharpen, 0.22, 0.18);
-  const spray = layer.crest >= 0.8 ? foamSprayPath(layer.y, layer.harmonics, layer.sharpen, 0.22) : "";
   const body = `${crest} L${TILE} 200 L0 200 Z`; // crest, then down and back to fill the water
 
   return (
@@ -113,16 +112,6 @@ function WaveLayer({ layer }: { layer: WaveLayerSpec }) {
                   strokeLinecap="round"
                   opacity={WATER.foam.coreOpacity * layer.crest}
                 />
-                {spray && (
-                  <path
-                    d={spray}
-                    fill="none"
-                    style={{ stroke: "var(--wave-foam)" }}
-                    strokeWidth={1.35 * layer.crest}
-                    strokeLinecap="round"
-                    opacity={0.38 * layer.crest}
-                  />
-                )}
               </>
             )}
           </svg>

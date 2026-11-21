@@ -42,7 +42,7 @@ export function crestPath(
   skew = 0,
 ): string {
   const kMax = Math.max(...harmonics.map(([k]) => k));
-  const steps = Math.max(32, kMax * 6);
+  const steps = Math.max(16, kMax * 4);
   const h = TILE / steps;
 
   const w = (k: number) => (2 * Math.PI * k) / TILE;
@@ -106,7 +106,7 @@ export function foamCrestPath(
   thresholdRatio = 0.2,
 ): string {
   const kMax = Math.max(...harmonics.map(([k]) => k));
-  const steps = Math.max(32, kMax * 6);
+  const steps = Math.max(16, kMax * 4);
   const h = TILE / steps;
 
   const w = (k: number) => (2 * Math.PI * k) / TILE;
@@ -165,80 +165,4 @@ export function foamCrestPath(
   }
 
   return foam.trim();
-}
-
-/**
- * Delicate secondary foam froth trailing just below the crest on the forward
- * face of a breaking swell.
- */
-export function foamSprayPath(
-  baseY: number,
-  harmonics: readonly Harmonic[],
-  sharpen: number,
-  skew = 0,
-): string {
-  const kMax = Math.max(...harmonics.map(([k]) => k));
-  const steps = Math.max(32, kMax * 6);
-  const h = TILE / steps;
-
-  const w = (k: number) => (2 * Math.PI * k) / TILE;
-  const amp = harmonics.reduce((sum, [, a]) => sum + a, 0);
-
-  const raw = (x: number) =>
-    harmonics.reduce((sum, [k, a, p]) => {
-      const th = w(k) * x + p;
-      const primary = a * Math.sin(th);
-      const stokesSkew = skew > 0 ? 0.22 * skew * a * Math.cos(2 * th - 0.4) : 0;
-      return sum + primary + stokesSkew;
-    }, 0);
-
-  const rawSlope = (x: number) =>
-    harmonics.reduce((sum, [k, a, p]) => {
-      const th = w(k) * x + p;
-      const primarySlope = a * w(k) * Math.cos(th);
-      const stokesSlope = skew > 0 ? -0.44 * skew * a * w(k) * Math.sin(2 * th - 0.4) : 0;
-      return sum + primarySlope + stokesSlope;
-    }, 0);
-
-  const q = amp > 0 ? sharpen / amp : 0;
-  let mean = 0;
-  for (let i = 0; i < steps; i++) mean += q * raw(i * h) ** 2;
-  mean /= steps;
-
-  const yAt = (x: number) => baseY - (raw(x) + q * raw(x) ** 2 - mean);
-  const dyAt = (x: number) => -rawSlope(x) * (1 + 2 * q * raw(x));
-  const r = (n: number) => Number(n.toFixed(1));
-
-  const elevations = [];
-  for (let i = 0; i <= steps; i++) elevations.push(baseY - yAt(i * h));
-  const maxElev = Math.max(...elevations);
-  if (maxElev <= 1) return "";
-
-  // Sits on the steep upper third of the wave face
-  const threshold = 0.35 * maxElev;
-  let spray = "";
-  let inCrest = false;
-
-  for (let i = 0; i < steps; i++) {
-    const midElev = (elevations[i] + elevations[i + 1]) / 2;
-    // Follows the forward face slope (dyAt > 0 in SVG coords means sloping downward to the right)
-    if (midElev >= threshold) {
-      const x0 = i * h;
-      const x1 = x0 + h;
-      // Offset slightly downward to sit on the forward spill face
-      const drop = 2.4;
-      if (!inCrest) {
-        inCrest = true;
-        spray += ` M${r(x0)} ${r(yAt(x0) + drop)}`;
-      }
-      spray +=
-        ` C${r(x0 + h / 3)} ${r(yAt(x0) + drop + (dyAt(x0) * h) / 3)}` +
-        `,${r(x1 - h / 3)} ${r(yAt(x1) + drop - (dyAt(x1) * h) / 3)}` +
-        `,${r(x1)} ${r(yAt(x1) + drop)}`;
-    } else {
-      inCrest = false;
-    }
-  }
-
-  return spray.trim();
 }

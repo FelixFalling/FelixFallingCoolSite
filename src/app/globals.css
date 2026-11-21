@@ -790,29 +790,17 @@ main:focus {
   100% {
     transform: translate3d(0, 0, 0);
   }
-  25% {
-    transform: translate3d(-6px, -11px, 0);
-  }
   50% {
     transform: translate3d(0, -15px, 0);
-  }
-  75% {
-    transform: translate3d(6px, -4px, 0);
   }
 }
 @keyframes waveSwell2 {
   0%,
   100% {
-    transform: translate3d(0, -7px, 0);
-  }
-  25% {
-    transform: translate3d(5px, 2px, 0);
+    transform: translate3d(0, -9px, 0);
   }
   50% {
     transform: translate3d(0, 6px, 0);
-  }
-  75% {
-    transform: translate3d(-5px, -1px, 0);
   }
 }
 
