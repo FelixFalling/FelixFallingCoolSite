@@ -23,9 +23,11 @@ import { useEffect, useRef } from "react";
  */
 export default function Reveal({
   id,
+  labelledBy,
   children,
 }: {
   id: string;
+  labelledBy?: string;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -61,7 +63,7 @@ export default function Reveal({
   }, []);
 
   return (
-    <section id={id} ref={ref} className="section reveal">
+    <section id={id} ref={ref} className="section reveal" aria-labelledby={labelledBy}>
       {children}
     </section>
   );

@@ -291,8 +291,20 @@ body {
   color: var(--ink);
   font-family: Helvetica, Arial, sans-serif;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   /* Smoothly cross-fade colors when the theme is toggled. */
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Consistent, high-contrast keyboard focus indicators */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 a {

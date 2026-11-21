@@ -1,4 +1,26 @@
 import { defineConfig, devices } from "@playwright/test";
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+
+function isWebkitRunnable(): boolean {
+  if (process.env.CI) return true;
+  if (process.env.PW_WEBKIT === "0" || process.env.PW_WEBKIT === "false") return false;
+  if (process.env.PW_WEBKIT === "1" || process.env.PW_WEBKIT === "true") return true;
+  try {
+    const home = process.env.HOME || "";
+    const pwDir = path.join(home, ".cache", "ms-playwright");
+    if (!fs.existsSync(pwDir)) return false;
+    const dirs = fs.readdirSync(pwDir).filter((d) => d.startsWith("webkit-"));
+    if (dirs.length === 0) return false;
+    const pwRun = path.join(pwDir, dirs[0], "pw_run.sh");
+    if (!fs.existsSync(pwRun)) return false;
+    execFileSync(pwRun, ["--version"], { stdio: "ignore", timeout: 2000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Playwright configuration - how the automated browser tests run.
@@ -91,12 +113,19 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], channel: "chrome" },
       testIgnore: EXPORT_ONLY,
     },
-    {
-      // A real iPhone viewport in the real iOS engine.
-      name: "mobile-safari",
-      use: { ...devices["iPhone 14"] },
-      testIgnore: EXPORT_ONLY,
-    },
+    isWebkitRunnable()
+      ? {
+          // A real iPhone viewport in the real iOS engine.
+          name: "mobile-safari",
+          use: { ...devices["iPhone 14"] },
+          testIgnore: EXPORT_ONLY,
+        }
+      : {
+          // Mobile Chrome fallback when WebKit is unavailable on the local OS.
+          name: "mobile-chrome",
+          use: { ...devices["Pixel 7"], channel: "chrome" },
+          testIgnore: EXPORT_ONLY,
+        },
     {
       /*
        * The odd one out, and the point of it: every project above runs against

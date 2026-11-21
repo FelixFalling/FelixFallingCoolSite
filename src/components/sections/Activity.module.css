@@ -7,6 +7,7 @@
 .chartScroll {
   overflow-x: auto;
   padding: 18px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chart {

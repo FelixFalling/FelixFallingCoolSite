@@ -63,6 +63,11 @@ export default function DuckRain() {
 
     function onKey(event: KeyboardEvent) {
       if (event.key.length !== 1) return; // ignore Shift, arrows, etc.
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
       typed = (typed + event.key.toLowerCase()).slice(-DUCKS.word.length);
       if (typed !== DUCKS.word) return;
       typed = "";

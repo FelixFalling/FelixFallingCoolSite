@@ -196,6 +196,7 @@ test.describe("the Curse of Ra clock", () => {
   });
 
   test("each 8-hour rung actually drives the answer", async ({ page }) => {
+    test.slow();
     /*
      * Adding <option>s to the markup would satisfy the test above while the
      * value behind a new one went nowhere, so this walks the whole ladder

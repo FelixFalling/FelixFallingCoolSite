@@ -98,7 +98,9 @@ export function useCoastalWeather(): CoastalWeather {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(API)
+    const controller = new AbortController();
+
+    fetch(API, { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         const current = data?.current;
@@ -113,10 +115,11 @@ export function useCoastalWeather(): CoastalWeather {
         setWeather(interpret(current.weather_code, current.wind_speed_10m ?? 0, golden));
       })
       .catch(() => {
-        /* offline / blocked - keep the defaults, no error surfaced */
+        /* offline / blocked / aborted - keep the defaults, no error surfaced */
       });
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 

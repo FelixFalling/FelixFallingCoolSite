@@ -24,9 +24,11 @@ export default function Section({
   children: React.ReactNode;
 }) {
   return (
-    <Reveal id={id}>
+    <Reveal id={id} labelledBy={`${id}-title`}>
       <div className="section-layout">
-        <h2 className="section-title">{title}</h2>
+        <h2 id={`${id}-title`} className="section-title">
+          {title}
+        </h2>
         <div className="section-body">{children}</div>
       </div>
     </Reveal>

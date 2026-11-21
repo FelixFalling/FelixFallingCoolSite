@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { resume } from "@/data/resume";
 import { THIRD_PARTY } from "../../thirdParty.mjs";
 import "./globals.css";
@@ -17,6 +17,13 @@ const DESCRIPTION =
   "Portfolio of Nick - software developer focused on test automation, " +
   "embedded systems, and DevOps. Featuring an animated Oregon-coast scene.";
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#edf1f1" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c1418" },
+  ],
+};
+
 /**
  * The `openGraph` and `twitter` blocks are what make a pasted link unfurl
  * into a rich card (image + title + description) on LinkedIn, Discord, Slack,
@@ -26,6 +33,18 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
+  authors: [{ name: resume.name, url: resume.links.github }],
+  creator: resume.name,
+  keywords: [
+    "Software Developer",
+    "Portfolio",
+    "Test Automation",
+    "TypeScript",
+    "Next.js",
+    "Embedded Systems",
+    "DevOps",
+    "Playwright",
+  ],
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
@@ -156,7 +175,7 @@ export default function RootLayout({
     // suppressHydrationWarning: the theme script below (and browser extensions
     // like Dark Reader) set attributes on <html> before React hydrates. This
     // silences the resulting harmless mismatch warning for the <html> element.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body>
         {/*
           Warm up the one third-party origin the page pulls from, so the DNS

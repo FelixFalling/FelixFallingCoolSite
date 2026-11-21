@@ -55,7 +55,7 @@ export default function Slides({
   // Which slide is in view = scroll position ÷ slide width, rounded.
   function handleScroll() {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || track.clientWidth <= 0) return;
     setActive(Math.round(track.scrollLeft / track.clientWidth));
   }
 
@@ -78,6 +78,19 @@ export default function Slides({
         className={styles.track}
         ref={trackRef}
         onScroll={single ? undefined : handleScroll}
+        onKeyDown={
+          single
+            ? undefined
+            : (e) => {
+                if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  goTo(active - 1);
+                } else if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  goTo(active + 1);
+                }
+              }
+        }
         tabIndex={single ? undefined : 0}
         role={single ? undefined : "region"}
         aria-label={single ? undefined : `${title} screenshots (scrolls horizontally)`}
@@ -146,6 +159,7 @@ export default function Slides({
                 className={i === active ? `${styles.dot} ${styles.dotActive}` : styles.dot}
                 onClick={() => goTo(i)}
                 aria-label={`Go to screenshot ${i + 1} of ${images.length}`}
+                aria-current={i === active ? "true" : undefined}
               />
             ))}
           </div>

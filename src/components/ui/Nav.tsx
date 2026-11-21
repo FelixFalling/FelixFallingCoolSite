@@ -9,9 +9,9 @@ import styles from "./Nav.module.css";
  */
 export default function Nav() {
   return (
-    <nav className={styles.nav}>
+    <nav className={styles.nav} aria-label="Main Navigation">
       <div className={styles.inner}>
-        <a href="#top" className={styles.brand}>
+        <a href="#top" className={styles.brand} aria-label={`${resume.name} – Back to top`}>
           {resume.name}
         </a>
         <div className={styles.right}>

@@ -19,32 +19,34 @@ export default function Button({
   variant = "primary",
   external = false,
   download = false,
+  className,
   children,
 }: {
   href: string;
   variant?: "primary" | "ghost";
   external?: boolean;
   download?: boolean;
+  className?: string;
   children: React.ReactNode;
 }) {
-  const className = variant === "ghost" ? styles.ghost : styles.primary;
+  const buttonClass = `${variant === "ghost" ? styles.ghost : styles.primary} ${className ?? ""}`.trim();
 
   if (external) {
     return (
-      <a className={className} href={href} target="_blank" rel={EXTERNAL_REL}>
+      <a className={buttonClass} href={href} target="_blank" rel={EXTERNAL_REL}>
         {children}
       </a>
     );
   }
   if (download) {
     return (
-      <a className={className} href={href} download>
+      <a className={buttonClass} href={href} download>
         {children}
       </a>
     );
   }
   return (
-    <Link className={className} href={href}>
+    <Link className={buttonClass} href={href}>
       {children}
     </Link>
   );
