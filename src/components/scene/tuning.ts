@@ -159,10 +159,10 @@ export const WATER = {
    * sinking into. Plain --sand left a dark band between the crest and the sea.
    */
   layers: [
-    { fill: "var(--wave-far-solid)",   y: 70,  harmonics: [[3, 5.5, 0.0], [5, 3.4, 2.3], [8, 1.8, 4.1]], sharpen: 0.15, drift: "waveDrift",  driftDur: 26,  swell: "waveSwell2", swellDur: 8,   swellOffset: 0,    crest: 0.3,  bleed: "28px" },
-    { fill: "var(--wave-mid-solid)",   y: 99,  harmonics: [[2, 10, 1.4],  [3, 5.5, 3.7], [7, 2.2, 0.5]], sharpen: 0.3,  drift: "waveDrift2", driftDur: 17,  swell: "waveSwell",  swellDur: 6.5, swellOffset: -2.1, crest: 0.55, bleed: "28px" },
-    { fill: "var(--wave-break-solid)", y: 124, harmonics: [[1, 15, 2.7],  [2, 8.5, 5.1], [5, 3.4, 1.2]], sharpen: 0.4,  drift: "waveDrift",  driftDur: 11,  swell: "waveSwell2", swellDur: 5,   swellOffset: -1.3, crest: 1,    bleed: "28px" },
-    { fill: "var(--waterline-fill)",   y: 152, harmonics: [[1, 7.5, 4.6], [3, 4.2, 1.9], [4, 2.1, 3.0]], sharpen: 0.25, drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell",  swellDur: 4.5, swellOffset: -3.4, crest: 0,    bleed: "28px" },
+    { fill: "var(--wave-far-solid)",   y: 70,  harmonics: [[3, 5.5, 0.0], [5, 3.4, 2.3], [8, 1.8, 4.1]], sharpen: 0.18, drift: "waveDrift",  driftDur: 26,  swell: "waveSwell2", swellDur: 8,   swellOffset: 0,    crest: 0.5,  bleed: "28px" },
+    { fill: "var(--wave-mid-solid)",   y: 99,  harmonics: [[2, 10, 1.4],  [3, 5.5, 3.7], [7, 2.2, 0.5]], sharpen: 0.32, drift: "waveDrift2", driftDur: 17,  swell: "waveSwell",  swellDur: 6.5, swellOffset: -2.1, crest: 0.75, bleed: "28px" },
+    { fill: "var(--wave-break-solid)", y: 124, harmonics: [[1, 15, 2.7],  [2, 8.5, 5.1], [5, 3.4, 1.2]], sharpen: 0.42, drift: "waveDrift",  driftDur: 11,  swell: "waveSwell2", swellDur: 5,   swellOffset: -1.3, crest: 1,    bleed: "28px" },
+    { fill: "var(--waterline-fill)",   y: 152, harmonics: [[1, 7.5, 4.6], [3, 4.2, 1.9], [4, 2.1, 3.0]], sharpen: 0.28, drift: "waveDrift2", driftDur: 8.5, swell: "waveSwell",  swellDur: 4.5, swellOffset: -3.4, crest: 0.65, bleed: "28px" },
   ] satisfies WaveLayerSpec[] as WaveLayerSpec[],
 
   /**
@@ -175,10 +175,10 @@ export const WATER = {
    * waves visibly flicker. Two strokes give the same softness for free.
    */
   foam: {
-    haloWidth: 5.5,
-    haloOpacity: 0.16,
-    coreWidth: 2.5,
-    coreOpacity: 0.42,
+    haloWidth: 5.0,
+    haloOpacity: 0.28,
+    coreWidth: 2.2,
+    coreOpacity: 0.75,
   },
 } as const;
 

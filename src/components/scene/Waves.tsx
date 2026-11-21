@@ -26,12 +26,14 @@
  * timings, the foam. This file is only the drawing; go there to tune the sea.
  */
 
-import { crestPath, TILE } from "./crest";
+import { crestPath, foamCrestPath, foamSprayPath, TILE } from "./crest";
 import { WATER, type WaveLayerSpec } from "./tuning";
 import styles from "./Waves.module.css";
 
 function WaveLayer({ layer }: { layer: WaveLayerSpec }) {
-  const crest = crestPath(layer.y, layer.harmonics, layer.sharpen);
+  const crest = crestPath(layer.y, layer.harmonics, layer.sharpen, 0.22);
+  const foam = foamCrestPath(layer.y, layer.harmonics, layer.sharpen, 0.22, 0.18);
+  const spray = layer.crest >= 0.8 ? foamSprayPath(layer.y, layer.harmonics, layer.sharpen, 0.22) : "";
   const body = `${crest} L${TILE} 200 L0 200 Z`; // crest, then down and back to fill the water
 
   return (
@@ -90,22 +92,37 @@ function WaveLayer({ layer }: { layer: WaveLayerSpec }) {
           >
             {/* fill via style, not the SVG attribute, so the var(--…) resolves */}
             <path d={body} style={{ fill: layer.fill }} />
-            {layer.crest > 0 && (
-              // Light on the crest: thin, soft and low-opacity - misty spray
-              // rather than a bright line. The softness is TWO stacked strokes
-              // (a faint wide halo under a stronger core), NOT filter: blur().
-              // A blur filter on an SVG path inside a layer that animates
-              // transform makes iOS Safari re-run the filter as the layer's
-              // tiles move, and the filtered stroke intermittently blanks - the
-              // waves "flicker". Keep this filter-free: do not add blur here.
-              //
-              // Only the breaking layer used to get this. Giving every layer a
-              // share of it, graded by nearness, is a big part of the sea
-              // reading as water: a real one is covered in scattered light,
-              // and a band with no highlight at all looks like paper.
+            {layer.crest > 0 && foam && (
+              // Light on the crest: seafoam whitecaps concentrated at the peaks
+              // and spilling down the forward face, rather than an artificial
+              // vector outline dipping through the deep troughs.
               <>
-                <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={WATER.foam.haloWidth * layer.crest} strokeLinecap="round" opacity={WATER.foam.haloOpacity * layer.crest} />
-                <path d={crest} fill="none" style={{ stroke: "var(--wave-foam)" }} strokeWidth={WATER.foam.coreWidth * layer.crest} strokeLinecap="round" opacity={WATER.foam.coreOpacity * layer.crest} />
+                <path
+                  d={foam}
+                  fill="none"
+                  style={{ stroke: "var(--wave-foam)" }}
+                  strokeWidth={WATER.foam.haloWidth * Math.max(0.65, layer.crest)}
+                  strokeLinecap="round"
+                  opacity={WATER.foam.haloOpacity * layer.crest}
+                />
+                <path
+                  d={foam}
+                  fill="none"
+                  style={{ stroke: "var(--wave-foam)" }}
+                  strokeWidth={WATER.foam.coreWidth * Math.max(0.65, layer.crest)}
+                  strokeLinecap="round"
+                  opacity={WATER.foam.coreOpacity * layer.crest}
+                />
+                {spray && (
+                  <path
+                    d={spray}
+                    fill="none"
+                    style={{ stroke: "var(--wave-foam)" }}
+                    strokeWidth={1.35 * layer.crest}
+                    strokeLinecap="round"
+                    opacity={0.38 * layer.crest}
+                  />
+                )}
               </>
             )}
           </svg>
